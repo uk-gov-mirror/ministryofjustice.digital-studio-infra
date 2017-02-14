@@ -6,6 +6,11 @@ provider "azurerm" {
   tenant_id = "747381f4-e81f-4a43-bf68-ced6a1e14edf"
 }
 
+provider "heroku" {
+  # email = "..." use HEROKU_EMAIL env var
+  # api_key = "..." use HEROKU_API_KEY env var
+}
+
 resource "azurerm_resource_group" "digitalhub-dev" {
     name = "tf_digitalhub_dev"
     location = "ukwest"
@@ -33,9 +38,14 @@ resource "azurerm_storage_container" "digitalhub-container-content-dev" {
   container_access_type = "container"
 }
 
-output "db" {
-  value = "${azurerm_template_deployment.digitalhub-template-dev.outputs.dbKey}"
-}
-output "storage" {
-  value = "${azurerm_template_deployment.digitalhub-template-dev.outputs.storageKey}"
+resource "heroku_app" "hub-admin-dev" {
+  name = "hub-admin-tf-dev"
+  region = "eu"
+  organization {
+    name = "noms-hub"
+  }
+  config_vars {
+    mongo = "${azurerm_template_deployment.digitalhub-template-dev.outputs.dbKey}"
+    storage = "${azurerm_template_deployment.digitalhub-template-dev.outputs.storageKey}"
+  }
 }

@@ -13,13 +13,15 @@
             }
         }
     },
-    "variables": {},
+    "variables": {
+        "name": "[concat('digitalhub', parameters('digitalhub_environment'))]"
+    },
     "resources": [
         {
             "comments": "NoSQL Database for Hub",
             "type": "Microsoft.DocumentDB/databaseAccounts",
             "kind": "MongoDB",
-            "name": "[concat('digitalhub', parameters('digitalhub_environment'))]",
+            "name": "[variables('name')]",
             "apiVersion": "2015-04-08",
             "location": "UK West",
             "tags": "[parameters('tagvalues')]",
@@ -42,7 +44,7 @@
                 "tier": "Standard"
             },
             "kind": "BlobStorage",
-            "name": "[concat('digitalhub', parameters('digitalhub_environment'))]",
+            "name": "[variables('name')]",
             "apiVersion": "2016-01-01",
             "location": "ukwest",
             "tags": "[parameters('tagvalues')]",
@@ -52,5 +54,15 @@
             "resources": [],
             "dependsOn": []
         }
-    ]
+    ],
+    "outputs": {
+        "storageKey": {
+            "type": "string",
+            "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name')), '2016-12-01').keys[0].value]"
+        },
+        "dbKey": {
+            "type": "string",
+            "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('name')), '2016-03-31').connectionStrings[0].connectionString]"
+        }
+    }
 }
