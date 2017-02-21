@@ -1,4 +1,4 @@
-variable "crsa-poc-admin-password" {
+variable "crsa_poc_admin_password" {
   type = "string"
 }
 
@@ -17,7 +17,7 @@ resource "azurerm_sql_server" "csra-poc" {
     location = "ukwest"
     version = "12.0"
     administrator_login = "csra"
-    administrator_login_password = "${var.crsa-poc-admin-password}"
+    administrator_login_password = "${var.crsa_poc_admin_password}"
     tags {
         Service = "CSRA"
         Environment = "PoC"
