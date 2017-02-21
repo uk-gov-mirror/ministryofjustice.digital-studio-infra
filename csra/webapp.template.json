@@ -1,0 +1,54 @@
+{
+    "parameters": {
+        "environment": {
+            "type": "String"
+        },
+        "tagvalues": {
+            "type": "object",
+            "defaultValue": {
+                "Service": "CSRA",
+                "Environment": "[parameters('environment')]"
+            }
+        }
+    },
+    "variables": {
+        "name": "[concat('csra-', toLower(parameters('environment')))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2016-03-01",
+            "name": "[variables('name')]",
+            "type": "Microsoft.Web/sites",
+            "properties": {
+                "name": "[variables('name')]",
+                "serverFarmId": "[variables('name')]",
+                "hostingEnvironment": ""
+            },
+            "location": "[resourceGroup().location]",
+            "tags": "[parameters('tagvalues')]",
+            "dependsOn": [
+                "[concat('Microsoft.Web/serverfarms/', variables('name'))]"
+            ]
+        },
+        {
+            "apiVersion": "2016-09-01",
+            "name": "csra-poc",
+            "type": "Microsoft.Web/serverfarms",
+            "location": "[resourceGroup().location]",
+            "tags": "[parameters('tagvalues')]",
+            "properties": {
+                "name": "[variables('name')]",
+                "workerSizeId": "0",
+                "reserved": false,
+                "numberOfWorkers": "1",
+                "hostingEnvironment": ""
+            },
+            "sku": {
+                "Tier": "Standard",
+                "Name": "S1"
+            }
+        }
+    ],
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0"
+}
