@@ -11,7 +11,7 @@ resource "azurerm_template_deployment" "digitalhub-template-dev" {
   name = "tf_digitalhub_template_dev"
   resource_group_name = "${azurerm_resource_group.digitalhub-dev.name}"
   deployment_mode = "Incremental"
-  template_body = "${file("templates/digitalhub.json")}"
+  template_body = "${file("./hub.template.json")}"
   parameters {
     digitalhub_environment = "tfdev"
   }
