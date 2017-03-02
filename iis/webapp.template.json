@@ -1,6 +1,11 @@
 {
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
     "parameters": {
         "name": {
+            "type": "String"
+        },
+        "hostname": {
             "type": "String"
         },
         "service": {
@@ -23,13 +28,23 @@
             "type": "Microsoft.Web/sites",
             "properties": {
                 "name": "[parameters('name')]",
-                "serverFarmId": "[parameters('name')]",
-                "hostingEnvironment": ""
+                "serverFarmId": "[parameters('name')]"
             },
             "location": "[resourceGroup().location]",
             "tags": "[variables('tagvalues')]",
             "dependsOn": [
                 "[concat('Microsoft.Web/serverfarms/', parameters('name'))]"
+            ]
+        },
+        {
+            "type":"Microsoft.Web/sites/hostnameBindings",
+            "name":"[concat(parameters('name'), '/', parameters('hostname'))]",
+            "apiVersion":"2016-03-01",
+            "location":"[resourceGroup().location]",
+            "properties":{
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Web/sites/',parameters('name'))]"
             ]
         },
         {
@@ -51,6 +66,10 @@
             }
         }
     ],
-    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0"
+    "outputs": {
+        "hostname": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Web/sites', parameters('name'))).defaultHostName]"
+        }
+    }
 }
