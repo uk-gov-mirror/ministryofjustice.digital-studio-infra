@@ -44,14 +44,27 @@ resource "azurerm_sql_database" "iis-dev" {
     }
 }
 
-resource "azurerm_template_deployment" "iis-dev" {
+resource "azurerm_template_deployment" "iis-dev-webapp" {
   name = "iis-dev"
   resource_group_name = "${azurerm_resource_group.iis-dev.name}"
   deployment_mode = "Incremental"
   template_body = "${file("./webapp.template.json")}"
   parameters {
     name = "iis-dev"
+    hostname = "iis-dev.noms.dsd.io"
     service = "IIS"
     environment = "dev"
   }
+}
+
+resource "azurerm_dns_cname_record" "iis-dev" {
+    name = "iis-dev"
+    zone_name = "noms.dsd.io"
+    resource_group_name = "webops"
+    ttl = "300"
+    record = "iis-dev.azurewebsites.net"
+    tags {
+        Service = "IIS"
+        Environment = "dev"
+    }
 }
