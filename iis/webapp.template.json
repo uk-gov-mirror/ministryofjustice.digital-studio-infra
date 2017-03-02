@@ -1,0 +1,56 @@
+{
+    "parameters": {
+        "name": {
+            "type": "String"
+        },
+        "service": {
+            "type": "String"
+        },
+        "environment": {
+            "type": "String"
+        }
+    },
+    "variables": {
+        "tagvalues": {
+            "Service": "[parameters('service')]",
+            "Environment": "[parameters('environment')]"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2016-03-01",
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Web/sites",
+            "properties": {
+                "name": "[parameters('name')]",
+                "serverFarmId": "[parameters('name')]",
+                "hostingEnvironment": ""
+            },
+            "location": "[resourceGroup().location]",
+            "tags": "[variables('tagvalues')]",
+            "dependsOn": [
+                "[concat('Microsoft.Web/serverfarms/', parameters('name'))]"
+            ]
+        },
+        {
+            "apiVersion": "2016-09-01",
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Web/serverfarms",
+            "location": "[resourceGroup().location]",
+            "tags": "[variables('tagvalues')]",
+            "properties": {
+                "name": "[parameters('name')]",
+                "workerSizeId": "0",
+                "reserved": false,
+                "numberOfWorkers": "1",
+                "hostingEnvironment": ""
+            },
+            "sku": {
+                "Tier": "Standard",
+                "Name": "S1"
+            }
+        }
+    ],
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0"
+}
