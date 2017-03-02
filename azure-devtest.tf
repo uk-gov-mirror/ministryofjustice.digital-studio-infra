@@ -5,8 +5,3 @@ provider "azurerm" {
   # client_secret = "..." use ARM_CLIENT_SECRET env var
   tenant_id = "747381f4-e81f-4a43-bf68-ced6a1e14edf"
 }
-
-provider "heroku" {
-  # email = "..." use HEROKU_EMAIL env var
-  # api_key = "..." use HEROKU_API_KEY env var
-}
