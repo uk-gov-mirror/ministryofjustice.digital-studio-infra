@@ -3,16 +3,28 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "name": {
-            "type": "String"
+            "type": "string"
         },
         "hostname": {
-            "type": "String"
+            "type": "string"
         },
         "service": {
-            "type": "String"
+            "type": "string"
         },
         "environment": {
-            "type": "String"
+            "type": "string"
+        },
+        "DB_USER": {
+            "type": "string"
+        },
+        "DB_PASS": {
+            "type": "secureString"
+        },
+        "DB_SERVER": {
+            "type": "string"
+        },
+        "DB_NAME": {
+            "type": "string"
         }
     },
     "variables": {

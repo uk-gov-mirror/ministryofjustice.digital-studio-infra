@@ -7,7 +7,10 @@ resource "azurerm_resource_group" "iis-dev" {
     }
 }
 
-resource "random_id" "iis-dev-sql-password" {
+resource "random_id" "iis-dev-sql-admin-password" {
+    byte_length = 16
+}
+resource "random_id" "iis-dev-sql-user-password" {
     byte_length = 16
 }
 
@@ -17,7 +20,7 @@ resource "azurerm_sql_server" "iis-dev" {
     location = "${azurerm_resource_group.iis-dev.location}"
     version = "12.0"
     administrator_login = "iis"
-    administrator_login_password = "${random_id.iis-dev-sql-password.b64}"
+    administrator_login_password = "${random_id.iis-dev-sql-admin-password.b64}"
     tags {
         Service = "IIS"
         Environment = "dev"
@@ -45,16 +48,20 @@ resource "azurerm_sql_database" "iis-dev" {
 }
 
 resource "azurerm_template_deployment" "iis-dev-webapp" {
-  name = "iis-dev"
-  resource_group_name = "${azurerm_resource_group.iis-dev.name}"
-  deployment_mode = "Incremental"
-  template_body = "${file("./webapp.template.json")}"
-  parameters {
     name = "iis-dev"
-    hostname = "iis-dev.noms.dsd.io"
-    service = "IIS"
-    environment = "dev"
-  }
+    resource_group_name = "${azurerm_resource_group.iis-dev.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("./webapp.template.json")}"
+    parameters {
+        name = "iis-dev"
+        hostname = "iis-dev.noms.dsd.io"
+        service = "IIS"
+        environment = "dev"
+        DB_USER = "iis-user"
+        DB_PASS = "${random_id.iis-dev-sql-user-password.b64}"
+        DB_SERVER = "${azurerm_sql_server.iis-dev.fully_qualified_domain_name}"
+        DB_NAME = "${azurerm_sql_database.iis-dev.name}"
+    }
 }
 
 resource "azurerm_dns_cname_record" "iis-dev" {
