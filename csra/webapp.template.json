@@ -1,5 +1,8 @@
 {
     "parameters": {
+        "hostname": {
+            "type": "string"
+        },
         "environment": {
             "type": "String"
         },
@@ -31,8 +34,19 @@
             ]
         },
         {
+            "type":"Microsoft.Web/sites/hostnameBindings",
+            "name":"[concat(variables('name'), '/', parameters('hostname'))]",
+            "apiVersion":"2016-03-01",
+            "location":"[resourceGroup().location]",
+            "properties":{
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Web/sites/',variables('name'))]"
+            ]
+        },
+        {
             "apiVersion": "2016-09-01",
-            "name": "csra-poc",
+            "name": "[variables('name')]",
             "type": "Microsoft.Web/serverfarms",
             "location": "[resourceGroup().location]",
             "tags": "[parameters('tagvalues')]",
