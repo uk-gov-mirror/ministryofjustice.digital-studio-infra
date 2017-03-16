@@ -1,0 +1,33 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "serverName": {
+            "type": "string"
+        },
+        "databaseName": {
+            "type": "string"
+        },
+        "service": {
+            "type": "string"
+        },
+        "environment": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('serverName'), '/', parameters('databaseName'), '/current')]",
+            "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
+            "properties": {
+                "status": "Enabled"
+            },
+            "location": null,
+            "tags": {
+                "Service": "[parameters('service')]",
+                "Environment": "[parameters('environment')]"
+            }
+        }
+    ]
+}
