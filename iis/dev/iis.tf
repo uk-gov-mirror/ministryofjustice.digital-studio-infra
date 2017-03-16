@@ -78,7 +78,7 @@ resource "azurerm_template_deployment" "iis-dev-webapp" {
 }
 
 resource "azurerm_dns_cname_record" "iis-dev" {
-    name = "iis-dev"
+    name = "hpa-dev"
     zone_name = "noms.dsd.io"
     resource_group_name = "webops"
     ttl = "300"
@@ -86,6 +86,20 @@ resource "azurerm_dns_cname_record" "iis-dev" {
     tags {
         Service = "IIS"
         Environment = "dev"
+    }
+}
+
+# The "production" site currently uses this non-production DNS entry
+# which can only be configured via the non-prod subscription
+resource "azurerm_dns_cname_record" "iis-prod" {
+    name = "hpa.service"
+    zone_name = "hmpps.dsd.io"
+    resource_group_name = "webops"
+    ttl = "300"
+    record = "iis-prod.azurewebsites.net"
+    tags {
+        Service = "IIS"
+        Environment = "Prod"
     }
 }
 
