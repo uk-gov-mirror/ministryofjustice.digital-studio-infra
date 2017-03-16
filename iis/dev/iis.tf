@@ -51,7 +51,7 @@ resource "azurerm_template_deployment" "iis-dev-sql-tde" {
     name = "iis-dev-sql-tde"
     resource_group_name = "${azurerm_resource_group.iis-dev.name}"
     deployment_mode = "Incremental"
-    template_body = "${file("../azure-sql-tde.template.json")}"
+    template_body = "${file("../../shared/azure-sql-tde.template.json")}"
     parameters {
         serverName = "${azurerm_sql_server.iis-dev.name}"
         databaseName = "${azurerm_sql_database.iis-dev.name}"
@@ -64,7 +64,7 @@ resource "azurerm_template_deployment" "iis-dev-webapp" {
     name = "iis-dev"
     resource_group_name = "${azurerm_resource_group.iis-dev.name}"
     deployment_mode = "Incremental"
-    template_body = "${file("./webapp.template.json")}"
+    template_body = "${file("../webapp.template.json")}"
     parameters {
         name = "iis-dev"
         hostname = "iis-dev.noms.dsd.io"
