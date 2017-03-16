@@ -1,12 +1,3 @@
-resource "azurerm_resource_group" "webops" {
-  name = "webops"
-  location = "ukwest"
-  tags {
-    Service = "WebOps"
-    Environment = "Management"
-  }
-}
-
 resource "azurerm_storage_account" "webops" {
   name = "nomsstudiowebops"
   resource_group_name = "${azurerm_resource_group.webops.name}"
