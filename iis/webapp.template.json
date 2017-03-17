@@ -79,9 +79,9 @@
         }
     ],
     "outputs": {
-        "hostname": {
+        "ips": {
             "type": "string",
-            "value": "[reference(resourceId('Microsoft.Web/sites', parameters('name'))).defaultHostName]"
+            "value": "[reference(resourceId('Microsoft.Web/sites', parameters('name'))).outboundIpAddresses]"
         }
     }
 }
