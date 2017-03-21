@@ -107,24 +107,7 @@ resource "azurerm_dns_cname_record" "cname" {
     resource_group_name = "webops"
     ttl = "300"
     record = "${var.app-name}.azurewebsites.net"
-    tags {
-        Service = "IIS"
-        Environment = "Stage"
-    }
-}
-
-# The "production" site currently uses this non-production DNS entry
-# which can only be configured via the non-prod subscription
-resource "azurerm_dns_cname_record" "prod-cname" {
-    name = "hpa.service"
-    zone_name = "hmpps.dsd.io"
-    resource_group_name = "webops"
-    ttl = "300"
-    record = "iis-prod.azurewebsites.net"
-    tags {
-        Service = "IIS"
-        Environment = "Prod"
-    }
+    tags = "${var.tags}"
 }
 
 output "advice" {
