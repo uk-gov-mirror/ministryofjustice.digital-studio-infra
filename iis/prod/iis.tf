@@ -39,13 +39,13 @@ resource "azurerm_sql_server" "iis-prod" {
     }
 }
 
-# resource "azurerm_sql_firewall_rule" "iis-prod" {
-#     name = "Closed to the world"
-#     resource_group_name = "${azurerm_resource_group.iis-prod.name}"
-#     server_name = "${azurerm_sql_server.iis-prod.name}"
-#     start_ip_address = "0.0.0.0"
-#     end_ip_address = "0.0.0.0"
-# }
+resource "azurerm_sql_firewall_rule" "iis-prod-office-access" {
+    name = "NOMS Studio office"
+    resource_group_name = "${azurerm_resource_group.iis-prod.name}"
+    server_name = "${azurerm_sql_server.iis-prod.name}"
+    start_ip_address = "${var.ips["office"]}"
+    end_ip_address = "${var.ips["office"]}"
+}
 
 resource "azurerm_sql_database" "iis-prod" {
     name = "iis-prod"
@@ -53,14 +53,15 @@ resource "azurerm_sql_database" "iis-prod" {
     location = "${azurerm_resource_group.iis-prod.location}"
     server_name = "${azurerm_sql_server.iis-prod.name}"
     edition = "Standard"
+    requested_service_objective_name = "S3"
     tags {
         Service = "IIS"
         Environment = "Prod"
     }
 }
 
-resource "azurerm_template_deployment" "iis-prod-sql-tde" {
-    name = "iis-prod-sql-tde"
+resource "azurerm_template_deployment" "sql-tde" {
+    name = "sql-tde"
     resource_group_name = "${azurerm_resource_group.iis-prod.name}"
     deployment_mode = "Incremental"
     template_body = "${file("../../shared/azure-sql-tde.template.json")}"
