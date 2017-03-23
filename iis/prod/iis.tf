@@ -69,6 +69,7 @@ resource "azurerm_sql_database" "db" {
     server_name = "${azurerm_sql_server.sql.name}"
     edition = "Standard"
     requested_service_objective_name = "S3"
+    collation = "Latin1_General_CS_AS"
     tags = "${var.tags}"
 }
 
@@ -95,6 +96,10 @@ resource "azurerm_template_deployment" "webapp" {
         hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
+        ip1 = "${var.ips["office"]}"
+        subnet1 = "255.255.255.255"
+        ip2 = "${var.ips["quantum"]}"
+        subnet2 = "255.255.255.255"
         DB_USER = "iisuser"
         DB_PASS = "${random_id.sql-user-password.b64}"
         DB_SERVER = "${azurerm_sql_server.sql.fully_qualified_domain_name}"

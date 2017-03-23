@@ -35,6 +35,15 @@ resource "random_id" "sql-user-password" {
     byte_length = 16
 }
 
+resource "azurerm_storage_account" "storage" {
+    name = "${replace(var.app-name, "-", "")}storage"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    account_type = "Standard_RAGRS"
+
+    tags = "${var.tags}"
+}
+
 resource "azurerm_key_vault" "vault" {
     name = "${var.app-name}"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -103,6 +112,7 @@ resource "azurerm_sql_database" "db" {
     location = "${azurerm_resource_group.group.location}"
     server_name = "${azurerm_sql_server.sql.name}"
     edition = "Basic"
+    collation = "Latin1_General_CS_AS"
     tags = "${var.tags}"
 }
 
@@ -129,6 +139,10 @@ resource "azurerm_template_deployment" "webapp" {
         hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
+        ip1 = "${var.ips["office"]}"
+        subnet1 = "255.255.255.255"
+        ip2 = "${var.ips["quantum"]}"
+        subnet2 = "255.255.255.255"
         DB_USER = "iisuser"
         DB_PASS = "${random_id.sql-user-password.b64}"
         DB_SERVER = "${azurerm_sql_server.sql.fully_qualified_domain_name}"
