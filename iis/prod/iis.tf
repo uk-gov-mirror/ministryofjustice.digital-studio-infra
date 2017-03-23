@@ -95,10 +95,13 @@ resource "azurerm_template_deployment" "webapp" {
         hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
-        DB_USER = "iis-user"
+        DB_USER = "iisuser"
         DB_PASS = "${random_id.sql-user-password.b64}"
         DB_SERVER = "${azurerm_sql_server.sql.fully_qualified_domain_name}"
         DB_NAME = "${azurerm_sql_database.db.name}"
+        CLIENT_ID = "TODO"
+        CLIENT_SECRET = "TODO"
+        TOKEN_HOST = "https://signon.service.justice.gov.uk"
     }
 }
 

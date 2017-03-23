@@ -14,16 +14,25 @@
         "environment": {
             "type": "string"
         },
+        "DB_SERVER": {
+            "type": "string"
+        },
         "DB_USER": {
             "type": "string"
         },
         "DB_PASS": {
             "type": "secureString"
         },
-        "DB_SERVER": {
+        "DB_NAME": {
             "type": "string"
         },
-        "DB_NAME": {
+        "CLIENT_ID": {
+            "type": "string"
+        },
+        "CLIENT_SECRET": {
+            "type": "secureString"
+        },
+        "TOKEN_HOST": {
             "type": "string"
         }
     },
@@ -35,17 +44,58 @@
     },
     "resources": [
         {
-            "apiVersion": "2016-03-01",
+            "apiVersion": "2015-08-01",
             "name": "[parameters('name')]",
             "type": "Microsoft.Web/sites",
             "properties": {
                 "name": "[parameters('name')]",
-                "serverFarmId": "[parameters('name')]"
+                "serverFarmId": "[parameters('name')]",
+                "clientAffinityEnabled": false
             },
             "location": "[resourceGroup().location]",
             "tags": "[variables('tagvalues')]",
             "dependsOn": [
                 "[concat('Microsoft.Web/serverfarms/', parameters('name'))]"
+            ],
+            "resources": [
+                {
+                    "name": "appsettings",
+                    "type": "config",
+                    "apiVersion": "2015-08-01",
+                    "dependsOn": [
+                        "[concat('Microsoft.Web/sites/', parameters('name'))]"
+                    ],
+                    "properties": {
+                        "WEBSITE_NODE_DEFAULT_VERSION": "6.9.1",
+                        "DB_SERVER": "[parameters('DB_SERVER')]",
+                        "DB_USER": "[parameters('DB_USER')]",
+                        "DB_PASS": "[parameters('DB_PASS')]",
+                        "DB_NAME": "[parameters('DB_NAME')]",
+                        "CLIENT_ID": "[parameters('CLIENT_ID')]",
+                        "CLIENT_SECRET": "[parameters('CLIENT_SECRET')]",
+                        "TOKEN_HOST": "[parameters('TOKEN_HOST')]"
+                    }
+                },
+                {
+                    "name": "web",
+                    "type": "config",
+                    "apiVersion": "2015-08-01",
+                    "dependsOn": [
+                        "[concat('Microsoft.Web/sites/', parameters('name'))]"
+                    ],
+                    "properties": {
+                        "alwaysOn": "true"
+                    }
+                },
+                {
+                    "name": "RedirectHttpToHttps",
+                    "type": "siteextensions",
+                    "apiVersion": "2015-08-01",
+                    "dependsOn": [
+                        "[concat('Microsoft.Web/sites/', parameters('name'))]"
+                    ],
+                    "properties": { }
+                }
             ]
         },
         {
