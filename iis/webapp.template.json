@@ -14,6 +14,39 @@
         "environment": {
             "type": "string"
         },
+        "ip1": {
+            "type": "string",
+            "defaultValue": "255.255.255.255",
+            "metadata": {
+                "description": "placeholder: equivalent to an empty record"
+            }
+        },
+        "subnet1": {
+            "type": "string",
+            "defaultValue": "255.255.255.255"
+        },
+        "ip2": {
+            "type": "string",
+            "defaultValue": "255.255.255.255",
+            "metadata": {
+                "description": "placeholder: equivalent to an empty record"
+            }
+        },
+        "subnet2": {
+            "type": "string",
+            "defaultValue": "255.255.255.255"
+        },
+        "ip3": {
+            "type": "string",
+            "defaultValue": "255.255.255.255",
+            "metadata": {
+                "description": "placeholder: equivalent to an empty record"
+            }
+        },
+        "subnet3": {
+            "type": "string",
+            "defaultValue": "255.255.255.255"
+        },
         "DB_SERVER": {
             "type": "string"
         },
@@ -84,7 +117,12 @@
                         "[concat('Microsoft.Web/sites/', parameters('name'))]"
                     ],
                     "properties": {
-                        "alwaysOn": "true"
+                        "alwaysOn": "true",
+                        "ipSecurityRestrictions": [
+                            {"ipAddress": "[parameters('ip1')]", "subnetMask": "[parameters('subnet1')]"},
+                            {"ipAddress": "[parameters('ip2')]", "subnetMask": "[parameters('subnet2')]"},
+                            {"ipAddress": "[parameters('ip3')]", "subnetMask": "[parameters('subnet3')]"}
+                        ]
                     }
                 },
                 {

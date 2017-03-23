@@ -59,6 +59,7 @@ resource "azurerm_sql_database" "db" {
     location = "${azurerm_resource_group.group.location}"
     server_name = "${azurerm_sql_server.sql.name}"
     edition = "Basic"
+    collation = "Latin1_General_CS_AS"
     tags = "${var.tags}"
 }
 
