@@ -15,6 +15,10 @@ resource "azurerm_template_deployment" "csra-prod-webapp" {
   parameters {
     hostname = "csra.noms.dsd.io"
     environment = "Prod"
+    ip1 = "${var.ips["office"]}"
+    subnet1 = "255.255.255.255"
+    ip2 = "${var.ips["quantum"]}"
+    subnet2 = "255.255.255.255"
   }
 }
 

@@ -12,6 +12,39 @@
                 "Service": "CSRA",
                 "Environment": "[parameters('environment')]"
             }
+        },
+        "ip1": {
+            "type": "string",
+            "defaultValue": "255.255.255.255",
+            "metadata": {
+                "description": "placeholder: equivalent to an empty record"
+            }
+        },
+        "subnet1": {
+            "type": "string",
+            "defaultValue": "255.255.255.255"
+        },
+        "ip2": {
+            "type": "string",
+            "defaultValue": "255.255.255.255",
+            "metadata": {
+                "description": "placeholder: equivalent to an empty record"
+            }
+        },
+        "subnet2": {
+            "type": "string",
+            "defaultValue": "255.255.255.255"
+        },
+        "ip3": {
+            "type": "string",
+            "defaultValue": "255.255.255.255",
+            "metadata": {
+                "description": "placeholder: equivalent to an empty record"
+            }
+        },
+        "subnet3": {
+            "type": "string",
+            "defaultValue": "255.255.255.255"
         }
     },
     "variables": {
@@ -31,6 +64,24 @@
             "tags": "[parameters('tagvalues')]",
             "dependsOn": [
                 "[concat('Microsoft.Web/serverfarms/', variables('name'))]"
+            ],
+            "resources": [
+                {
+                    "name": "web",
+                    "type": "config",
+                    "apiVersion": "2015-08-01",
+                    "dependsOn": [
+                        "[concat('Microsoft.Web/sites/', variables('name'))]"
+                    ],
+                    "properties": {
+                        "alwaysOn": "true",
+                        "ipSecurityRestrictions": [
+                            {"ipAddress": "[parameters('ip1')]", "subnetMask": "[parameters('subnet1')]"},
+                            {"ipAddress": "[parameters('ip2')]", "subnetMask": "[parameters('subnet2')]"},
+                            {"ipAddress": "[parameters('ip3')]", "subnetMask": "[parameters('subnet3')]"}
+                        ]
+                    }
+                }
             ]
         },
         {
