@@ -28,6 +28,9 @@ resource "azurerm_resource_group" "group" {
     tags = "${var.tags}"
 }
 
+resource "random_id" "session-secret" {
+    byte_length = 20
+}
 resource "random_id" "sql-admin-password" {
     byte_length = 16
 }
@@ -42,6 +45,18 @@ resource "azurerm_storage_account" "storage" {
     account_type = "Standard_RAGRS"
 
     tags = "${var.tags}"
+}
+
+variable "log-containers" {
+    type = "list"
+    default = ["app-logs", "web-logs", "db-logs"]
+}
+resource "azurerm_storage_container" "logs" {
+    count = "${length(var.log-containers)}"
+    name = "${var.log-containers[count.index]}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    storage_account_name = "${azurerm_storage_account.storage.name}"
+    container_access_type = "private"
 }
 
 resource "azurerm_key_vault" "vault" {
@@ -147,6 +162,7 @@ resource "azurerm_template_deployment" "webapp" {
         DB_PASS = "${random_id.sql-user-password.b64}"
         DB_SERVER = "${azurerm_sql_server.sql.fully_qualified_domain_name}"
         DB_NAME = "${azurerm_sql_database.db.name}"
+        SESSION_SECRET = "${random_id.session-secret.b64}"
         CLIENT_ID = "TODO"
         CLIENT_SECRET = "TODO"
         TOKEN_HOST = "https://www.signon.dsd.io"
