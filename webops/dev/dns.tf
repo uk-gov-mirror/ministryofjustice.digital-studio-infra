@@ -40,8 +40,8 @@ resource "azurerm_dns_ns_record" "service-hmpps" {
     }
 }
 
-resource "azurerm_dns_ns_record" "dp" {
-    name = "service"
+resource "azurerm_dns_ns_record" "digital-prisons" {
+    name = "dp"
     zone_name = "${azurerm_dns_zone.hmpps.name}"
     resource_group_name = "${azurerm_resource_group.webops.name}"
     ttl = "300"
