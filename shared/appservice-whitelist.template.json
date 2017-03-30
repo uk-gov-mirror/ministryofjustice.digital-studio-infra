@@ -1,0 +1,69 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "ip1": {
+            "type": "string",
+            "defaultValue": "255.255.255.255",
+            "metadata": {
+                "description": "placeholder: equivalent to an empty record"
+            }
+        },
+        "subnet1": {
+            "type": "string",
+            "defaultValue": "255.255.255.255"
+        },
+        "ip2": {
+            "type": "string",
+            "defaultValue": "255.255.255.255",
+            "metadata": {
+                "description": "placeholder: equivalent to an empty record"
+            }
+        },
+        "subnet2": {
+            "type": "string",
+            "defaultValue": "255.255.255.255"
+        },
+        "ip3": {
+            "type": "string",
+            "defaultValue": "255.255.255.255",
+            "metadata": {
+                "description": "placeholder: equivalent to an empty record"
+            }
+        },
+        "subnet3": {
+            "type": "string",
+            "defaultValue": "255.255.255.255"
+        },
+        "ip4": {
+            "type": "string",
+            "defaultValue": "255.255.255.255",
+            "metadata": {
+                "description": "placeholder: equivalent to an empty record"
+            }
+        },
+        "subnet4": {
+            "type": "string",
+            "defaultValue": "255.255.255.255"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('name'), '/web')]",
+            "type": "Microsoft.Web/sites/config",
+            "properties": {
+                "ipSecurityRestrictions": [
+                    {"ipAddress": "[parameters('ip1')]", "subnetMask": "[parameters('subnet1')]"},
+                    {"ipAddress": "[parameters('ip2')]", "subnetMask": "[parameters('subnet2')]"},
+                    {"ipAddress": "[parameters('ip3')]", "subnetMask": "[parameters('subnet3')]"},
+                    {"ipAddress": "[parameters('ip4')]", "subnetMask": "[parameters('subnet4')]"}
+                ]
+            },
+            "location": "[resourceGroup().location]"
+        }
+    ]
+}
