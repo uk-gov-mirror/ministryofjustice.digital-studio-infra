@@ -7,7 +7,7 @@
         },
         "ip1": {
             "type": "string",
-            "defaultValue": "255.255.255.255",
+            "defaultValue": "192.0.2.0",
             "metadata": {
                 "description": "placeholder: equivalent to an empty record"
             }
@@ -18,7 +18,7 @@
         },
         "ip2": {
             "type": "string",
-            "defaultValue": "255.255.255.255",
+            "defaultValue": "192.0.2.1",
             "metadata": {
                 "description": "placeholder: equivalent to an empty record"
             }
@@ -29,7 +29,7 @@
         },
         "ip3": {
             "type": "string",
-            "defaultValue": "255.255.255.255",
+            "defaultValue": "192.0.2.3",
             "metadata": {
                 "description": "placeholder: equivalent to an empty record"
             }
@@ -40,7 +40,7 @@
         },
         "ip4": {
             "type": "string",
-            "defaultValue": "255.255.255.255",
+            "defaultValue": "192.0.2.4",
             "metadata": {
                 "description": "placeholder: equivalent to an empty record"
             }
