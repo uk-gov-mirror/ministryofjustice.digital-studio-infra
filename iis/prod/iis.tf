@@ -38,6 +38,63 @@ resource "random_id" "sql-user-password" {
     byte_length = 16
 }
 
+resource "azurerm_storage_account" "storage" {
+    name = "${replace(var.app-name, "-", "")}storage"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    account_type = "Standard_RAGRS"
+    enable_blob_encryption = true
+
+    tags = "${var.tags}"
+}
+
+variable "log-containers" {
+    type = "list"
+    default = ["app-logs", "web-logs", "db-logs"]
+}
+resource "azurerm_storage_container" "logs" {
+    count = "${length(var.log-containers)}"
+    name = "${var.log-containers[count.index]}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    storage_account_name = "${azurerm_storage_account.storage.name}"
+    container_access_type = "private"
+}
+
+resource "azurerm_key_vault" "vault" {
+    name = "${var.app-name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    sku {
+        name = "standard"
+    }
+    tenant_id = "${var.azure_tenant_id}"
+
+    access_policy {
+        tenant_id = "${var.azure_tenant_id}"
+        object_id = "${var.azure_webops_group_oid}"
+        key_permissions = ["all"]
+        secret_permissions = ["all"]
+    }
+    access_policy {
+        tenant_id = "${var.azure_tenant_id}"
+        object_id = "${var.azure_app_service_oid}"
+        key_permissions = []
+        secret_permissions = ["get"]
+    }
+    access_policy {
+        object_id = "${var.azure_glenm_tfprod_oid}"
+        tenant_id = "${var.azure_tenant_id}"
+        key_permissions = ["get"]
+        secret_permissions = ["get"]
+    }
+
+    enabled_for_deployment = false
+    enabled_for_disk_encryption = false
+    enabled_for_template_deployment = true
+
+    tags = "${var.tags}"
+}
+
 resource "azurerm_sql_server" "sql" {
     name = "${var.app-name}"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -90,19 +147,42 @@ resource "azurerm_template_deployment" "sql-tde" {
 }
 
 resource "azurerm_template_deployment" "webapp" {
-    name = "${var.app-name}"
+    name = "webapp"
     resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
-    template_body = "${file("../webapp.template.json")}"
+    template_body = "${file("../../shared/appservice.template.json")}"
     parameters {
         name = "${var.app-name}"
-        hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
+    }
+}
+
+resource "azurerm_template_deployment" "webapp-whitelist" {
+    name = "webapp-whitelist"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice-whitelist.template.json")}"
+
+    parameters {
+        name = "${var.app-name}"
         ip1 = "${var.ips["office"]}"
         subnet1 = "255.255.255.255"
         ip2 = "${var.ips["quantum"]}"
         subnet2 = "255.255.255.255"
+    }
+
+    depends_on = ["azurerm_template_deployment.webapp"]
+}
+
+resource "azurerm_template_deployment" "webapp-config" {
+    name = "webapp-config"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../webapp-config.template.json")}"
+
+    parameters {
+        name = "${var.app-name}"
         DB_USER = "iisuser"
         DB_PASS = "${random_id.sql-user-password.b64}"
         DB_SERVER = "${azurerm_sql_server.sql.fully_qualified_domain_name}"
@@ -112,6 +192,26 @@ resource "azurerm_template_deployment" "webapp" {
         CLIENT_SECRET = "TODO"
         TOKEN_HOST = "https://signon.service.justice.gov.uk"
     }
+
+    depends_on = ["azurerm_template_deployment.webapp"]
+}
+
+resource "azurerm_template_deployment" "webapp-ssl" {
+    name = "webapp-ssl"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice-ssl.template.json")}"
+
+    parameters {
+        name = "${var.app-name}"
+        hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
+        keyVaultId = "${azurerm_key_vault.vault.id}"
+        keyVaultCertName = "hpaDOTserviceDOThmppsDOTdsdDOTio"
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
+    }
+
+    depends_on = ["azurerm_template_deployment.webapp"]
 }
 
 resource "azurerm_dns_cname_record" "cname" {
