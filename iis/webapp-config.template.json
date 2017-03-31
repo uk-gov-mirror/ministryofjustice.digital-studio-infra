@@ -28,6 +28,10 @@
         },
         "TOKEN_HOST": {
             "type": "string"
+        },
+        "APPINSIGHTS_INSTRUMENTATIONKEY": {
+            "type": "string",
+            "defaultValue": ""
         }
     },
     "resources": [
@@ -44,7 +48,8 @@
                 "SESSION_SECRET": "[parameters('SESSION_SECRET')]",
                 "CLIENT_ID": "[parameters('CLIENT_ID')]",
                 "CLIENT_SECRET": "[parameters('CLIENT_SECRET')]",
-                "TOKEN_HOST": "[parameters('TOKEN_HOST')]"
+                "TOKEN_HOST": "[parameters('TOKEN_HOST')]",
+                "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]"
             }
         }
     ]
