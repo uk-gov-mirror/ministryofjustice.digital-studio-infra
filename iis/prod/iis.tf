@@ -158,6 +158,20 @@ resource "azurerm_template_deployment" "webapp" {
     }
 }
 
+resource "azurerm_template_deployment" "insights" {
+    name = "${var.app-name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/insights.template.json")}"
+    parameters {
+        name = "${var.app-name}"
+        location = "northeurope" // Not in UK yet
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
+        appServiceId = "${azurerm_template_deployment.webapp.outputs.resourceId}"
+    }
+}
+
 resource "azurerm_template_deployment" "webapp-whitelist" {
     name = "webapp-whitelist"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -191,6 +205,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         CLIENT_ID = "TODO"
         CLIENT_SECRET = "TODO"
         TOKEN_HOST = "https://signon.service.justice.gov.uk"
+        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs.instrumentationKey}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
