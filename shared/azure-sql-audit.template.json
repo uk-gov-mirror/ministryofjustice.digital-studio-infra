@@ -1,0 +1,26 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "serverName": {
+            "type": "string"
+        },
+        "storageAccountName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('serverName'), '/DefaultAuditPolicy')]",
+            "type": "Microsoft.Sql/servers/auditingPolicies",
+            "properties": {
+                "auditingState": "Enabled",
+                "storageAccountName": "[parameters('storageAccountName')]",
+                "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]",
+                "storageAccountResourceGroupName": "[resourceGroup().name]",
+                "storageAccountSubscriptionId": "[subscription().subscriptionId]"
+            }
+        }
+    ]
+}

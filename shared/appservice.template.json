@@ -70,6 +70,10 @@
         "ips": {
             "type": "string",
             "value": "[reference(resourceId('Microsoft.Web/sites', parameters('name'))).outboundIpAddresses]"
+        },
+        "resourceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Web/sites', parameters('name'))]"
         }
     }
 }

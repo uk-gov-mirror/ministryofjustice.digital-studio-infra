@@ -127,6 +127,17 @@ resource "azurerm_sql_firewall_rule" "app-access" {
     end_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs.ips), count.index)}"
 }
 
+# resource "azurerm_template_deployment" "sql-audit" {
+#     name = "sql-audit"
+#     resource_group_name = "${azurerm_resource_group.group.name}"
+#     deployment_mode = "Incremental"
+#     template_body = "${file("../../shared/azure-sql-audit.template.json")}"
+#     parameters {
+#         serverName = "${azurerm_sql_server.sql.name}"
+#         storageAccountName = "${azurerm_storage_account.storage.name}"
+#     }
+# }
+
 resource "azurerm_sql_database" "db" {
     name = "${var.app-name}"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -159,6 +170,20 @@ resource "azurerm_template_deployment" "webapp" {
         name = "${var.app-name}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
+    }
+}
+
+resource "azurerm_template_deployment" "insights" {
+    name = "${var.app-name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/insights.template.json")}"
+    parameters {
+        name = "${var.app-name}"
+        location = "northeurope" // Not in UK yet
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
+        appServiceId = "${azurerm_template_deployment.webapp.outputs.resourceId}"
     }
 }
 
@@ -199,6 +224,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         CLIENT_ID = "TODO"
         CLIENT_SECRET = "TODO"
         TOKEN_HOST = "https://www.signon.dsd.io"
+        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs.instrumentationKey}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
