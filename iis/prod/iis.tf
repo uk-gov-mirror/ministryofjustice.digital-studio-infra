@@ -239,5 +239,8 @@ resource "azurerm_dns_cname_record" "cname" {
 }
 
 output "advice" {
-    value = "Don't forget to set up the SQL instance user/schemas manually."
+    value = [
+        "Don't forget to set up the SQL instance user/schemas manually.",
+        "Application Insights continuous export must also be done manually"
+    ]
 }
