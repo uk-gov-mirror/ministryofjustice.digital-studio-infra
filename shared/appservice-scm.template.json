@@ -1,0 +1,27 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "repoURL": {
+            "type": "string"
+        },
+        "branch": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "type":"Microsoft.Web/sites/sourcecontrols",
+            "name":"[concat(parameters('name'), '/web')]",
+            "apiVersion":"2015-08-01",
+            "properties": {
+                "RepoUrl": "[parameters('repoURL')]",
+                "branch" : "[parameters('branch')]",
+                "IsManualIntegration": true
+            }
+        }
+    ]
+}
