@@ -10,9 +10,11 @@ variable "azure_webops_group_oid" {
     type = "string"
     default = "d37d3e52-53af-4b04-b622-75eea2ee643a"
 }
+
+// These AD ObjectIDs were found via `az ad sp list`
 variable "azure_glenm_tfprod_oid" {
     type = "string"
-    default = "0ef6b152-f82b-4fa2-9e66-30b117a3add7"
+    default = "ad1a039a-c546-4a8f-b5ac-9ce4079b1e92"
 }
 
 provider "azurerm" {

@@ -189,6 +189,16 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
     depends_on = ["azurerm_template_deployment.webapp"]
 }
 
+data "external" "vault" {
+    program = ["node", "../../tools/keyvault-data.js"]
+    query {
+        vault = "${azurerm_key_vault.vault.name}"
+
+        client_id = "signon-client-id"
+        client_secret = "signon-client-secret"
+    }
+}
+
 resource "azurerm_template_deployment" "webapp-config" {
     name = "webapp-config"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -202,8 +212,8 @@ resource "azurerm_template_deployment" "webapp-config" {
         DB_SERVER = "${azurerm_sql_server.sql.fully_qualified_domain_name}"
         DB_NAME = "${azurerm_sql_database.db.name}"
         SESSION_SECRET = "${random_id.session-secret.b64}"
-        CLIENT_ID = "TODO"
-        CLIENT_SECRET = "TODO"
+        CLIENT_ID = "${data.external.vault.result.client_id}"
+        CLIENT_SECRET = "${data.external.vault.result.client_secret}"
         TOKEN_HOST = "https://signon.service.justice.gov.uk"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs.instrumentationKey}"
     }

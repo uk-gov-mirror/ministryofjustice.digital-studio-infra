@@ -83,14 +83,14 @@ resource "azurerm_key_vault" "vault" {
     access_policy {
         object_id = "${var.azure_glenm_tf_oid}"
         tenant_id = "${var.azure_tenant_id}"
-        key_permissions = ["get"]
-        secret_permissions = ["get"]
+        key_permissions = []
+        secret_permissions = ["get", "list"]
     }
     access_policy {
         object_id = "${var.azure_robl_tf_oid}"
         tenant_id = "${var.azure_tenant_id}"
-        key_permissions = ["get"]
-        secret_permissions = ["get"]
+        key_permissions = []
+        secret_permissions = ["get", "list"]
     }
 
     enabled_for_deployment = false
@@ -208,6 +208,16 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
     depends_on = ["azurerm_template_deployment.webapp"]
 }
 
+data "external" "vault" {
+    program = ["node", "../../tools/keyvault-data.js"]
+    query {
+        vault = "${azurerm_key_vault.vault.name}"
+
+        client_id = "signon-client-id"
+        client_secret = "signon-client-secret"
+    }
+}
+
 resource "azurerm_template_deployment" "webapp-config" {
     name = "webapp-config"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -221,8 +231,8 @@ resource "azurerm_template_deployment" "webapp-config" {
         DB_SERVER = "${azurerm_sql_server.sql.fully_qualified_domain_name}"
         DB_NAME = "${azurerm_sql_database.db.name}"
         SESSION_SECRET = "${random_id.session-secret.b64}"
-        CLIENT_ID = "TODO"
-        CLIENT_SECRET = "TODO"
+        CLIENT_ID = "${data.external.vault.result.client_id}"
+        CLIENT_SECRET = "${data.external.vault.result.client_secret}"
         TOKEN_HOST = "https://www.signon.dsd.io"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs.instrumentationKey}"
     }
