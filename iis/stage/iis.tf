@@ -43,6 +43,7 @@ resource "azurerm_storage_account" "storage" {
     resource_group_name = "${azurerm_resource_group.group.name}"
     location = "${azurerm_resource_group.group.location}"
     account_type = "Standard_RAGRS"
+    enable_blob_encryption = true
 
     tags = "${var.tags}"
 }
