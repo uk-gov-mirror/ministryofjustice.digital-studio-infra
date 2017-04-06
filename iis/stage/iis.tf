@@ -235,6 +235,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         CLIENT_ID = "${data.external.vault.result.client_id}"
         CLIENT_SECRET = "${data.external.vault.result.client_secret}"
         TOKEN_HOST = "https://www.signon.dsd.io"
+        HEALTHCHECK_INTERVAL = "2"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs.instrumentationKey}"
     }
 
