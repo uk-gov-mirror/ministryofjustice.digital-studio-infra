@@ -29,6 +29,10 @@
         "TOKEN_HOST": {
             "type": "string"
         },
+        "HEALTHCHECK_INTERVAL": {
+            "type": "string",
+            "defaultValue": ""
+        },
         "APPINSIGHTS_INSTRUMENTATIONKEY": {
             "type": "string",
             "defaultValue": ""
@@ -49,6 +53,7 @@
                 "CLIENT_ID": "[parameters('CLIENT_ID')]",
                 "CLIENT_SECRET": "[parameters('CLIENT_SECRET')]",
                 "TOKEN_HOST": "[parameters('TOKEN_HOST')]",
+                "HEALTHCHECK_INTERVAL": "[parameters('HEALTHCHECK_INTERVAL')]",
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]"
             }
         }
