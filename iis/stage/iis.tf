@@ -111,22 +111,30 @@ resource "azurerm_sql_server" "sql" {
     tags = "${var.tags}"
 }
 
-resource "azurerm_sql_firewall_rule" "office-access" {
-    name = "NOMS Studio office"
+resource "azurerm_sql_firewall_rule" "world-open" {
+    name = "Open to the world"
     resource_group_name = "${azurerm_resource_group.group.name}"
     server_name = "${azurerm_sql_server.sql.name}"
-    start_ip_address = "${var.ips["office"]}"
-    end_ip_address = "${var.ips["office"]}"
+    start_ip_address = "0.0.0.0"
+    end_ip_address = "255.255.255.255"
 }
 
-resource "azurerm_sql_firewall_rule" "app-access" {
-    count = "${length(split(",", azurerm_template_deployment.webapp.outputs.ips))}"
-    name = "Application IP ${count.index}"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    server_name = "${azurerm_sql_server.sql.name}"
-    start_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs.ips), count.index)}"
-    end_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs.ips), count.index)}"
-}
+# resource "azurerm_sql_firewall_rule" "office-access" {
+#     name = "NOMS Studio office"
+#     resource_group_name = "${azurerm_resource_group.group.name}"
+#     server_name = "${azurerm_sql_server.sql.name}"
+#     start_ip_address = "${var.ips["office"]}"
+#     end_ip_address = "${var.ips["office"]}"
+# }
+
+# resource "azurerm_sql_firewall_rule" "app-access" {
+#     count = "${length(split(",", azurerm_template_deployment.webapp.outputs.ips))}"
+#     name = "Application IP ${count.index}"
+#     resource_group_name = "${azurerm_resource_group.group.name}"
+#     server_name = "${azurerm_sql_server.sql.name}"
+#     start_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs.ips), count.index)}"
+#     end_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs.ips), count.index)}"
+# }
 
 # resource "azurerm_template_deployment" "sql-audit" {
 #     name = "sql-audit"
@@ -196,14 +204,8 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
 
     parameters {
         name = "${var.app-name}"
-        ip1 = "${var.ips["office"]}"
-        subnet1 = "255.255.255.255"
-        ip2 = "${var.ips["quantum"]}"
-        subnet2 = "255.255.255.255"
-        ip3 = "82.39.108.24" // Suha Akyuz for pen test
-        subnet3 = "255.255.255.255"
-        ip4 = "81.134.202.16" // MoJ Office
-        subnet4 = "255.255.255.240"
+        ip1 = "0.0.0.0"
+        subnet1 = "0.0.0.0"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
