@@ -23,5 +23,11 @@
                 "IsManualIntegration": true
             }
         }
-    ]
+    ],
+    "outputs": {
+        "deployTrigger": {
+            "type": "string",
+            "value": "[concat(list(resourceId('Microsoft.Web/sites/config', parameters('name'), 'publishingcredentials'), '2015-08-01').properties.scmUri, '/deploy')]"
+        }
+    }
 }
