@@ -23,11 +23,10 @@ ARM_CLIENT_ID=xxxxx
 ARM_CLIENT_SECRET=xxxxx
 ```
 
-Some directories might interact with the heroku api, you'll need to go get an API key from the admin UI to make that work.
+Some environments might interact with the github api, you'll need to go get an API key from the admin UI to make that work.
 
 ```
-HEROKU_EMAIL=xxxx
-HEROKU_API_KEY=xxxxx
+GITHUB_TOKEN=xxxx
 ```
 
 ### Required Setup
