@@ -63,7 +63,7 @@ resource "azurerm_template_deployment" "webapp-github" {
     parameters {
         name = "${var.app-name}"
         repoURL = "https://github.com/noms-digital-studio/csra-app.git"
-        branch = "release-to-stage"
+        branch = "deploy-to-stage"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
