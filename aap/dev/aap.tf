@@ -77,3 +77,17 @@ resource "azurerm_template_deployment" "viper-github" {
 
     depends_on = ["azurerm_template_deployment.viper"]
 }
+
+resource "github_repository_webhook" "viper-deploy" {
+  repository = "viper-service"
+
+  name = "web"
+  configuration {
+    url = "${azurerm_template_deployment.viper-github.outputs.deployTrigger}?scmType=GitHub"
+    content_type = "form"
+    insecure_ssl = false
+  }
+  active = true
+
+  events = ["push"]
+}
