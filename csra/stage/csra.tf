@@ -69,6 +69,21 @@ resource "azurerm_template_deployment" "webapp-github" {
     depends_on = ["azurerm_template_deployment.webapp"]
 }
 
+
+resource "github_repository_webhook" "webapp-deploy" {
+  repository = "csra-app"
+
+  name = "web"
+  configuration {
+    url = "${azurerm_template_deployment.webapp-github.outputs.deployTrigger}?scmType=GitHub"
+    content_type = "form"
+    insecure_ssl = false
+  }
+  active = true
+
+  events = ["push"]
+}
+
 resource "azurerm_dns_cname_record" "cname" {
     name = "${var.app-name}"
     zone_name = "hmpps.dsd.io"
