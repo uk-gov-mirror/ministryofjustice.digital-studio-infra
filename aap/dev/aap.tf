@@ -46,6 +46,13 @@ resource "azurerm_sql_server" "sql" {
     tags = "${var.tags}"
 }
 
+resource "azurerm_sql_firewall_rule" "azure-services" {
+    name = "Allow azure access"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    server_name = "${azurerm_sql_server.sql.name}"
+    start_ip_address = "0.0.0.0"
+    end_ip_address = "0.0.0.0"
+}
 resource "azurerm_sql_firewall_rule" "world-open" {
     name = "Open to the world"
     resource_group_name = "${azurerm_resource_group.group.name}"
