@@ -10,6 +10,10 @@ terraform {
     }
 }
 
+variable "env-name" {
+    type = "string"
+    default = "aap-dev"
+}
 variable "viper-name" {
     type = "string"
     default = "viper-dev"
@@ -23,8 +27,40 @@ variable "tags" {
 }
 
 resource "azurerm_resource_group" "group" {
-    name = "aap-dev"
+    name = "${var.env-name}"
     location = "ukwest"
+    tags = "${var.tags}"
+}
+
+resource "random_id" "sql-admin-password" {
+    byte_length = 32
+}
+
+resource "azurerm_sql_server" "sql" {
+    name = "${var.env-name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    version = "12.0"
+    administrator_login = "aap"
+    administrator_login_password = "${random_id.sql-admin-password.b64}"
+    tags = "${var.tags}"
+}
+
+resource "azurerm_sql_firewall_rule" "world-open" {
+    name = "Open to the world"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    server_name = "${azurerm_sql_server.sql.name}"
+    start_ip_address = "0.0.0.0"
+    end_ip_address = "255.255.255.255"
+}
+
+resource "azurerm_sql_database" "db" {
+    name = "${var.env-name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    server_name = "${azurerm_sql_server.sql.name}"
+    edition = "Basic"
+    collation = "SQL_Latin1_General_CP1_CI_AS"
     tags = "${var.tags}"
 }
 
