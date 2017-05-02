@@ -32,6 +32,16 @@ resource "random_id" "sql-admin-password" {
     byte_length = 32
 }
 
+resource "azurerm_storage_account" "storage" {
+    name = "${replace(var.env-name, "-", "")}storage"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    account_type = "Standard_RAGRS"
+    enable_blob_encryption = true
+
+    tags = "${var.tags}"
+}
+
 resource "azurerm_sql_server" "sql" {
     name = "${var.env-name}"
     resource_group_name = "${azurerm_resource_group.group.name}"

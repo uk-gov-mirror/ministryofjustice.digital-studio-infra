@@ -36,6 +36,16 @@ resource "random_id" "sql-admin-password" {
     byte_length = 32
 }
 
+resource "azurerm_storage_account" "storage" {
+    name = "${replace(var.env-name, "-", "")}storage"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    account_type = "Standard_RAGRS"
+    enable_blob_encryption = true
+
+    tags = "${var.tags}"
+}
+
 resource "azurerm_sql_server" "sql" {
     name = "${var.env-name}"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -69,6 +79,19 @@ resource "azurerm_sql_database" "db" {
     edition = "Basic"
     collation = "SQL_Latin1_General_CP1_CI_AS"
     tags = "${var.tags}"
+}
+
+resource "azurerm_template_deployment" "sql-tde" {
+    name = "sql-tde"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/azure-sql-tde.template.json")}"
+    parameters {
+        serverName = "${azurerm_sql_server.sql.name}"
+        databaseName = "${azurerm_sql_database.db.name}"
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
+    }
 }
 
 resource "azurerm_template_deployment" "viper" {
