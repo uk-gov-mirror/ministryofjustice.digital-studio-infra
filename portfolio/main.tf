@@ -48,8 +48,10 @@ resource "azurerm_template_deployment" "app-whitelist" {
 
     parameters {
         name = "${var.app-name}"
-        ip1 = "${var.ips["office"]}"
-        subnet1 = "255.255.255.255"
+        # ip1 = "${var.ips["office"]}"
+        # subnet1 = "255.255.255.255"
+        ip1 = "0.0.0.0"
+        subnet1 = "0.0.0.0"
     }
 
     depends_on = ["azurerm_template_deployment.app"]
