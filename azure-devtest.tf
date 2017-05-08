@@ -8,7 +8,7 @@ variable "azure_app_service_oid" {
 }
 variable "azure_webops_group_oid" {
     type = "string"
-    default = "d37d3e52-53af-4b04-b622-75eea2ee643a"
+    default = "98dc3307-f515-4717-b3c1-7174413e20b0"
 }
 
 // These AD ObjectIDs were found via `az ad sp list`
