@@ -18,6 +18,10 @@ variable "viper-name" {
     type = "string"
     default = "viper-dev"
 }
+variable "rsr-name" {
+    type = "string"
+    default = "rsr-dev"
+}
 variable "tags" {
     type = "map"
     default {
@@ -149,7 +153,71 @@ resource "github_repository_webhook" "viper-deploy" {
 
   name = "web"
   configuration {
-    url = "${azurerm_template_deployment.viper-github.outputs.deployTrigger}?scmType=GitHub"
+    url = "${azurerm_template_deployment.viper-github.outputs["deployTrigger"]}?scmType=GitHub"
+    content_type = "form"
+    insecure_ssl = false
+  }
+  active = true
+
+  events = ["push"]
+}
+
+resource "azurerm_template_deployment" "rsr" {
+    name = "rsr"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice.template.json")}"
+    parameters {
+        name = "${var.rsr-name}"
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
+    }
+}
+
+resource "azurerm_template_deployment" "rsr-hostname" {
+    name = "rsr-hostname"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice-hostname.template.json")}"
+
+    parameters {
+        name = "${var.rsr-name}"
+        hostname = "${azurerm_dns_cname_record.rsr.name}.${azurerm_dns_cname_record.rsr.zone_name}"
+    }
+
+    depends_on = ["azurerm_template_deployment.rsr"]
+}
+
+resource "azurerm_dns_cname_record" "rsr" {
+    name = "${var.rsr-name}"
+    zone_name = "hmpps.dsd.io"
+    resource_group_name = "webops"
+    ttl = "300"
+    record = "${var.rsr-name}.azurewebsites.net"
+    tags = "${var.tags}"
+}
+
+resource "azurerm_template_deployment" "rsr-github" {
+    name = "rsr-github"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice-scm.template.json")}"
+
+    parameters {
+        name = "${azurerm_template_deployment.rsr.parameters.name}"
+        repoURL = "https://github.com/noms-digital-studio/rsr-calculator-service.git"
+        branch = "master"
+    }
+
+    depends_on = ["azurerm_template_deployment.rsr"]
+}
+
+resource "github_repository_webhook" "rsr-deploy" {
+  repository = "rsr-calculator-service"
+
+  name = "web"
+  configuration {
+    url = "${azurerm_template_deployment.rsr-github.outputs["deployTrigger"]}?scmType=GitHub"
     content_type = "form"
     insecure_ssl = false
   }
