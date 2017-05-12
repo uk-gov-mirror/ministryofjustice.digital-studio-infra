@@ -25,18 +25,12 @@
                 "httpLogs": {
                     "azureBlobStorage": {
                         "enabled": true,
-                        "sasUrl": ".....",
+                        "sasUrl": "[concat(reference(variables('storageId'), variables('storageVersion')).primaryEndpoints.blob, parameters('storageAccountContainer'))]",
                         "retentionInDays": 180
                     }
                 }
             },
             "location": "[resourceGroup().location]"
         }
-    ],
-    "outputs": {
-        "temp": {
-            "type": "array",
-            "value": "[listServiceSAS(variables('storageId'), variables('storageVersion'))]"
-        }
-    }
+    ]
 }
