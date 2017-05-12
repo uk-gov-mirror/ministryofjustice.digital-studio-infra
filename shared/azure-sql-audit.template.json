@@ -11,15 +11,30 @@
     },
     "resources": [
         {
-            "apiVersion": "2014-04-01",
+            "apiVersion": "2014-04-01-preview",
             "name": "[concat(parameters('serverName'), '/DefaultAuditPolicy')]",
             "type": "Microsoft.Sql/servers/auditingPolicies",
             "properties": {
                 "auditingState": "Enabled",
+                "eventTypesToAudit": "All",
+                "retentionDays": "180",
                 "storageAccountName": "[parameters('storageAccountName')]",
                 "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]",
                 "storageAccountResourceGroupName": "[resourceGroup().name]",
                 "storageAccountSubscriptionId": "[subscription().subscriptionId]"
+            }
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Sql/servers/securityAlertPolicies",
+            "name": "[concat(parameters('serverName'), '/Default')]",
+            "properties": {
+                "state": "Enabled",
+                "disabledAlerts": "",
+                "emailAddresses": "noms-studio-webops@digital.justice.gov.uk",
+                "emailAccountAdmins": "Enabled",
+                "storageAccountEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]",
+                "storageAccountAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
             }
         }
     ]
