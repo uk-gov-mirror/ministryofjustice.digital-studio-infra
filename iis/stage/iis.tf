@@ -182,6 +182,21 @@ resource "azurerm_template_deployment" "webapp" {
     }
 }
 
+# resource "azurerm_template_deployment" "webapp-weblogs" {
+#     name = "webapp-weblogs"
+#     resource_group_name = "${azurerm_resource_group.group.name}"
+#     deployment_mode = "Incremental"
+#     template_body = "${file("../../shared/appservice-weblogs.template.json")}"
+
+#     parameters {
+#         name = "${var.app-name}"
+#         storageAccountName = "${azurerm_storage_account.storage.name}"
+#         storageAccountContainer = "web-logs"
+#     }
+
+#     depends_on = ["azurerm_template_deployment.webapp"]
+# }
+
 resource "azurerm_template_deployment" "insights" {
     name = "${var.app-name}"
     resource_group_name = "${azurerm_resource_group.group.name}"
