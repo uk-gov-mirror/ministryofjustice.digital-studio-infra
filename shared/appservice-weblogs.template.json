@@ -5,16 +5,9 @@
         "name": {
             "type": "string"
         },
-        "storageAccountName": {
-            "type": "string"
-        },
-        "storageAccountContainer": {
+        "storageSAS": {
             "type": "string"
         }
-    },
-    "variables": {
-        "storageId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
-        "storageVersion": "[providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]]"
     },
     "resources": [
         {
@@ -25,7 +18,7 @@
                 "httpLogs": {
                     "azureBlobStorage": {
                         "enabled": true,
-                        "sasUrl": "[concat(reference(variables('storageId'), variables('storageVersion')).primaryEndpoints.blob, parameters('storageAccountContainer'))]",
+                        "sasUrl": "[parameters('storageSAS')]",
                         "retentionInDays": 180
                     }
                 }
