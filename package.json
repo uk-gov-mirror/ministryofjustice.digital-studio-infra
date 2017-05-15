@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "adal-node": "^0.1.22",
+    "azure": "^2.0.0-preview",
     "azure-keyvault": "^2.0.0-preview"
   }
 }
