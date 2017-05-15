@@ -24,3 +24,15 @@ resource "azurerm_template_deployment" "csra-prod-webapp" {
 
 # Because the DNS is currently using noms.dsd.io, which is non-prod
 # the configuration entry for this is done from the non-prod tf dir
+
+resource "azurerm_dns_cname_record" "cname" {
+    name = "csra"
+    zone_name = "service.hmpps.dsd.io"
+    resource_group_name = "webops-prod"
+    ttl = "300"
+    record = "csra-prod.azurewebsites.net"
+    tags {
+      Service = "CSRA"
+      Environment = "Prod"
+    }
+}
