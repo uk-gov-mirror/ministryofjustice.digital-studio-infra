@@ -110,27 +110,17 @@ resource "azurerm_template_deployment" "viper" {
     }
 }
 
-resource "azurerm_template_deployment" "viper-hostname" {
-    name = "viper-hostname"
+resource "azurerm_template_deployment" "viper-ssl" {
+    name = "viper-ssl"
     resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
-    template_body = "${file("../../shared/appservice-hostname.template.json")}"
+    template_body = "${file("../../shared/appservice-sslonly.template.json")}"
 
     parameters {
-        name = "${var.viper-name}"
-        hostname = "${azurerm_dns_cname_record.viper.name}.${azurerm_dns_cname_record.viper.zone_name}"
+        name = "${azurerm_template_deployment.viper.parameters.name}"
     }
 
     depends_on = ["azurerm_template_deployment.viper"]
-}
-
-resource "azurerm_dns_cname_record" "viper" {
-    name = "${var.viper-name}"
-    zone_name = "hmpps.dsd.io"
-    resource_group_name = "webops"
-    ttl = "300"
-    record = "${var.viper-name}.azurewebsites.net"
-    tags = "${var.tags}"
 }
 
 resource "azurerm_template_deployment" "viper-github" {
