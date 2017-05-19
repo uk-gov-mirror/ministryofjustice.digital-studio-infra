@@ -276,6 +276,48 @@ resource "azurerm_dns_cname_record" "cname" {
     tags = "${var.tags}"
 }
 
+
+resource "azurerm_template_deployment" "stats-exposer" {
+    name = "stats-exposer-app"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice.template.json")}"
+    parameters {
+        name = "${var.app-name}-stats-exposer"
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
+    }
+}
+
+resource "azurerm_template_deployment" "stats-exposer-github" {
+    name = "stats-exposer-github"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice-scm.template.json")}"
+
+    parameters {
+        name = "${azurerm_template_deployment.stats-exposer.parameters.name}"
+        repoURL = "https://github.com/noms-digital-studio/ai-stats-exposer.git"
+        branch = "master"
+    }
+
+    depends_on = ["azurerm_template_deployment.stats-exposer"]
+}
+
+resource "github_repository_webhook" "stats-exposer-deploy" {
+  repository = "ai-stats-exposer"
+
+  name = "web"
+  configuration {
+    url = "${azurerm_template_deployment.stats-exposer-github.outputs["deployTrigger"]}?scmType=GitHub"
+    content_type = "form"
+    insecure_ssl = false
+  }
+  active = true
+
+  events = ["push"]
+}
+
 output "advice" {
     value = [
         "Don't forget to set up the SQL instance user/schemas manually.",
