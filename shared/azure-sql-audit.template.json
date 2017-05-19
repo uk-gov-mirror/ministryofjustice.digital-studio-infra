@@ -11,17 +11,38 @@
     },
     "resources": [
         {
-            "apiVersion": "2014-04-01-preview",
-            "name": "[concat(parameters('serverName'), '/DefaultAuditPolicy')]",
-            "type": "Microsoft.Sql/servers/auditingPolicies",
+            "apiVersion": "2015-05-01-Preview",
+            "name": "[concat(parameters('serverName'), '/Default')]",
+            "type": "Microsoft.Sql/servers/auditingSettings",
             "properties": {
-                "auditingState": "Enabled",
-                "eventTypesToAudit": "All",
+                "state": "Enabled",
+                "storageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]",
+                "storageAccountAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]",
                 "retentionDays": "180",
-                "storageAccountName": "[parameters('storageAccountName')]",
-                "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]",
-                "storageAccountResourceGroupName": "[resourceGroup().name]",
-                "storageAccountSubscriptionId": "[subscription().subscriptionId]"
+                "auditActionsAndGroups": [
+                    "BATCH_STARTED_GROUP",
+                    "BATCH_COMPLETED_GROUP",
+                    "APPLICATION_ROLE_CHANGE_PASSWORD_GROUP",
+                    "BACKUP_RESTORE_GROUP",
+                    "DATABASE_LOGOUT_GROUP",
+                    "DATABASE_OBJECT_CHANGE_GROUP",
+                    "DATABASE_OBJECT_OWNERSHIP_CHANGE_GROUP",
+                    "DATABASE_OBJECT_PERMISSION_CHANGE_GROUP",
+                    "DATABASE_OPERATION_GROUP",
+                    "DATABASE_PERMISSION_CHANGE_GROUP",
+                    "DATABASE_PRINCIPAL_CHANGE_GROUP",
+                    "DATABASE_PRINCIPAL_IMPERSONATION_GROUP",
+                    "DATABASE_ROLE_MEMBER_CHANGE_GROUP",
+                    "FAILED_DATABASE_AUTHENTICATION_GROUP",
+                    "SCHEMA_OBJECT_ACCESS_GROUP",
+                    "SCHEMA_OBJECT_CHANGE_GROUP",
+                    "SCHEMA_OBJECT_OWNERSHIP_CHANGE_GROUP",
+                    "SCHEMA_OBJECT_PERMISSION_CHANGE_GROUP",
+                    "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+                    "USER_CHANGE_PASSWORD_GROUP"
+                ],
+                "storageAccountSubscriptionId": "[subscription().subscriptionId]",
+                "isStorageSecondaryKeyInUse": false
             }
         },
         {
@@ -33,9 +54,13 @@
                 "disabledAlerts": "",
                 "emailAddresses": "noms-studio-webops@digital.justice.gov.uk",
                 "emailAccountAdmins": "Enabled",
-                "storageAccountEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]",
-                "storageAccountAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]"
-            }
+                "storageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]",
+                "storageAccountAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value]",
+                "retentionDays": 180
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Sql/servers/', parameters('serverName'), '/auditingSettings/Default')]"
+            ]
         }
     ]
 }
