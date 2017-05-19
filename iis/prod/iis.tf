@@ -122,6 +122,17 @@ resource "azurerm_sql_firewall_rule" "app-access" {
     end_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs.ips), count.index)}"
 }
 
+resource "azurerm_template_deployment" "sql-audit" {
+    name = "sql-audit"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/azure-sql-audit.template.json")}"
+    parameters {
+        serverName = "${azurerm_sql_server.sql.name}"
+        storageAccountName = "${azurerm_storage_account.storage.name}"
+    }
+}
+
 resource "azurerm_sql_database" "db" {
     name = "${var.app-name}"
     resource_group_name = "${azurerm_resource_group.group.name}"
