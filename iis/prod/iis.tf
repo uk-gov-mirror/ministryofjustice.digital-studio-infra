@@ -235,6 +235,9 @@ data "external" "vault" {
 
         client_id = "signon-client-id"
         client_secret = "signon-client-secret"
+
+        dashboard_token = "dashboard-token"
+        appinsights_api_key = "appinsights-api-key"
     }
 }
 
@@ -298,6 +301,26 @@ resource "azurerm_template_deployment" "stats-exposer" {
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
     }
+}
+
+resource "azurerm_template_deployment" "stats-expos-erconfig" {
+    name = "stats-exposer-config"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../stats-webapp-config.template.json")}"
+
+    parameters {
+        name = "${var.app-name}"
+        DASHBOARD_TARGET = "https://iis-monitoring.herokuapp.com"
+        DASHBOARD_TOKEN = "${data.external.vault.result.dashboard_token}"
+        APPINSIGHTS_APP_ID = "5595f5b0-cfb0-4af0-ac47-f46f8abc2c1e"
+        APPINSIGHTS_API_KEY = "${data.external.vault.result.appinsights_api_key}"
+        APPINSIGHTS_UPDATE_INTERVAL = 15
+        APPINSIGHTS_QUERY_week = "traces | where timestamp > ago(7d) | where message == 'AUDIT' | summarize count() by tostring(customDimensions.key)"
+        APPINSIGHTS_QUERY_today = "traces | where timestamp > startofday(now()) | where message == 'AUDIT' | summarize count() by tostring(customDimensions.key)"
+    }
+
+    depends_on = ["azurerm_template_deployment.stats-exposer"]
 }
 
 resource "azurerm_template_deployment" "stats-exposer-github" {
