@@ -190,7 +190,7 @@ resource "azurerm_template_deployment" "webapp-weblogs" {
     template_body = "${file("../../shared/appservice-weblogs.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         storageSAS = "${data.external.sas-url.result.url}"
     }
 
@@ -203,7 +203,7 @@ resource "azurerm_template_deployment" "insights" {
     deployment_mode = "Incremental"
     template_body = "${file("../../shared/insights.template.json")}"
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         location = "northeurope" // Not in UK yet
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
@@ -248,7 +248,7 @@ resource "azurerm_template_deployment" "webapp-config" {
     template_body = "${file("../webapp-config.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         DB_USER = "iisuser"
         DB_PASS = "${random_id.sql-user-password.b64}"
         DB_SERVER = "${azurerm_sql_server.sql.fully_qualified_domain_name}"
@@ -270,7 +270,7 @@ resource "azurerm_template_deployment" "webapp-ssl" {
     template_body = "${file("../../shared/appservice-ssl.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
         keyVaultId = "${azurerm_key_vault.vault.id}"
         keyVaultCertName = "hpaDOTserviceDOThmppsDOTdsdDOTio"
@@ -310,7 +310,7 @@ resource "azurerm_template_deployment" "stats-expos-erconfig" {
     template_body = "${file("../stats-webapp-config.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.stats-exposer.parameters.name}"
         DASHBOARD_TARGET = "https://iis-monitoring.herokuapp.com"
         DASHBOARD_TOKEN = "${data.external.vault.result.dashboard_token}"
         APPINSIGHTS_APP_ID = "5595f5b0-cfb0-4af0-ac47-f46f8abc2c1e"
