@@ -54,20 +54,34 @@ resource "azurerm_template_deployment" "webapp-hostname" {
     depends_on = ["azurerm_template_deployment.webapp"]
 }
 
-# resource "azurerm_template_deployment" "webapp-github" {
-#     name = "webapp-github"
-#     resource_group_name = "${azurerm_resource_group.group.name}"
-#     deployment_mode = "Incremental"
-#     template_body = "${file("../../shared/appservice-scm.template.json")}"
+resource "azurerm_template_deployment" "webapp-github" {
+    name = "webapp-github"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice-scm.template.json")}"
 
-#     parameters {
-#         name = "${var.app-name}"
-#         repoURL = "https://github.com/noms-digital-studio/csra-app"
-#         branch = "release-to-mock"
-#     }
+    parameters {
+        name = "${var.app-name}"
+        repoURL = "https://github.com/noms-digital-studio/csra-app"
+        branch = "release-to-mock"
+    }
 
-#     depends_on = ["azurerm_template_deployment.webapp"]
-# }
+    depends_on = ["azurerm_template_deployment.webapp"]
+}
+
+resource "github_repository_webhook" "webapp-deploy" {
+  repository = "csra-app"
+
+  name = "web"
+  configuration {
+    url = "${azurerm_template_deployment.webapp-github.outputs["deployTrigger"]}?scmType=GitHub"
+    content_type = "form"
+    insecure_ssl = false
+  }
+  active = true
+
+  events = ["push"]
+}
 
 resource "azurerm_dns_cname_record" "cname" {
     name = "csra-mock"
