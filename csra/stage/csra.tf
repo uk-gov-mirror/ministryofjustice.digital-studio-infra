@@ -75,7 +75,7 @@ resource "github_repository_webhook" "webapp-deploy" {
 
   name = "web"
   configuration {
-    url = "${azurerm_template_deployment.webapp-github.outputs.deployTrigger}?scmType=GitHub"
+    url = "${azurerm_template_deployment.webapp-github.outputs["deployTrigger"]}?scmType=GitHub"
     content_type = "form"
     insecure_ssl = false
   }
