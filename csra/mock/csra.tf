@@ -113,7 +113,7 @@ resource "azurerm_template_deployment" "webapp-config" {
     parameters {
         name = "${var.app-name}"
         NODE_ENV = "production"
-        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs.instrumentationKey}"
+        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
