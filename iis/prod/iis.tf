@@ -207,7 +207,7 @@ resource "azurerm_template_deployment" "insights" {
         location = "northeurope" // Not in UK yet
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
-        appServiceId = "${azurerm_template_deployment.webapp.outputs.resourceId}"
+        appServiceId = "${azurerm_template_deployment.webapp.outputs["resourceId"]}"
     }
 }
 
@@ -257,7 +257,8 @@ resource "azurerm_template_deployment" "webapp-config" {
         CLIENT_ID = "${data.external.vault.result.client_id}"
         CLIENT_SECRET = "${data.external.vault.result.client_secret}"
         TOKEN_HOST = "https://signon.service.justice.gov.uk"
-        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs.instrumentationKey}"
+        HEALTHCHECK_INTERVAL = "5"
+        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]

@@ -203,7 +203,7 @@ resource "azurerm_template_deployment" "webapp-weblogs" {
     template_body = "${file("../../shared/appservice-weblogs.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         storageSAS = "${data.external.sas-url.result.url}"
     }
 
@@ -216,11 +216,11 @@ resource "azurerm_template_deployment" "insights" {
     deployment_mode = "Incremental"
     template_body = "${file("../../shared/insights.template.json")}"
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         location = "northeurope" // Not in UK yet
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
-        appServiceId = "${azurerm_template_deployment.webapp.outputs.resourceId}"
+        appServiceId = "${azurerm_template_deployment.webapp.outputs["resourceId"]}"
     }
 }
 
@@ -231,7 +231,7 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
     template_body = "${file("../../shared/appservice-whitelist.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         ip1 = "0.0.0.0"
         subnet1 = "0.0.0.0"
     }
@@ -256,7 +256,7 @@ resource "azurerm_template_deployment" "webapp-config" {
     template_body = "${file("../webapp-config.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         DB_USER = "iisuser"
         DB_PASS = "${random_id.sql-user-password.b64}"
         DB_SERVER = "${azurerm_sql_server.sql.fully_qualified_domain_name}"
@@ -265,8 +265,8 @@ resource "azurerm_template_deployment" "webapp-config" {
         CLIENT_ID = "${data.external.vault.result.client_id}"
         CLIENT_SECRET = "${data.external.vault.result.client_secret}"
         TOKEN_HOST = "https://www.signon.dsd.io"
-        HEALTHCHECK_INTERVAL = "2"
-        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs.instrumentationKey}"
+        HEALTHCHECK_INTERVAL = "5"
+        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
@@ -279,7 +279,7 @@ resource "azurerm_template_deployment" "webapp-ssl" {
     template_body = "${file("../../shared/appservice-ssl.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
         keyVaultId = "${azurerm_key_vault.vault.id}"
         keyVaultCertName = "hpa-stageDOTnomsDOTdsdDOTio"
