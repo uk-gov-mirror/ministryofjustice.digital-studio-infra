@@ -27,6 +27,7 @@
             "name": "[concat(parameters('name'), '/appsettings')]",
             "type": "Microsoft.Web/sites/config",
             "properties": {
+                "WEBSITE_NODE_DEFAULT_VERSION": "6.10.0",
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "NOMIS_URL": "[parameters('NOMIS_URL')]",
                 "NOMIS_TOKEN": "[parameters('NOMIS_TOKEN')]",
