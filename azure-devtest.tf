@@ -24,7 +24,10 @@ variable "azure_robl_tf_oid" {
     type = "string"
     default = "b9bc7ac9-39e8-4212-857a-a86598fe88a5"
 }
-
+variable "azure_joemc_tf_oid" {
+    type = "string"
+    default = "f05a56ac-2824-4b9a-ab0e-bec09f728947"
+}
 provider "azurerm" {
     # NOMS Digital Studio Dev & Test Environments
     subscription_id = "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
