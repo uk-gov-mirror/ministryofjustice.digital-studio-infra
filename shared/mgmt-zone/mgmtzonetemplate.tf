@@ -14,21 +14,28 @@
 # application resource group and the management infrastructure resoure groups are distinct. 
 # Based on this it was felt that we could provide this template as a basis for your own management zone, setting up the basic structure
 # which can be customized as required.
+#
+# Prior to this you will need to generate an appropriate ssl certificate/use an available wildcard certificate if this is in existence
+#
 
 
 terraform {
     required_version = ">= 0.9.2"
     backend "azure" {
-        resource_group_name = "changeme"
-        storage_account_name = "changeme"
+        resource_group_name = "webops"
+        storage_account_name = "nomsstudiowebops"
         container_name = "terraform"
-        key = "notm-dev.terraform.tfstate"
-        arm_subscription_id = "changeme"
-        arm_tenant_id = "changeme"
+        key = "mgmt-test.terraform.tfstate"
+        arm_subscription_id = "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+        arm_tenant_id = "747381f4-e81f-4a43-bf68-ced6a1e14edf"
     }
 }
 
-variable "sshprivkey" {
+variable "deploysshprivkey" {
+    type = "string"
+    default = ""
+}
+variable "deploysshpubkey" {
     type = "string"
     default = ""
 }
@@ -40,17 +47,37 @@ variable "rg-name" {
     type = "string"
     default = "changeme"
 }
-variable "mgmt-vnet-space"{
+variable "keyvault-cert-name" {
+    type = "string"
+    default = "certDOTname"
+}
+variable "mgmt-vnet-space" {
     type = "string"
     default = "10.0.0.0/16"
+}
+variable "mgmt-subnet" {
+    type = "string"
+    default = "10.0.0.0/16"
+}
+variable "appgw-subnet" {
+    type = "string"
+    default = "10.0.1.0/16"
 }
 variable "ci-server-name" {
     type = "string"
     default = "changeme"
 }
+variable "ci-server-priv-ip" {
+    type = "string"
+    default = "10.0.0.10"
+}
 variable "jmp-server-name" {
     type = "string"
     default = "changeme"
+}
+variable "jmp-server-priv-ip" {
+    type = "string"
+    default = "10.0.0.20"
 }
 variable "tags" {
     type = "map"
@@ -59,7 +86,6 @@ variable "tags" {
         Environment = "changeme"
     }
 }
-
 
 resource "random_id" "session-secret" {
     byte_length = 20
@@ -133,14 +159,14 @@ resource "azurerm_subnet" "mgmt-subnet" {
   name                 = "mgmt-subnet"
   resource_group_name  = "${azurerm_resource_group.mgmt.name}"
   virtual_network_name = "${azurerm_virtual_network.vnet.name}"
-  address_prefix       = "10.0.2.0/24"
+  address_prefix       = "${var.mgmt-subnet}"
 }
 
 resource "azurerm_subnet" "apgw-subnet" {
   name                 = "apgw-subnet"
   resource_group_name  = "${azurerm_resource_group.mgmt.name}"
   virtual_network_name = "${azurerm_virtual_network.vnet.name}"
-  address_prefix       = "10.0.3.0/24"
+  address_prefix       = "${var.appgw-subnet}"
 }
 
 resource "azurerm_network_interface" "ci-nic" {
@@ -152,7 +178,7 @@ resource "azurerm_network_interface" "ci-nic" {
     name                          = "ci-nic-config"
     subnet_id                     = "${azurerm_subnet.mgmt-subnet.id}"
     private_ip_address_allocation = "static"
-    private_ip_address            = ""
+    private_ip_address            = "${var.ci-server-priv-ip}"
   }
 }
 
@@ -240,7 +266,7 @@ resource "azurerm_network_interface" "jump-nic" {
     name                          = "jump-nic-config"
     subnet_id                     = "${azurerm_subnet.mgmt-subnet.id}"
     private_ip_address_allocation = "static"
-    private_ip_address            = 
+    private_ip_address            = "${var.jmp-server-priv-ip}"
   }
 }
 
@@ -327,7 +353,7 @@ resource "azurerm_template_deployment" "management-appgw" {
         subnetName = "${azurerm_subnet.appGatewaySubnet.name}"
         vnetID = "${azurerm_virtual_network.mgmt-vnet.id}"
         keyVaultId = "${azurerm_key_vault.vault.id}"
-        keyVaultCertName = "changeDOTthis"
+        keyVaultCertName = "${var.keyvault-cert-name}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
         role = "other"
@@ -335,6 +361,79 @@ resource "azurerm_template_deployment" "management-appgw" {
     output "appgwcname" {
       value = "${azurerm_template_deployment.management-appgw.outputs["appgwcname"]}"
     }
+
+resource "azurerm_network_security_group" "mgmt" {
+  name                = "mgmtsecuritygroup"
+  location            = "ukwest"
+  resource_group_name = "${azurerm_resource_group.mgmt.name}"
+
+  security_rule {
+    name                       = "ssh-inbound"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "${azurerm_network_interface.jump-nic.private_ip_address}"
+  }
+  security_rule {
+    name                       = "ssh-management-zone-jmp"
+    priority                   = 200
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "${azurerm_network_interface.jump-nic.private_ip_address}"
+    destination_address_prefix = "${azurerm_subnet.mgmt-subnet.address_prefix}"
+  }
+  security_rule {
+    name                       = "ssh-management-zone-ci"
+    priority                   = 300
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "${azurerm_network_interface.ci-nic.private_ip_address}"
+    destination_address_prefix = "${azurerm_subnet.mgmt-subnet.address_prefix}"
+  }
+  security_rule {
+    name                       = "https-inbound"
+    priority                   = 400
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "${azurerm_subnet.appGatewaySubnet.address_prefix}"
+  }
+  security_rule {
+    name                       = "appgw-to-ci"
+    priority                   = 500
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "${azurerm_subnet.appGatewaySubnet.address_prefix}"
+    destination_address_prefix = "${azurerm_subnet.mgmt-subnet.address_prefix}"
+  }
+  security_rule {
+    name                       = "default-deny"
+    priority                   = 4000
+    direction                  = "Inbound"
+    access                     = "deny"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
 
 resource "azurerm_dns_cname_record" "cname" {
     name = "ci"
