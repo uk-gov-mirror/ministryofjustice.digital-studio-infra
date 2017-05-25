@@ -22,10 +22,10 @@
 terraform {
     required_version = ">= 0.9.2"
     backend "azure" {
-        resource_group_name = "webops"
-        storage_account_name = "nomsstudiowebops"
-        container_name = "terraform"
-        key = "mgmt-test.terraform.tfstate"
+        #resource_group_name = "webops"
+        #storage_account_name = "nomsstudiowebops"
+        #container_name = "terraform"
+        #key = "mgmt-test.terraform.tfstate"
         arm_subscription_id = "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
         arm_tenant_id = "747381f4-e81f-4a43-bf68-ced6a1e14edf"
     }
@@ -38,6 +38,18 @@ variable "deploysshprivkey" {
 variable "deploysshpubkey" {
     type = "string"
     default = ""
+}
+variable "jumpadminsshpubkey" {
+  type = "string"
+  default = ""
+}
+variable "ci-admin" {
+  type = "string"
+  default = "deploy"
+}
+variable "jump-admin" {
+  type = "string"
+  default = "deploy"
 }
 variable "env-name" {
     type = "string"
@@ -213,14 +225,6 @@ resource "azurerm_virtual_machine" "ci" {
   }
 
   storage_data_disk {
-    name              = "datadisk_new"
-    managed_disk_type = "Standard_LRS"
-    create_option     = "Empty"
-    lun               = 0
-    disk_size_gb      = "1023"
-  }
-
-  storage_data_disk {
     name            = "${azurerm_managed_disk.ci-data-disk.name}"
     managed_disk_id = "${azurerm_managed_disk.ci-data-disk.id}"
     create_option   = "Attach"
@@ -230,8 +234,12 @@ resource "azurerm_virtual_machine" "ci" {
 
   os_profile {
     computer_name  = "${var.ci-server-name}"
-    admin_username = "ciadmin"
+    admin_username = "${var.ci-admin}"
     admin_password = "${var.ci-admin-password}"
+    ssh_keys {
+      path = "/home/${var.ci-admin}/.ssh/authorized_keys"
+      key_data = "${var.deploysshpubkey}"
+    }
   }
 
   os_profile_linux_config {
@@ -270,17 +278,8 @@ resource "azurerm_network_interface" "jump-nic" {
   }
 }
 
-resource "azurerm_managed_disk" "jump-data-disk" {
-  name                 = "jump-data-disk"
-  location             = "ukwest"
-  resource_group_name  = "${azurerm_resource_group.mgmt.name}"
-  storage_account_type = "Standard_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = "1023"
-}
-
 resource "azurerm_virtual_machine" "jump" {
-  name                  = "${var.ci-server-name}"
+  name                  = "${var.jump-server-name}"
   location              = "ukwest"
   resource_group_name   = "${azurerm_resource_group.mgmt.name}"
   network_interface_ids = ["${azurerm_network_interface.ci-nic.id}"]
@@ -294,32 +293,20 @@ resource "azurerm_virtual_machine" "jump" {
   }
 
   storage_os_disk {
-    name              = "${var.jump-server-name}"
+    name              = "${var.jmp-server-name}"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
   }
 
-  storage_data_disk {
-    name              = "datadisk_new"
-    managed_disk_type = "Standard_LRS"
-    create_option     = "Empty"
-    lun               = 0
-    disk_size_gb      = "1023"
-  }
-
-  storage_data_disk {
-    name            = "${azurerm_managed_disk.jump-data-disk.name}"
-    managed_disk_id = "${azurerm_managed_disk.jump-data-disk.id}"
-    create_option   = "Attach"
-    lun             = 1
-    disk_size_gb    = "${azurerm_managed_disk.jump-data-disk.disk_size_gb}"
-  }
-
   os_profile {
     computer_name  = "${var.jump-server-name}"
-    admin_username = "jmpadmin"
+    admin_username = "${var.jump-admin}"
     admin_password = "${var.jmp-admin-password}"
+    ssh_keys {
+      path = "/home/${var.jump-admin}/.ssh/authorized_keys"
+      key_data = "${var.jumpadminsshpubkey}"
+    }
   }
 
   os_profile_linux_config {
@@ -334,33 +321,35 @@ resource "azurerm_virtual_machine" "jump" {
 }
 
 resource "azurerm_template_deployment" "management-appgw" {
-    name = "appgwdeployment"
-    resource_group_name = "${azurerm_resource_group.mgmt.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../../shared/mgmt-appgw.template.json")}"
+  name = "appgwdeployment"
+  resource_group_name = "${azurerm_resource_group.mgmt.name}"
+  deployment_mode = "Incremental"
+  template_body = "${file("mgmt-appgw.template.json")}"
 
-    parameters {
-        subnetPrefix = "${azurerm_subnet.appGatewaySubnet.address_prefix}"
-        applicationGatewaySize = "WAF_Medium"
-        capacity = "2"
-        backendIpAddress1 = "${azurerm_network_interface.ci-nic.private_ip_address}"
-        wafEnabled = true
-        wafRuleSetType = "OWASP"
-        wafRuleSetVersion = "3.0"
-        wafMode = "Prevention"
-        appGWName = "${var.tags["Service"]}"
-        virtualNetworkName: "${azurerm_virtual_network.mgmt-vnet.name}"
-        subnetName = "${azurerm_subnet.appGatewaySubnet.name}"
-        vnetID = "${azurerm_virtual_network.mgmt-vnet.id}"
-        keyVaultId = "${azurerm_key_vault.vault.id}"
-        keyVaultCertName = "${var.keyvault-cert-name}"
-        service = "${var.tags["Service"]}"
-        environment = "${var.tags["Environment"]}"
-        role = "other"
-    }
-    output "appgwcname" {
-      value = "${azurerm_template_deployment.management-appgw.outputs["appgwcname"]}"
-    }
+  parameters {
+      subnetPrefix = "${azurerm_subnet.appGatewaySubnet.address_prefix}"
+      applicationGatewaySize = "WAF_Medium"
+      capacity = "2"
+      backendIpAddress1 = "${azurerm_network_interface.ci-nic.private_ip_address}"
+      wafEnabled = true
+      wafRuleSetType = "OWASP"
+      wafRuleSetVersion = "3.0"
+      wafMode = "Prevention"
+      appGWName = "${var.tags["Service"]}"
+      virtualNetworkName: "${azurerm_virtual_network.mgmt-vnet.name}"
+      subnetName = "${azurerm_subnet.appGatewaySubnet.name}"
+      vnetID = "${azurerm_virtual_network.mgmt-vnet.id}"
+      keyVaultId = "${azurerm_key_vault.vault.id}"
+      keyVaultCertName = "${var.keyvault-cert-name}"
+      service = "${var.tags["Service"]}"
+      environment = "${var.tags["Environment"]}"
+      role = "other"
+  }
+}
+
+output "appgwcname" {
+  value = "${azurerm_template_deployment.management-appgw.outputs["appgwcname"]}"
+}
 
 resource "azurerm_network_security_group" "mgmt" {
   name                = "mgmtsecuritygroup"
