@@ -69,11 +69,11 @@ variable "mgmt-vnet-space" {
 }
 variable "mgmt-subnet" {
     type = "string"
-    default = "10.0.0.0/16"
+    default = "10.0.0.0/24"
 }
 variable "appgw-subnet" {
     type = "string"
-    default = "10.0.1.0/16"
+    default = "10.0.1.0/24"
 }
 variable "ci-server-name" {
     type = "string"
@@ -87,9 +87,13 @@ variable "jmp-server-name" {
     type = "string"
     default = "changeme"
 }
+variable "bastion-subnet" {
+    type = "string"
+    default = "10.0.3.0/24"
+}
 variable "jmp-server-priv-ip" {
     type = "string"
-    default = "10.0.0.20"
+    default = "10.0.3.20"
 }
 variable "tags" {
     type = "map"
@@ -172,6 +176,13 @@ resource "azurerm_subnet" "mgmt-subnet" {
   resource_group_name  = "${azurerm_resource_group.mgmt.name}"
   virtual_network_name = "${azurerm_virtual_network.vnet.name}"
   address_prefix       = "${var.mgmt-subnet}"
+}
+
+resource "azurerm_subnet" "bastion-subnet" {
+  name                 = "mgmt-subnet"
+  resource_group_name  = "${azurerm_resource_group.mgmt.name}"
+  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
+  address_prefix       = "${var.bastion-subnet}"
 }
 
 resource "azurerm_subnet" "apgw-subnet" {
@@ -272,7 +283,7 @@ resource "azurerm_network_interface" "jump-nic" {
 
   ip_configuration {
     name                          = "jump-nic-config"
-    subnet_id                     = "${azurerm_subnet.mgmt-subnet.id}"
+    subnet_id                     = "${azurerm_subnet.bastion-subnet.id}"
     private_ip_address_allocation = "static"
     private_ip_address            = "${var.jmp-server-priv-ip}"
   }
@@ -282,7 +293,7 @@ resource "azurerm_virtual_machine" "jump" {
   name                  = "${var.jump-server-name}"
   location              = "ukwest"
   resource_group_name   = "${azurerm_resource_group.mgmt.name}"
-  network_interface_ids = ["${azurerm_network_interface.ci-nic.id}"]
+  network_interface_ids = ["${azurerm_network_interface.jump-nic.id}"]
   vm_size               = "Standard_DS1_v2"
 
   storage_image_reference {
@@ -390,8 +401,19 @@ resource "azurerm_network_security_group" "mgmt" {
     destination_address_prefix = "${azurerm_subnet.mgmt-subnet.address_prefix}"
   }
   security_rule {
-    name                       = "https-inbound"
+    name                       = "ssh-bastion-zone-ci"
     priority                   = 400
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "${azurerm_network_interface.ci-nic.private_ip_address}"
+    destination_address_prefix = "${azurerm_subnet.bastion-subnet.address_prefix}"
+  }
+  security_rule {
+    name                       = "https-inbound"
+    priority                   = 500
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
@@ -402,7 +424,7 @@ resource "azurerm_network_security_group" "mgmt" {
   }
   security_rule {
     name                       = "appgw-to-ci"
-    priority                   = 500
+    priority                   = 600
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
