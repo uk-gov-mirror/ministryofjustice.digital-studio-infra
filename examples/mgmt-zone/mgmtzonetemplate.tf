@@ -251,6 +251,7 @@ resource "azurerm_virtual_machine" "ci" {
       path = "/home/${var.ci-admin}/.ssh/authorized_keys"
       key_data = "${var.deploysshpubkey}"
     }
+    custom_data = "${base64encode( file( "../jenkins-cloudinit.txt" ) )}"
   }
 
   os_profile_linux_config {
