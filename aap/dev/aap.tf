@@ -64,6 +64,7 @@ module "sql" {
             end = "255.255.255.255"
         },
     ]
+    audit_storage_account = "${azurerm_storage_account.storage.name}"
     edition = "Basic"
     collation = "SQL_Latin1_General_CP1_CI_AS"
     tags = "${var.tags}"

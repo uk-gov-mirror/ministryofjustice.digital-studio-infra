@@ -21,6 +21,9 @@ variable "firewall_rules" {
         # },
     ]
 }
+variable "audit_storage_account" {
+    type = "string"
+}
 variable "edition" {
     type = "string"
     default = "Basic"
@@ -65,13 +68,24 @@ resource "azurerm_sql_firewall_rule" "firewall" {
     end_ip_address = "${lookup(var.firewall_rules[count.index], "end")}"
 }
 
+resource "azurerm_template_deployment" "sql-audit" {
+    name = "sql-audit"
+    resource_group_name = "${var.resource_group}"
+    deployment_mode = "Incremental"
+    template_body = "${file("${path.module}/../../azure-sql-audit.template.json")}"
+    parameters {
+        serverName = "${azurerm_sql_server.sql.name}"
+        storageAccountName = "${var.audit_storage_account}"
+    }
+}
+
 resource "azurerm_sql_database" "db" {
     name = "${var.name}"
     resource_group_name = "${var.resource_group}"
     location = "${var.location}"
     server_name = "${azurerm_sql_server.sql.name}"
     edition = "${var.edition}"
-    collation = "SQL_Latin1_General_CP1_CI_AS"
+    collation = "${var.collation}"
     tags = "${var.tags}"
 }
 
@@ -86,4 +100,11 @@ resource "azurerm_template_deployment" "sql-tde" {
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
     }
+}
+
+output "db_server" {
+    value = "${azurerm_sql_server.sql.fully_qualified_domain_name}"
+}
+output "db_name" {
+    value = "${azurerm_sql_database.db.name}"
 }
