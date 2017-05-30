@@ -36,10 +36,6 @@ resource "azurerm_resource_group" "group" {
     tags = "${var.tags}"
 }
 
-resource "random_id" "sql-admin-password" {
-    byte_length = 32
-}
-
 resource "azurerm_storage_account" "storage" {
     name = "${replace(var.env-name, "-", "")}storage"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -50,52 +46,27 @@ resource "azurerm_storage_account" "storage" {
     tags = "${var.tags}"
 }
 
-resource "azurerm_sql_server" "sql" {
+module "sql" {
+    source = "../../shared/modules/azure-sql"
     name = "${var.env-name}"
-    resource_group_name = "${azurerm_resource_group.group.name}"
+    resource_group = "${azurerm_resource_group.group.name}"
     location = "${azurerm_resource_group.group.location}"
-    version = "12.0"
     administrator_login = "aap"
-    administrator_login_password = "${random_id.sql-admin-password.b64}"
-    tags = "${var.tags}"
-}
-
-resource "azurerm_sql_firewall_rule" "azure-services" {
-    name = "Allow azure access"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    server_name = "${azurerm_sql_server.sql.name}"
-    start_ip_address = "0.0.0.0"
-    end_ip_address = "0.0.0.0"
-}
-resource "azurerm_sql_firewall_rule" "world-open" {
-    name = "Open to the world"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    server_name = "${azurerm_sql_server.sql.name}"
-    start_ip_address = "0.0.0.0"
-    end_ip_address = "255.255.255.255"
-}
-
-resource "azurerm_sql_database" "db" {
-    name = "${var.env-name}"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    location = "${azurerm_resource_group.group.location}"
-    server_name = "${azurerm_sql_server.sql.name}"
+    firewall_rules = [
+        {
+            label = "Allow azure access"
+            start = "0.0.0.0"
+            end = "0.0.0.0"
+        },
+        {
+            label = "Open to the world"
+            start = "0.0.0.0"
+            end = "255.255.255.255"
+        },
+    ]
     edition = "Basic"
     collation = "SQL_Latin1_General_CP1_CI_AS"
     tags = "${var.tags}"
-}
-
-resource "azurerm_template_deployment" "sql-tde" {
-    name = "sql-tde"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../../shared/azure-sql-tde.template.json")}"
-    parameters {
-        serverName = "${azurerm_sql_server.sql.name}"
-        databaseName = "${azurerm_sql_database.db.name}"
-        service = "${var.tags["Service"]}"
-        environment = "${var.tags["Environment"]}"
-    }
 }
 
 resource "azurerm_template_deployment" "viper" {
