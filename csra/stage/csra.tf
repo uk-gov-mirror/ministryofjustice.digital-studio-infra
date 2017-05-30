@@ -171,18 +171,3 @@ resource "azurerm_dns_cname_record" "cname" {
     record = "${var.app-name}.azurewebsites.net"
     tags = "${var.tags}"
 }
-
-# The "production" site currently uses this non-production DNS entry
-# which can only be configured via the non-prod subscription
-# it's due to move to .service.hmpps.dsd.io
-resource "azurerm_dns_cname_record" "cname-prod" {
-    name = "csra"
-    zone_name = "noms.dsd.io"
-    resource_group_name = "webops"
-    ttl = "300"
-    record = "csra-prod.azurewebsites.net"
-    tags = {
-        Service = "CSRA"
-        Environment = "Prod"
-    }
-}
