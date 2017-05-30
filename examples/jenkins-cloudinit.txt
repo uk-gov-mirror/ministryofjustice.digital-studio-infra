@@ -26,6 +26,7 @@ runcmd:
   - usermod -aG docker azureuser
   - usermod -aG docker jenkins
   - service jenkins restart
+  - sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 
 #apply updates
 apt_update: true

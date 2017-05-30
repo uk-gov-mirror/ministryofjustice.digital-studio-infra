@@ -95,6 +95,14 @@ variable "jmp-server-priv-ip" {
     type = "string"
     default = "10.0.3.20"
 }
+variable "sslcertificate" {
+    type = "string"
+    default = "certificate value for the jenkins web site"
+}
+variable "sslcertificatepassword" {
+    type = "string"
+    default = "the password for the certificate above"
+}
 variable "tags" {
     type = "map"
     default {
@@ -336,10 +344,10 @@ resource "azurerm_template_deployment" "management-appgw" {
   name = "appgwdeployment"
   resource_group_name = "${azurerm_resource_group.mgmt.name}"
   deployment_mode = "Incremental"
-  template_body = "${file("mgmt-appgw.template.json")}"
+  template_body = "${file("../mgmt-appgw.template.json")}"
 
   parameters {
-      subnetPrefix = "${azurerm_subnet.appGatewaySubnet.address_prefix}"
+      subnetPrefix = "${azurerm_virtual_network.mgmt-vnet.address_prefix}"
       applicationGatewaySize = "WAF_Medium"
       capacity = "2"
       backendIpAddress1 = "${azurerm_network_interface.ci-nic.private_ip_address}"
@@ -347,11 +355,13 @@ resource "azurerm_template_deployment" "management-appgw" {
       wafRuleSetType = "OWASP"
       wafRuleSetVersion = "3.0"
       wafMode = "Prevention"
-      appGWName = "${var.tags["Service"]}"
+      appGWName = "${var.tags["Service"]}-mgmt-AppGW"
+      appGWPubIpName = "${var.tags["Service"]}-mgmt-AppGW-Pub-IP"
       virtualNetworkName: "${azurerm_virtual_network.mgmt-vnet.name}"
       subnetName = "${azurerm_subnet.appGatewaySubnet.name}"
-      vnetID = "${azurerm_virtual_network.mgmt-vnet.id}"
-      keyVaultId = "${azurerm_key_vault.vault.id}"
+      appGatewaySubnet = "${azurerm_subnet.appGatewaySubnet.subnetPrefix}"
+      sslcertificate = "${var.sslcertificate}"
+      sslcertificatepassword = "${var.ssscertificatepassword}"
       keyVaultCertName = "${var.keyvault-cert-name}"
       service = "${var.tags["Service"]}"
       environment = "${var.tags["Environment"]}"

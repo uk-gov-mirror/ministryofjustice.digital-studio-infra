@@ -2,14 +2,21 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "addressPrefix": {
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "mgmt-vnet",
+      "metadata": {
+        "description": "name of the management Virtual Network"
+      }
+    },
+    "subnetPrefix": {
       "type": "string",
       "defaultValue": "10.0.0.0/16",
       "metadata": {
         "description": "Address prefix for the Virtual Network"
       }
     },
-    "subnetPrefix": {
+    "appGatewaySubnet": {
       "type": "string",
       "defaultValue": "10.0.0.0/28",
       "metadata": {
@@ -52,13 +59,7 @@
         "description": "IP Address for Backend Server 1"
       }
     },
-    "backendIpAddress2": {
-      "type": "string",
-      "metadata": {
-        "description": "IP Address for Backend Server 2"
-      }
-    },
-        "wafEnabled": {
+    "wafEnabled": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
@@ -86,6 +87,9 @@
         "description": "WAF Rule Set Type"
       }
     },
+    "appGWPubIpName": {
+      "type": "string",
+    },
     "wafRuleSetVersion": {
       "type": "string",
       "allowedValues": [
@@ -96,23 +100,37 @@
       "metadata": {
         "description": "WAF Rule Set Version"
       }
+    },
+    "keyVaultId": {
+      "type": "string"
+    },
+    "keyVaultCertname": {
+      "type": "string"
+    },
+    "service": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string"
+    },
+    "virtualNetworkName": {
+      "type": "string"
     }
   },
   "variables": {
-    "applicationGatewayName": "applicationGateway1",
-    "publicIPAddressName": "publicIp1",
-    "virtualNetworkName": "virtualNetwork1",
-    "subnetName": "appGatewaySubnet",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
-    "applicationGatewayID": "[resourceId('Microsoft.Network/applicationGateways',variables('applicationGatewayName'))]"
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
+    "publicIPRef": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('appGWPubIpName'))]",
+    "applicationGatewayID": "[resourceId('Microsoft.Network/applicationGateways',parameters('appGWName'))]"
   },
   "resources": [
     {
       "apiVersion": "2017-03-01",
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressName')]",
+      "name": "[parameters('appGWPubIpName')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "publicIPAllocationMethod": "Dynamic"
@@ -120,33 +138,12 @@
     },
     {
       "apiVersion": "2017-03-01",
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[variables('virtualNetworkName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('addressPrefix')]"
-          ]
-        },
-        "subnets": [
-          {
-            "name": "[variables('subnetName')]",
-            "properties": {
-              "addressPrefix": "[parameters('subnetPrefix')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "2017-03-01",
-      "name": "[variables('applicationGatewayName')]",
+      "name": "[parameters('appGWName')]",
       "type": "Microsoft.Network/applicationGateways",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('appGWPubIpName'))]"
       ],
       "properties": {
         "sku": {
@@ -154,6 +151,15 @@
           "tier": "WAF",
           "capacity": "[parameters('capacity')]"
         },
+        "sslCertificates": [
+          {
+            "name": "ciSSLCertificate",
+            "properties": {
+              "data": "[parameters('sslcertificate')]",
+              "password": "[parameters('sslcertificatepassword')]"
+            }
+          }
+        ],
         "gatewayIPConfigurations": [
           {
             "name": "appGatewayIpConfig",
@@ -178,7 +184,7 @@
           {
             "name": "appGatewayFrontendPort",
             "properties": {
-              "Port": 80
+              "Port": 443
             }
           }
         ],
@@ -190,9 +196,6 @@
                 {
                   "IpAddress": "[parameters('backendIpAddress1')]"
                 },
-                {
-                  "IpAddress": "[parameters('backendIpAddress2')]"
-                }
               ]
             }
           }
@@ -201,7 +204,7 @@
           {
             "name": "appGatewayBackendHttpSettings",
             "properties": {
-              "Port": 80,
+              "Port": 8080,
               "Protocol": "Http",
               "CookieBasedAffinity": "Disabled"
             }
@@ -218,7 +221,7 @@
                 "Id": "[concat(variables('applicationGatewayID'), '/frontendPorts/appGatewayFrontendPort')]"
               },
               "Protocol": "Http",
-              "SslCertificate": null
+              "SslCertificate": "[concat(variables('applicationGatewayID'), '/sslCertificates/ciSSLCertificate')]"
             }
           }
         ],
@@ -252,7 +255,7 @@
   "outputs": {
     "appgwcname": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))).dnsSettimgs.fqdn]" 
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('appGWPubIpName'))).dnsSettimgs.fqdn]" 
     }
   }
 }
