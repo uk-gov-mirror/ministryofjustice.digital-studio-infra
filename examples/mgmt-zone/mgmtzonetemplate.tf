@@ -1,13 +1,12 @@
 # The purpose of this terraform runbook is to stand up the following resources:
 #   1) Management Zone Resource Group
-#   2) Keyvault with secrets preseeded - Administrative details
-#   3) Management vnet
-#   4) management Subnet
-#   5) ssh jump box
-#   6) CI server (vm only - managed disks)
-#   7) Application Gateway with SSL certificate deployed - Wont actually do this natively - need to call the rm template which is a bit non-ideal
-#   8) DNS Entry for CI server (This will actually point at the cname of the applicatoin gateway).
-#   9) basic NSGs
+#   2) Management vnet
+#   3) management Subnet
+#   4) ssh jump box
+#   5) CI server (vm only - managed disks)
+#   6) Application Gateway with SSL certificate deployed - Wont actually do this natively - need to call the rm template which is a bit non-ideal
+#   7) DNS Entry for CI server (This will actually point at the cname of the applicatoin gateway).
+#   8) basic NSGs
 #
 #
 # The details above have been determined by evaluating the configuration in place for previous IAAS based projects where the 
@@ -22,10 +21,10 @@
 terraform {
     required_version = ">= 0.9.2"
     backend "azure" {
-        #resource_group_name = "webops"
-        #storage_account_name = "nomsstudiowebops"
-        #container_name = "terraform"
-        #key = "mgmt-test.terraform.tfstate"
+        resource_group_name = "webops"
+        storage_account_name = "nomsstudiowebops"
+        container_name = "terraform"
+        key = "mgmt-test.terraform.tfstate"
         arm_subscription_id = "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
         arm_tenant_id = "747381f4-e81f-4a43-bf68-ced6a1e14edf"
     }
@@ -111,9 +110,6 @@ variable "tags" {
     }
 }
 
-resource "random_id" "session-secret" {
-    byte_length = 20
-}
 resource "random_id" "ci-admin-password" {
     byte_length = 16
 }
@@ -131,72 +127,31 @@ resource "azurerm_resource_group" "mgmt" {
 
 #you may not require the virtual network to be specified if you already have this provisioned.
 
-resource "azurerm_virtual_network" "vnet" {
+resource "azurerm_virtual_network" "mgmt-vnet" {
   name                = "mgmt-vnet"
   address_space       = ["${var.mgmt-vnet-space}"]
   location            = "ukwest"
   resource_group_name = "${azurerm_resource_group.mgmt.name}"
 }
 
-resource "azurerm_key_vault" "vault" {
-    name = "${var.app-name}"
-    resource_group_name = "${azurerm_resource_group.mgmt.name}"
-    location = "${azurerm_resource_group.mgmt.location}"
-    sku {
-        name = "standard"
-    }
-    tenant_id = "${var.azure_tenant_id}"
-
-    access_policy {
-        tenant_id = "${var.azure_tenant_id}"
-        object_id = "${var.azure_vault_group_oid}"
-        key_permissions = ["all"]
-        secret_permissions = ["all"]
-    }
-    access_policy {
-        tenant_id = "${var.azure_tenant_id}"
-        object_id = "${var.azure_app_service_oid}"
-        key_permissions = []
-        secret_permissions = ["get"]
-    }
-    access_policy {
-        object_id = "${var.azure_tfuser_oid}"
-        tenant_id = "${var.azure_tenant_id}"
-        key_permissions = ["get"]
-        secret_permissions = ["get"]
-    }
-
-    enabled_for_deployment = true
-    enabled_for_disk_encryption = true
-    enabled_for_template_deployment = true
-
-    tags = "${var.tags}"
-}
-
-
-resource "azurerm_resource_group" "mgmt" {
-  name     = "changeme"
-  location = "ukwest"
-}
-
 resource "azurerm_subnet" "mgmt-subnet" {
   name                 = "mgmt-subnet"
   resource_group_name  = "${azurerm_resource_group.mgmt.name}"
-  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
+  virtual_network_name = "${azurerm_virtual_network.mgmt-vnet.name}"
   address_prefix       = "${var.mgmt-subnet}"
 }
 
 resource "azurerm_subnet" "bastion-subnet" {
   name                 = "mgmt-subnet"
   resource_group_name  = "${azurerm_resource_group.mgmt.name}"
-  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
+  virtual_network_name = "${azurerm_virtual_network.mgmt-vnet.name}"
   address_prefix       = "${var.bastion-subnet}"
 }
 
-resource "azurerm_subnet" "apgw-subnet" {
-  name                 = "apgw-subnet"
+resource "azurerm_subnet" "appgw-subnet" {
+  name                 = "appgw-subnet"
   resource_group_name  = "${azurerm_resource_group.mgmt.name}"
-  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
+  virtual_network_name = "${azurerm_virtual_network.mgmt-vnet.name}"
   address_prefix       = "${var.appgw-subnet}"
 }
 
@@ -254,16 +209,16 @@ resource "azurerm_virtual_machine" "ci" {
   os_profile {
     computer_name  = "${var.ci-server-name}"
     admin_username = "${var.ci-admin}"
-    admin_password = "${var.ci-admin-password}"
-    ssh_keys {
-      path = "/home/${var.ci-admin}/.ssh/authorized_keys"
-      key_data = "${var.deploysshpubkey}"
-    }
+    admin_password = "${random_id.ci-admin-password.b64}"
     custom_data = "${base64encode( file( "../jenkins-cloudinit.txt" ) )}"
   }
 
   os_profile_linux_config {
     disable_password_authentication = true
+    ssh_keys {
+      path = "/home/${var.ci-admin}/.ssh/authorized_keys"
+      key_data = "${var.deploysshpubkey}"
+    }
   }
 
   tags {
@@ -299,7 +254,7 @@ resource "azurerm_network_interface" "jump-nic" {
 }
 
 resource "azurerm_virtual_machine" "jump" {
-  name                  = "${var.jump-server-name}"
+  name                  = "${var.jmp-server-name}"
   location              = "ukwest"
   resource_group_name   = "${azurerm_resource_group.mgmt.name}"
   network_interface_ids = ["${azurerm_network_interface.jump-nic.id}"]
@@ -313,24 +268,24 @@ resource "azurerm_virtual_machine" "jump" {
   }
 
   storage_os_disk {
-    name              = "${var.jmp-server-name}"
+    name              = "${var.jmp-server-name}-${var.tags["Service"]}-os"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
   }
 
   os_profile {
-    computer_name  = "${var.jump-server-name}"
+    computer_name  = "${var.jmp-server-name}"
     admin_username = "${var.jump-admin}"
-    admin_password = "${var.jmp-admin-password}"
-    ssh_keys {
-      path = "/home/${var.jump-admin}/.ssh/authorized_keys"
-      key_data = "${var.jumpadminsshpubkey}"
-    }
+    admin_password = "${random_id.jmp-admin-password.b64}"
   }
 
   os_profile_linux_config {
     disable_password_authentication = true
+    ssh_keys {
+      path = "/home/${var.jump-admin}/.ssh/authorized_keys"
+      key_data = "${var.jumpadminsshpubkey}"
+    }
   }
 
   tags {
@@ -347,7 +302,7 @@ resource "azurerm_template_deployment" "management-appgw" {
   template_body = "${file("../mgmt-appgw.template.json")}"
 
   parameters {
-      subnetPrefix = "${azurerm_virtual_network.mgmt-vnet.address_prefix}"
+      subnetPrefix = "${azurerm_virtual_network.mgmt-vnet.address_space}"
       applicationGatewaySize = "WAF_Medium"
       capacity = "2"
       backendIpAddress1 = "${azurerm_network_interface.ci-nic.private_ip_address}"
@@ -357,11 +312,11 @@ resource "azurerm_template_deployment" "management-appgw" {
       wafMode = "Prevention"
       appGWName = "${var.tags["Service"]}-mgmt-AppGW"
       appGWPubIpName = "${var.tags["Service"]}-mgmt-AppGW-Pub-IP"
-      virtualNetworkName: "${azurerm_virtual_network.mgmt-vnet.name}"
-      subnetName = "${azurerm_subnet.appGatewaySubnet.name}"
-      appGatewaySubnet = "${azurerm_subnet.appGatewaySubnet.subnetPrefix}"
+      virtualNetworkName = "${azurerm_virtual_network.mgmt-vnet.name}"
+      subnetName = "${azurerm_subnet.appgw-subnet.name}"
+      appgw-subnet = "${azurerm_subnet.appgw-subnet.address_prefix}"
       sslcertificate = "${var.sslcertificate}"
-      sslcertificatepassword = "${var.ssscertificatepassword}"
+      sslcertificatepassword = "${var.sslcertificatepassword}"
       keyVaultCertName = "${var.keyvault-cert-name}"
       service = "${var.tags["Service"]}"
       environment = "${var.tags["Environment"]}"
@@ -431,7 +386,7 @@ resource "azurerm_network_security_group" "mgmt" {
     source_port_range          = "*"
     destination_port_range     = "443"
     source_address_prefix      = "*"
-    destination_address_prefix = "${azurerm_subnet.appGatewaySubnet.address_prefix}"
+    destination_address_prefix = "${azurerm_subnet.appgw-subnet.address_prefix}"
   }
   security_rule {
     name                       = "appgw-to-ci"
@@ -441,7 +396,7 @@ resource "azurerm_network_security_group" "mgmt" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "80"
-    source_address_prefix      = "${azurerm_subnet.appGatewaySubnet.address_prefix}"
+    source_address_prefix      = "${azurerm_subnet.appgw-subnet.address_prefix}"
     destination_address_prefix = "${azurerm_subnet.mgmt-subnet.address_prefix}"
   }
   security_rule {
@@ -462,6 +417,6 @@ resource "azurerm_dns_cname_record" "cname" {
     zone_name = "${var.tags["Service"]}.hmpps.dsd.io"
     resource_group_name = "changeme"
     ttl = "300"
-    record = "${azurerm_template_deployment.management-appgw.output.appgwcname}"
+    record = "${azurerm_template_deployment.management-appgw.outputs["appgwcname"]}"
     tags = "${var.tags}"
 }
