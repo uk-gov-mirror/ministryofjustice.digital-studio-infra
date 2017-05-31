@@ -102,10 +102,6 @@ data "external" "vault" {
     program = ["node", "../../tools/keyvault-data.js"]
     query {
         vault = "${azurerm_key_vault.vault.name}"
-
-        client_id = "signon-client-id"
-        client_secret = "signon-client-secret"
-
         noms_token = "noms-token"
         noms_private_key = "noms-private-key"
     }
