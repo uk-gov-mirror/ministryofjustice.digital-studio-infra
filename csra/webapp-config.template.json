@@ -11,6 +11,9 @@
         "APPINSIGHTS_INSTRUMENTATIONKEY": {
             "type": "string",
             "defaultValue": ""
+        },
+        "DB_URI": {
+            "type": "string"
         }
     },
     "resources": [
@@ -21,7 +24,8 @@
             "properties": {
                 "WEBSITE_NODE_DEFAULT_VERSION": "6.10.0",
                 "NODE_ENV": "[parameters('NODE_ENV')]",
-                "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]"
+                "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
+                "DB_URI": "[parameters('DB_URI')]"
             }
         }
     ]

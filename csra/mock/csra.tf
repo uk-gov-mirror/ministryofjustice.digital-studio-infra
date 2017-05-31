@@ -22,6 +22,10 @@ variable "tags" {
     }
 }
 
+resource "random_id" "sql-user-password" {
+    byte_length = 32
+}
+
 resource "azurerm_resource_group" "group" {
     name = "${var.app-name}"
     location = "ukwest"
@@ -48,6 +52,25 @@ resource "azurerm_storage_container" "logs" {
     resource_group_name = "${azurerm_resource_group.group.name}"
     storage_account_name = "${azurerm_storage_account.storage.name}"
     container_access_type = "private"
+}
+
+module "sql" {
+    source = "../../shared/modules/azure-sql"
+    name = "${var.app-name}"
+    resource_group = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    administrator_login = "csra"
+    firewall_rules = [
+        {
+            label = "Open to the world"
+            start = "0.0.0.0"
+            end = "255.255.255.255"
+        },
+    ]
+    audit_storage_account = "${azurerm_storage_account.storage.name}"
+    edition = "Basic"
+    collation = "SQL_Latin1_General_CP1_CI_AS"
+    tags = "${var.tags}"
 }
 
 resource "azurerm_template_deployment" "webapp" {
@@ -114,6 +137,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         name = "${var.app-name}"
         NODE_ENV = "production"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
+        DB_URI = "mssql://app:${random_id.sql-user-password.b64}@${module.sql.db_server}:1433/${module.sql.db_name}?encrypt=true"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
