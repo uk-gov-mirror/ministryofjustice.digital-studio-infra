@@ -94,6 +94,17 @@ resource "azurerm_key_vault" "vault" {
     enabled_for_template_deployment = true
 
     tags = "${var.tags}"
+
+
+}
+
+data "external" "vault" {
+    program = ["node", "../../tools/keyvault-data.js"]
+    query {
+        vault = "${azurerm_key_vault.vault.name}"
+        noms_token = "noms-token"
+        noms_private_key = "noms-private-key"
+    }
 }
 
 resource "azurerm_template_deployment" "webapp" {
@@ -145,9 +156,9 @@ resource "azurerm_template_deployment" "webapp-config" {
     parameters {
         name = "${var.app-name}"
         NODE_ENV = "production"
-        NOMIS_URL = "TODO: this"
-        NOMIS_TOKEN = "TODO: this"
-        NOMIS_PRIVATE_KEY = "TODO: this"
+        API_GATEWAY_URL = "https://noms-api-dev.dsd.io/"
+        NOMS_TOKEN = "${data.external.vault.result.noms_token}"
+        NOMS_PRIVATE_KEY = "${data.external.vault.result.noms_private_key}"
         SESSION_SECRET = "${random_id.session-secret.b64}"
     }
 
