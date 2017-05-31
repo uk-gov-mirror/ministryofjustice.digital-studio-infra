@@ -8,13 +8,13 @@
         "NODE_ENV": {
             "type": "string"
         },
-        "NOMIS_URL": {
+        "API_GATEWAY_URL": {
             "type": "string"
         },
-        "NOMIS_TOKEN": {
+        "NOMS_TOKEN": {
             "type": "secureString"
         },
-        "NOMIS_PRIVATE_KEY": {
+        "NOMS_PRIVATE_KEY": {
             "type": "secureString"
         },
         "SESSION_SECRET": {
@@ -29,9 +29,9 @@
             "properties": {
                 "WEBSITE_NODE_DEFAULT_VERSION": "6.10.0",
                 "NODE_ENV": "[parameters('NODE_ENV')]",
-                "NOMIS_URL": "[parameters('NOMIS_URL')]",
-                "NOMIS_TOKEN": "[parameters('NOMIS_TOKEN')]",
-                "NOMIS_PRIVATE_KEY": "[parameters('NOMIS_PRIVATE_KEY')]",
+                "API_GATEWAY_URL": "[parameters('API_GATEWAY_URL')]",
+                "NOMS_TOKEN": "[parameters('NOMS_TOKEN')]",
+                "NOMS_PRIVATE_KEY": "[parameters('NOMS_PRIVATE_KEY')]",
                 "SESSION_SECRET": "[parameters('SESSION_SECRET')]"
             }
         }
