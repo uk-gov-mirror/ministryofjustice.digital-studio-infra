@@ -314,7 +314,7 @@ resource "azurerm_template_deployment" "management-appgw" {
       appGWPubIpName = "${var.tags["Service"]}-mgmt-AppGW-Pub-IP"
       virtualNetworkName = "${azurerm_virtual_network.mgmt-vnet.name}"
       subnetName = "${azurerm_subnet.appgw-subnet.name}"
-      appgw-subnet = "${azurerm_subnet.appgw-subnet.address_prefix}"
+      appGatewaySubnet = "${azurerm_subnet.appgw-subnet.address_prefix}"
       sslcertificate = "${var.sslcertificate}"
       sslcertificatepassword = "${var.sslcertificatepassword}"
       keyVaultCertName = "${var.keyvault-cert-name}"
