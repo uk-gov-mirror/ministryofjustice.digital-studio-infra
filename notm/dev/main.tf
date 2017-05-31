@@ -158,7 +158,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         NODE_ENV = "production"
         API_GATEWAY_URL = "https://noms-api-dev.dsd.io/"
         NOMS_TOKEN = "${data.external.vault.result.noms_token}"
-        NOMS_PRIVATE_KEY = "${data.external.vault.result.noms_private_key}}"
+        NOMS_PRIVATE_KEY = "${data.external.vault.result.noms_private_key}"
         SESSION_SECRET = "${random_id.session-secret.b64}"
     }
 
