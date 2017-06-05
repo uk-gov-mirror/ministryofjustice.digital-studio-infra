@@ -44,6 +44,12 @@ variable "tags" {
     #    Environment = "xxx"
     # }
 }
+variable "setup_queries" {
+    type = "list"
+    default = [
+    # list of string SQL commands to run
+    ]
+}
 
 resource "random_id" "sql-admin-password" {
     byte_length = 32
@@ -57,6 +63,9 @@ resource "azurerm_sql_server" "sql" {
     administrator_login = "${var.administrator_login}"
     administrator_login_password = "${random_id.sql-admin-password.b64}"
     tags = "${var.tags}"
+    lifecycle {
+        prevent_destroy = true
+    }
 }
 
 resource "azurerm_sql_firewall_rule" "firewall" {
@@ -87,6 +96,24 @@ resource "azurerm_sql_database" "db" {
     edition = "${var.edition}"
     collation = "${var.collation}"
     tags = "${var.tags}"
+    lifecycle {
+        prevent_destroy = true
+    }
+}
+
+resource "null_resource" "db-setup" {
+    depends_on = ["azurerm_sql_database.db"]
+    provisioner "local-exec" {
+        # Base64 to handle quoting issues
+        command = <<CMD
+node ${path.module}/db-setup.js \
+    --server '${azurerm_sql_server.sql.fully_qualified_domain_name}' \
+    --username '${var.administrator_login}' \
+    --password '${random_id.sql-admin-password.b64}' \
+    --database '${azurerm_sql_database.db.name}' \
+    --queries '${base64encode(jsonencode(var.setup_queries))}' \
+CMD
+    }
 }
 
 resource "azurerm_template_deployment" "sql-tde" {

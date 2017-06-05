@@ -8,6 +8,8 @@
   "dependencies": {
     "adal-node": "^0.1.22",
     "azure": "^2.0.0-preview",
-    "azure-keyvault": "^2.0.0-preview"
+    "azure-keyvault": "^2.0.0-preview",
+    "mssql": "^4.0.4",
+    "yargs": "^8.0.1"
   }
 }
