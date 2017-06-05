@@ -71,6 +71,12 @@ module "sql" {
     edition = "Basic"
     collation = "SQL_Latin1_General_CP1_CI_AS"
     tags = "${var.tags}"
+
+    # Use `terraform taint -module sql null_resource.db-setup` to rerun
+    setup_queries = [
+        "IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'app') DROP USER app",
+        "CREATE USER app WITH PASSWORD = '${random_id.sql-user-password.b64}'"
+    ]
 }
 
 resource "azurerm_template_deployment" "webapp" {
