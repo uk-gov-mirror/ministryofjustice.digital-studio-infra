@@ -11,10 +11,7 @@
         "API_ENDPOINT_URL": {
             "type": "string"
         },
-        "USE_API_AUTH": {
-            "type": "string"
-        },
-        "REWRITE_CONTEXT_ENDPOINT": {
+        "USE_API_GATEWAY_AUTH": {
             "type": "string"
         },
         "NOMS_TOKEN": {
@@ -33,11 +30,10 @@
             "name": "[concat(parameters('name'), '/appsettings')]",
             "type": "Microsoft.Web/sites/config",
             "properties": {
-                "WEBSITE_NODE_DEFAULT_VERSION": "7.4.0",
+                "WEBSITE_NODE_DEFAULT_VERSION": "6.10.0",
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "API_ENDPOINT_URL": "[parameters('API_ENDPOINT_URL')]",
-                "REWRITE_CONTEXT_ENDPOINT": "[parameters('REWRITE_CONTEXT_ENDPOINT')]",
-                "USE_API_AUTH": "[parameters('USE_API_AUTH')]",
+                "USE_API_GATEWAY_AUTH": "[parameters('USE_API_GATEWAY_AUTH')]",
                 "NOMS_TOKEN": "[parameters('NOMS_TOKEN')]",
                 "NOMS_PRIVATE_KEY": "[parameters('NOMS_PRIVATE_KEY')]",
                 "SESSION_SECRET": "[parameters('SESSION_SECRET')]"
