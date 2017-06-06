@@ -193,7 +193,7 @@ resource "github_repository_webhook" "webapp-deploy" {
 }
 
 resource "azurerm_dns_cname_record" "cname" {
-    name = "csra-mock"
+    name = "${var.app-name}"
     zone_name = "hmpps.dsd.io"
     resource_group_name = "webops"
     ttl = "300"
