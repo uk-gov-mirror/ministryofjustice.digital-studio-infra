@@ -22,6 +22,10 @@ variable "tags" {
     }
 }
 
+resource "random_id" "sql-user-password" {
+    byte_length = 32
+}
+
 resource "azurerm_resource_group" "group" {
     name = "${var.app-name}"
     location = "ukwest"
@@ -85,6 +89,40 @@ resource "azurerm_key_vault" "vault" {
     tags = "${var.tags}"
 }
 
+module "sql" {
+    source = "../../shared/modules/azure-sql"
+    name = "${var.app-name}"
+    resource_group = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    administrator_login = "csra"
+    firewall_rules = [
+        {
+            label = "Sheffield Digital Studio"
+            start = "${var.ips["office"]}"
+            end = "${var.ips["office"]}"
+        },
+    ]
+    audit_storage_account = "${azurerm_storage_account.storage.name}"
+    edition = "Basic"
+    collation = "SQL_Latin1_General_CP1_CI_AS"
+    tags = "${var.tags}"
+
+    # Use `terraform taint -module sql null_resource.db-setup` to rerun
+    setup_queries = [
+        "IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'app') DROP USER app",
+        "CREATE USER app WITH PASSWORD = '${random_id.sql-user-password.b64}'"
+    ]
+}
+
+resource "azurerm_sql_firewall_rule" "app-access" {
+    count = "${length(split(",", azurerm_template_deployment.webapp.outputs["ips"]))}"
+    name = "Application IP ${count.index}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    server_name = "${module.sql.server_name}"
+    start_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs["ips"]), count.index)}"
+    end_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs["ips"]), count.index)}"
+}
+
 resource "azurerm_template_deployment" "webapp" {
     name = "webapp"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -139,6 +177,22 @@ resource "azurerm_template_deployment" "insights" {
     }
 }
 
+resource "azurerm_template_deployment" "webapp-config" {
+    name = "webapp-config"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../webapp-config.template.json")}"
+
+    parameters {
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
+        NODE_ENV = "production"
+        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
+        DB_URI = "mssql://app:${random_id.sql-user-password.b64}@${module.sql.db_server}:1433/${module.sql.db_name}?encrypt=true"
+    }
+
+    depends_on = ["azurerm_template_deployment.webapp"]
+}
+
 resource "azurerm_template_deployment" "webapp-whitelist" {
     name = "webapp-whitelist"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -151,21 +205,6 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
         subnet1 = "255.255.255.255"
         ip2 = "${var.ips["quantum"]}"
         subnet2 = "255.255.255.255"
-    }
-
-    depends_on = ["azurerm_template_deployment.webapp"]
-}
-
-resource "azurerm_template_deployment" "webapp-config" {
-    name = "webapp-config"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../webapp-config.template.json")}"
-
-    parameters {
-        name = "${azurerm_template_deployment.webapp.parameters.name}"
-        NODE_ENV = "production"
-        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]

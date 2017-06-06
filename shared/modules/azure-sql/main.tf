@@ -129,6 +129,9 @@ resource "azurerm_template_deployment" "sql-tde" {
     }
 }
 
+output "server_name" {
+    value = "${azurerm_sql_server.sql.name}"
+}
 output "db_server" {
     value = "${azurerm_sql_server.sql.fully_qualified_domain_name}"
 }
