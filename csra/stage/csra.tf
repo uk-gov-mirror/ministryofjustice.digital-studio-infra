@@ -197,15 +197,19 @@ resource "azurerm_template_deployment" "webapp-config" {
     depends_on = ["azurerm_template_deployment.webapp"]
 }
 
-resource "azurerm_template_deployment" "webapp-hostname" {
-    name = "webapp-hostname"
+resource "azurerm_template_deployment" "webapp-ssl" {
+    name = "webapp-ssl"
     resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
-    template_body = "${file("../../shared/appservice-hostname.template.json")}"
+    template_body = "${file("../../shared/appservice-ssl.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
+        keyVaultId = "${azurerm_key_vault.vault.id}"
+        keyVaultCertName = "${replace("${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}", ".", "DOT")}"
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
