@@ -83,13 +83,13 @@ resource "azurerm_key_vault" "vault" {
         object_id = "${var.azure_glenm_tf_oid}"
         tenant_id = "${var.azure_tenant_id}"
         key_permissions = []
-        secret_permissions = ["get", "list"]
+        secret_permissions = ["get", "set"]
     }
     access_policy {
         object_id = "${var.azure_robl_tf_oid}"
         tenant_id = "${var.azure_tenant_id}"
         key_permissions = []
-        secret_permissions = ["get", "list"]
+        secret_permissions = ["get", "set"]
     }
 
     enabled_for_deployment = false
