@@ -22,7 +22,10 @@ variable "tags" {
     }
 }
 
-resource "random_id" "sql-user-password" {
+resource "random_id" "sql-app-password" {
+    byte_length = 32
+}
+resource "random_id" "sql-reader-password" {
     byte_length = 32
 }
 
@@ -74,8 +77,19 @@ module "sql" {
 
     # Use `terraform taint -module sql null_resource.db-setup` to rerun
     setup_queries = [
-        "IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'app') DROP USER app",
-        "CREATE USER app WITH PASSWORD = '${random_id.sql-user-password.b64}'"
+<<SQL
+IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'app')
+    ALTER USER app WITH PASSWORD = '${random_id.sql-app-password.b64}';
+ELSE
+    CREATE USER app WITH PASSWORD = '${random_id.sql-app-password.b64}';
+SQL
+,
+<<SQL
+IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'reader')
+    ALTER USER reader WITH PASSWORD = '${random_id.sql-reader-password.b64}';
+ELSE
+    CREATE USER reader WITH PASSWORD = '${random_id.sql-reader-password.b64}';
+SQL
     ]
 }
 
@@ -143,7 +157,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         name = "${var.app-name}"
         NODE_ENV = "production"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
-        DB_URI = "mssql://app:${random_id.sql-user-password.b64}@${module.sql.db_server}:1433/${module.sql.db_name}?encrypt=true"
+        DB_URI = "mssql://app:${random_id.sql-app-password.b64}@${module.sql.db_server}:1433/${module.sql.db_name}?encrypt=true"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
