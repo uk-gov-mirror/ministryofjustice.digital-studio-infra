@@ -126,12 +126,15 @@ ELSE
     CREATE USER app WITH PASSWORD = '${random_id.sql-app-password.b64}';
 SQL
 ,
+    # Permissions for app managed by migrations, as they're quite fine grained
 <<SQL
 IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'reader')
     ALTER USER reader WITH PASSWORD = '${random_id.sql-reader-password.b64}';
 ELSE
     CREATE USER reader WITH PASSWORD = '${random_id.sql-reader-password.b64}';
 SQL
+,
+        "GRANT SELECT TO reader"
     ]
 }
 
