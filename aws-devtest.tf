@@ -6,6 +6,14 @@ variable "aws_region" {
     type = "string"
     default = "eu-west-2"
 }
+variable "aws_az_a" {
+    type = "string"
+    default = "eu-west-2a"
+}
+variable "aws_az_b" {
+    type = "string"
+    default = "eu-west-2b"
+}
 provider "aws" {
     allowed_account_ids = ["${var.aws_account_id}"]
     region = "${var.aws_region}"
