@@ -5,6 +5,10 @@
         "name": {
             "type": "string"
         },
+        "APPINSIGHTS_INSTRUMENTATIONKEY": {
+            "type": "string",
+            "defaultValue": ""
+        },
         "NODE_ENV": {
             "type": "string"
         },
@@ -31,6 +35,7 @@
             "type": "Microsoft.Web/sites/config",
             "properties": {
                 "WEBSITE_NODE_DEFAULT_VERSION": "6.10.0",
+                "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "API_ENDPOINT_URL": "[parameters('API_ENDPOINT_URL')]",
                 "USE_API_GATEWAY_AUTH": "[parameters('USE_API_GATEWAY_AUTH')]",
