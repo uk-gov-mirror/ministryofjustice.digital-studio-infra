@@ -202,9 +202,8 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
     parameters {
         name = "${azurerm_template_deployment.webapp.parameters.name}"
         ip1 = "${var.ips["office"]}"
-        subnet1 = "255.255.255.255"
         ip2 = "${var.ips["quantum"]}"
-        subnet2 = "255.255.255.255"
+        ip3 = "${var.ips["health-kick"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
