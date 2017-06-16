@@ -222,6 +222,20 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
         ip1 = "${var.ips["office"]}"
         ip2 = "${var.ips["quantum"]}"
         ip3 = "${var.ips["health-kick"]}"
+
+        # DOM1 ATOS
+        ip4 = "157.203.176.138"
+        subnet4 = "255.255.255.254"
+        ip5 = "157.203.176.140"
+        ip6 = "157.203.177.190"
+        subnet6 = "255.255.255.254"
+        ip7 = "157.203.177.192"
+
+        # DOM1 Vodafone NAT
+        ip8 = "62.25.109.201"
+        ip9 = "62.25.109.203"
+        ip10 = "212.137.36.233"
+        ip11 = "212.137.36.234"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
