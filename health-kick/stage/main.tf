@@ -53,6 +53,26 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
         value = "aws-elasticbeanstalk-service-role"
     }
     setting {
+        namespace = "aws:elb:listener:443"
+        name = "ListenerProtocol"
+        value = "HTTPS"
+    }
+    setting {
+        namespace = "aws:elb:listener:443"
+        name = "SSLCertificateId"
+        value = "${data.aws_acm_certificate.cert.arn}"
+    }
+    setting {
+        namespace = "aws:elb:listener:443"
+        name = "InstancePort"
+        value = "80"
+    }
+    setting {
+        namespace = "aws:elb:listener:443"
+        name = "ListenerProtocol"
+        value = "HTTPS"
+    }
+    setting {
         namespace = "aws:ec2:vpc"
         name = "VPCId"
         value = "${aws_vpc.vpc.id}"
@@ -99,4 +119,16 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     }
 
     tags = "${var.tags}"
+}
+
+resource "azurerm_dns_cname_record" "cname" {
+    name = "health-kick"
+    zone_name = "hmpps.dsd.io"
+    resource_group_name = "webops"
+    ttl = "60"
+    record = "${aws_elastic_beanstalk_environment.app-env.cname}"
+}
+
+data "aws_acm_certificate" "cert" {
+  domain = "health-kick.hmpps.dsd.io"
 }

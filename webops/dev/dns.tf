@@ -71,11 +71,3 @@ resource "azurerm_dns_cname_record" "search" {
     ttl = "300"
     record = "search-noms-api.dsd.io"
 }
-
-resource "azurerm_dns_cname_record" "health-kick" {
-    name = "health-kick"
-    zone_name = "${azurerm_dns_zone.hmpps.name}"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
-    ttl = "60"
-    record = "health-kick-stage.m3mmmva2gt.eu-west-2.elasticbeanstalk.com"
-}
