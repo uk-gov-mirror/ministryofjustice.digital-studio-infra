@@ -55,6 +55,11 @@ function main() {
       console.log("Got certificates from letsencrypt");
       certDetails = result;
 
+      if (argv.vault == '-') {
+        console.log("Skipping vault upload");
+        return null;
+      }
+
       return createPkcs12(
         certDetails.privkey,
         certDetails.cert,
@@ -63,6 +68,10 @@ function main() {
       );
     })
     .then((pkcs12file) => {
+      if (!pkcs12file) {
+        return;
+      }
+
       secretName = buildCertSecretName(certDetails.subject);
       console.log("storing to %s as %s", argv.vault, secretName);
       return keyVaultClient.setSecret(
