@@ -30,6 +30,13 @@ variable "tags" {
     }
 }
 
+resource "random_id" "sql-app-password" {
+    byte_length = 32
+}
+resource "random_id" "app-basic-password" {
+    byte_length = 32
+}
+
 resource "azurerm_resource_group" "group" {
     name = "${var.env-name}"
     location = "ukwest"
@@ -68,6 +75,18 @@ module "sql" {
     edition = "Basic"
     collation = "SQL_Latin1_General_CP1_CI_AS"
     tags = "${var.tags}"
+
+    # Use `terraform taint -module sql null_resource.db-setup` to rerun
+    setup_queries = [
+<<SQL
+IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'app')
+    ALTER USER app WITH PASSWORD = '${random_id.sql-app-password.b64}';
+ELSE
+    CREATE USER app WITH PASSWORD = '${random_id.sql-app-password.b64}';
+SQL
+,
+        "GRANT SELECT TO app"
+    ]
 }
 
 resource "azurerm_template_deployment" "viper" {
@@ -80,6 +99,31 @@ resource "azurerm_template_deployment" "viper" {
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
     }
+}
+
+resource "azurerm_template_deployment" "viper-config" {
+    name = "viper-config"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../viper-config.template.json")}"
+
+    parameters {
+        name = "${var.viper-name}"
+        NODE_ENV = "production"
+        BASIC_AUTH_USER = "viper"
+        BASIC_AUTH_PASS = "${random_id.app-basic-password.b64}"
+        DB_CONN = <<JSON
+${jsonencode(map(
+    "username", "app",
+    "password", "${random_id.sql-app-password.b64}",
+    "server", "${module.sql.db_server}",
+    "database", "${module.sql.db_name}",
+    "port", 1433
+))}
+JSON
+    }
+
+    depends_on = ["azurerm_template_deployment.viper"]
 }
 
 resource "azurerm_template_deployment" "viper-ssl" {
@@ -104,7 +148,7 @@ resource "azurerm_template_deployment" "viper-github" {
     parameters {
         name = "${azurerm_template_deployment.viper.parameters.name}"
         repoURL = "https://github.com/noms-digital-studio/viper-service.git"
-        branch = "master"
+        branch = "deploy-to-dev"
     }
 
     depends_on = ["azurerm_template_deployment.viper"]
