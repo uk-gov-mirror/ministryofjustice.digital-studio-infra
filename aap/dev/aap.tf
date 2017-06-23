@@ -112,15 +112,7 @@ resource "azurerm_template_deployment" "viper-config" {
         NODE_ENV = "production"
         BASIC_AUTH_USER = "viper"
         BASIC_AUTH_PASS = "${random_id.app-basic-password.b64}"
-        DB_CONN = <<JSON
-${jsonencode(map(
-    "username", "app",
-    "password", "${random_id.sql-app-password.b64}",
-    "server", "${module.sql.db_server}",
-    "database", "${module.sql.db_name}",
-    "port", 1433
-))}
-JSON
+        DB_URI = "mssql://app:${random_id.sql-app-password.b64}@${module.sql.db_server}:1433/${module.sql.db_name}?encrypt=true"
     }
 
     depends_on = ["azurerm_template_deployment.viper"]

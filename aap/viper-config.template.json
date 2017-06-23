@@ -14,7 +14,7 @@
         "BASIC_AUTH_PASS": {
             "type": "string"
         },
-        "DB_CONN": {
+        "DB_URI": {
             "type": "string"
         }
     },
@@ -28,7 +28,7 @@
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "BASIC_AUTH_USER": "[parameters('BASIC_AUTH_USER')]",
                 "BASIC_AUTH_PASS": "[parameters('BASIC_AUTH_PASS')]",
-                "DB_CONN": "[parameters('DB_CONN')]"
+                "DB_URI": "[parameters('DB_URI')]"
             }
         }
     ]
