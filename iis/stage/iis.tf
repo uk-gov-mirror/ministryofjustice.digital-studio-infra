@@ -229,7 +229,7 @@ resource "azurerm_template_deployment" "webapp-ssl" {
         name = "${azurerm_template_deployment.webapp.parameters.name}"
         hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
         keyVaultId = "${azurerm_key_vault.vault.id}"
-        keyVaultCertName = "hpa-stageDOTnomsDOTdsdDOTio"
+        keyVaultCertName = "hpa-stageDOThmppsDOTdsdDOTio"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
     }
@@ -239,7 +239,7 @@ resource "azurerm_template_deployment" "webapp-ssl" {
 
 resource "azurerm_dns_cname_record" "cname" {
     name = "hpa-stage"
-    zone_name = "noms.dsd.io"
+    zone_name = "hmpps.dsd.io"
     resource_group_name = "webops"
     ttl = "300"
     record = "${var.app-name}.azurewebsites.net"
