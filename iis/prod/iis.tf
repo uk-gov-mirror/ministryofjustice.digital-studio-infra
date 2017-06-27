@@ -84,8 +84,8 @@ resource "azurerm_key_vault" "vault" {
     access_policy {
         object_id = "${var.azure_glenm_tfprod_oid}"
         tenant_id = "${var.azure_tenant_id}"
-        key_permissions = ["get"]
-        secret_permissions = ["get"]
+        key_permissions = []
+        secret_permissions = ["get", "set"]
     }
 
     enabled_for_deployment = false
