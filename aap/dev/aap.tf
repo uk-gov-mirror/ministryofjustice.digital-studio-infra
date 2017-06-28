@@ -80,3 +80,17 @@ SQL
         "GRANT SELECT TO app"
     ]
 }
+
+resource "azurerm_template_deployment" "api" {
+    name = "api"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/api-management.template.json")}"
+
+    parameters {
+        name = "${var.env-name}"
+        publisherEmail = "noms-studio-webops@digital.justice.gov.uk"
+        publisherName = "HMPPS"
+        sku = "Developer"
+    }
+}
