@@ -249,6 +249,8 @@ data "external" "vault" {
         client_id = "signon-client-id"
         client_secret = "signon-client-secret"
 
+        administrators = "administrators"
+
         dashboard_token = "dashboard-token"
         appinsights_api_key = "appinsights-api-key"
     }
@@ -270,7 +272,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         CLIENT_ID = "${data.external.vault.result.client_id}"
         CLIENT_SECRET = "${data.external.vault.result.client_secret}"
         TOKEN_HOST = "https://signon.service.justice.gov.uk"
-        HEALTHCHECK_INTERVAL = "5"
+        ADMINISTRATORS = "${data.external.vault.result.administrators}"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
     }
 
