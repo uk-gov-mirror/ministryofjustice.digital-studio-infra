@@ -31,9 +31,6 @@ resource "azurerm_resource_group" "group" {
 resource "random_id" "session-secret" {
     byte_length = 20
 }
-resource "random_id" "sql-admin-password" {
-    byte_length = 16
-}
 resource "random_id" "sql-user-password" {
     byte_length = 16
 }
@@ -95,66 +92,33 @@ resource "azurerm_key_vault" "vault" {
     tags = "${var.tags}"
 }
 
-resource "azurerm_sql_server" "sql" {
+module "sql" {
+    source = "../../shared/modules/azure-sql"
     name = "${var.app-name}"
-    resource_group_name = "${azurerm_resource_group.group.name}"
+    resource_group = "${azurerm_resource_group.group.name}"
     location = "${azurerm_resource_group.group.location}"
-    version = "12.0"
     administrator_login = "iis"
-    administrator_login_password = "${random_id.sql-admin-password.b64}"
-    tags = "${var.tags}"
-}
-
-resource "azurerm_sql_firewall_rule" "office-access" {
-    name = "NOMS Studio office"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    server_name = "${azurerm_sql_server.sql.name}"
-    start_ip_address = "${var.ips["office"]}"
-    end_ip_address = "${var.ips["office"]}"
-}
-
-resource "azurerm_sql_firewall_rule" "app-access" {
-    count = "${length(split(",", azurerm_template_deployment.webapp.outputs.ips))}"
-    name = "Application IP ${count.index}"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    server_name = "${azurerm_sql_server.sql.name}"
-    start_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs.ips), count.index)}"
-    end_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs.ips), count.index)}"
-}
-
-resource "azurerm_template_deployment" "sql-audit" {
-    name = "sql-audit"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../../shared/azure-sql-audit.template.json")}"
-    parameters {
-        serverName = "${azurerm_sql_server.sql.name}"
-        storageAccountName = "${azurerm_storage_account.storage.name}"
-    }
-}
-
-resource "azurerm_sql_database" "db" {
-    name = "${var.app-name}"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    location = "${azurerm_resource_group.group.location}"
-    server_name = "${azurerm_sql_server.sql.name}"
+    firewall_rules = [
+        {
+            label = "NOMS Studio office"
+            start = "${var.ips["office"]}"
+            end = "${var.ips["office"]}"
+        },
+    ]
+    audit_storage_account = "${azurerm_storage_account.storage.name}"
     edition = "Standard"
-    requested_service_objective_name = "S3"
+    scale = "S3"
     collation = "Latin1_General_CS_AS"
     tags = "${var.tags}"
 }
 
-resource "azurerm_template_deployment" "sql-tde" {
-    name = "sql-tde"
+resource "azurerm_sql_firewall_rule" "app-access" {
+    count = "${length(split(",", azurerm_template_deployment.webapp.outputs["ips"]))}"
+    name = "Application IP ${count.index}"
     resource_group_name = "${azurerm_resource_group.group.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../../shared/azure-sql-tde.template.json")}"
-    parameters {
-        serverName = "${azurerm_sql_server.sql.name}"
-        databaseName = "${azurerm_sql_database.db.name}"
-        service = "${var.tags["Service"]}"
-        environment = "${var.tags["Environment"]}"
-    }
+    server_name = "${module.sql.server_name}"
+    start_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs["ips"]), count.index)}"
+    end_ip_address = "${element(split(",", azurerm_template_deployment.webapp.outputs["ips"]), count.index)}"
 }
 
 resource "azurerm_template_deployment" "webapp" {
@@ -218,7 +182,7 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
     template_body = "${file("../../shared/appservice-whitelist.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         ip1 = "${var.ips["office"]}"
         ip2 = "${var.ips["quantum"]}"
         ip3 = "${var.ips["health-kick"]}"
@@ -266,8 +230,8 @@ resource "azurerm_template_deployment" "webapp-config" {
         name = "${azurerm_template_deployment.webapp.parameters.name}"
         DB_USER = "iisuser"
         DB_PASS = "${random_id.sql-user-password.b64}"
-        DB_SERVER = "${azurerm_sql_server.sql.fully_qualified_domain_name}"
-        DB_NAME = "${azurerm_sql_database.db.name}"
+        DB_SERVER = "${module.sql.db_server}"
+        DB_NAME = "${module.sql.db_name}"
         SESSION_SECRET = "${random_id.session-secret.b64}"
         CLIENT_ID = "${data.external.vault.result.client_id}"
         CLIENT_SECRET = "${data.external.vault.result.client_secret}"
