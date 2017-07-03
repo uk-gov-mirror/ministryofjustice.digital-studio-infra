@@ -1,6 +1,6 @@
 variable "viper-name" {
     type = "string"
-    default = "viper-dev"
+    default = "viper-prod"
 }
 
 resource "random_id" "app-basic-password" {
@@ -49,31 +49,12 @@ resource "azurerm_template_deployment" "viper-ssl" {
     depends_on = ["azurerm_template_deployment.viper"]
 }
 
-resource "azurerm_template_deployment" "viper-github" {
-    name = "viper-github"
+// use -target to create the app to allow terraform to compute this
+resource "azurerm_sql_firewall_rule" "viper-access" {
+    count = "${length(split(",", azurerm_template_deployment.viper.outputs["ips"]))}"
+    name = "Viper Application IP ${count.index}"
     resource_group_name = "${azurerm_resource_group.group.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../../shared/appservice-scm.template.json")}"
-
-    parameters {
-        name = "${azurerm_template_deployment.viper.parameters.name}"
-        repoURL = "https://github.com/noms-digital-studio/viper-service.git"
-        branch = "deploy-to-dev"
-    }
-
-    depends_on = ["azurerm_template_deployment.viper"]
-}
-
-resource "github_repository_webhook" "viper-deploy" {
-  repository = "viper-service"
-
-  name = "web"
-  configuration {
-    url = "${azurerm_template_deployment.viper-github.outputs["deployTrigger"]}?scmType=GitHub"
-    content_type = "form"
-    insecure_ssl = false
-  }
-  active = true
-
-  events = ["push"]
+    server_name = "${module.sql.server_name}"
+    start_ip_address = "${element(split(",", azurerm_template_deployment.viper.outputs["ips"]), count.index)}"
+    end_ip_address = "${element(split(",", azurerm_template_deployment.viper.outputs["ips"]), count.index)}"
 }
