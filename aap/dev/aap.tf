@@ -25,9 +25,6 @@ variable "tags" {
 resource "random_id" "sql-app-password" {
     byte_length = 32
 }
-resource "random_id" "app-basic-password" {
-    byte_length = 32
-}
 
 resource "azurerm_resource_group" "group" {
     name = "${var.env-name}"
