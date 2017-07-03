@@ -44,6 +44,15 @@ variable "tags" {
     #    Environment = "xxx"
     # }
 }
+variable "db_users" {
+    type = "map"
+    default {}
+    # {
+    #     username = "password"
+    #     username2 = "password2"
+    #     ...
+    # }
+}
 variable "setup_queries" {
     type = "list"
     default = [
@@ -101,8 +110,33 @@ resource "azurerm_sql_database" "db" {
     }
 }
 
-resource "null_resource" "db-setup" {
+resource "null_resource" "user-setup" {
     depends_on = ["azurerm_sql_database.db"]
+
+    triggers {
+        queries = "${jsonencode(var.db_users)}"
+    }
+
+    provisioner "local-exec" {
+        # Base64 to handle quoting issues
+        command = <<CMD
+node ${path.module}/db-setup.js \
+    --server '${azurerm_sql_server.sql.fully_qualified_domain_name}' \
+    --username '${var.administrator_login}' \
+    --password '${random_id.sql-admin-password.b64}' \
+    --database '${azurerm_sql_database.db.name}' \
+    --users '${base64encode(jsonencode(var.db_users))}' \
+CMD
+    }
+}
+
+resource "null_resource" "db-setup" {
+    depends_on = ["azurerm_sql_database.db", "null_resource.user-setup"]
+
+    triggers {
+        queries = "${jsonencode(var.setup_queries)}"
+    }
+
     provisioner "local-exec" {
         # Base64 to handle quoting issues
         command = <<CMD
