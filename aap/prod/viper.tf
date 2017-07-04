@@ -58,3 +58,19 @@ resource "azurerm_sql_firewall_rule" "viper-access" {
     start_ip_address = "${element(split(",", azurerm_template_deployment.viper.outputs["ips"]), count.index)}"
     end_ip_address = "${element(split(",", azurerm_template_deployment.viper.outputs["ips"]), count.index)}"
 }
+
+resource "azurerm_template_deployment" "viper-whitelist" {
+    name = "viper-whitelist"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice-whitelist.template.json")}"
+
+    parameters {
+        name = "${azurerm_template_deployment.viper.parameters.name}"
+        ip1 = "${var.ips["office"]}"
+        ip2 = "${azurerm_template_deployment.api.outputs["ip"]}"
+        ip3 = "${var.ips["health-kick"]}"
+    }
+
+    depends_on = ["azurerm_template_deployment.viper"]
+}

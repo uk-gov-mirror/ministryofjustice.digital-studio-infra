@@ -63,5 +63,11 @@
         "capacity": "[parameters('skuCount')]"
       }
     }
-  ]
+  ],
+  "outputs": {
+    "ip": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ApiManagement/service', parameters('name'))).staticIPs[0]]"
+    }
+  }
 }
