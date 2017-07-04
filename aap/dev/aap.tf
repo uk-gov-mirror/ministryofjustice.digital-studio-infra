@@ -96,7 +96,6 @@ resource "null_resource" "api-sync" {
     }
 
     provisioner "local-exec" {
-        # Base64 to handle quoting issues
         command = <<CMD
 node ${path.module}/../tools/sync-api.js \
     --tenantId '${var.azure_tenant_id}' \
