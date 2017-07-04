@@ -91,3 +91,27 @@ resource "azurerm_template_deployment" "api" {
         sku = "Developer"
     }
 }
+
+resource "null_resource" "api-sync" {
+    depends_on = ["azurerm_template_deployment.api"]
+
+    triggers {
+        swagger = "https://${azurerm_template_deployment.viper.parameters.name}.azurewebsites.net/api-docs"
+    }
+
+    provisioner "local-exec" {
+        # Base64 to handle quoting issues
+        command = <<CMD
+node ${path.module}/../tools/sync-api.js \
+    --tenantId '${var.azure_tenant_id}' \
+    --subscriptionId '${var.azure_subscription_id}' \
+    --resourceGroupName '${azurerm_resource_group.group.name}' \
+    --serviceName '${azurerm_template_deployment.api.parameters.name}' \
+    --swaggerDefinition 'https://${azurerm_template_deployment.viper.parameters.name}.azurewebsites.net/api-docs' \
+    --path 'analytics' \
+    --apiId 'analytics' \
+    --username 'viper' \
+    --password '${random_id.app-basic-password.b64}'
+CMD
+    }
+}

@@ -9,7 +9,7 @@ Each directory represents a distinct project, and is effectively a seperate terr
 ### Required Software
 
  * [terraform 0.9.2+](http://terraform.io/)
- * [Node.JS 6+](https://nodejs.org/)
+ * [Node.JS 8+](https://nodejs.org/)
  * [Yarn](https://yarnpkg.com/en/)
 
 ### Required Config
