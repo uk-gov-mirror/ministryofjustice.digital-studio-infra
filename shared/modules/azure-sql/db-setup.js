@@ -61,11 +61,14 @@ mssql.connect({
       .then(() => tx.commit())
       .then(() => db.close())
       .catch((err) => {
-        console.error("FAILED", err);
         db.close();
-        process.exit(1);
+        throw err;
       });
   })
+  .catch((err) => {
+    console.error("FAILED", err);
+    process.exit(1);
+  });
 
 function processQueries(tx, queries) {
   const [query, ...remainingQueries] = queries;
