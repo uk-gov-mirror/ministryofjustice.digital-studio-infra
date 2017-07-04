@@ -125,10 +125,15 @@ module "sql" {
 
     setup_queries = [
         "IF SCHEMA_ID('HPA') IS NULL EXEC sp_executesql 'CREATE SCHEMA HPA'",
+        "GRANT SELECT ON SCHEMA::HPA TO iisuser",
         "GRANT SELECT ON SCHEMA::IIS TO iisuser",
         "GRANT SELECT, INSERT, DELETE ON SCHEMA::NON_IIS TO iisuser",
-        "GRANT ALL TO atodd",
-        "GRANT ALL TO mwhitfield"
+        "ALTER ROLE db_datareader ADD MEMBER atodd",
+        "ALTER ROLE db_datawriter ADD MEMBER atodd",
+        "ALTER ROLE db_ddladmin ADD MEMBER atodd",
+        "ALTER ROLE db_datareader ADD MEMBER mwhitfield",
+        "ALTER ROLE db_datawriter ADD MEMBER mwhitfield",
+        "ALTER ROLE db_ddladmin ADD MEMBER mwhitfield",
     ]
 }
 
