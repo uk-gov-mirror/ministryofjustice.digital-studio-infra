@@ -65,15 +65,11 @@ module "sql" {
     collation = "SQL_Latin1_General_CP1_CI_AS"
     tags = "${var.tags}"
 
-    # Use `terraform taint -module sql null_resource.db-setup` to rerun
+    db_users {
+        app = "${random_id.sql-app-password.b64}"
+    }
+
     setup_queries = [
-<<SQL
-IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'app')
-    ALTER USER app WITH PASSWORD = '${random_id.sql-app-password.b64}';
-ELSE
-    CREATE USER app WITH PASSWORD = '${random_id.sql-app-password.b64}';
-SQL
-,
         "GRANT SELECT TO app"
     ]
 }
