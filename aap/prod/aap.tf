@@ -42,6 +42,41 @@ resource "azurerm_storage_account" "storage" {
     tags = "${var.tags}"
 }
 
+resource "azurerm_key_vault" "vault" {
+    name = "${var.env-name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    sku {
+        name = "standard"
+    }
+    tenant_id = "${var.azure_tenant_id}"
+
+    access_policy {
+        tenant_id = "${var.azure_tenant_id}"
+        object_id = "${var.azure_webops_group_oid}"
+        key_permissions = ["all"]
+        secret_permissions = ["all"]
+    }
+    access_policy {
+        tenant_id = "${var.azure_tenant_id}"
+        object_id = "${var.azure_app_service_oid}"
+        key_permissions = []
+        secret_permissions = ["get"]
+    }
+    access_policy {
+        object_id = "${var.azure_glenm_tfprod_oid}"
+        tenant_id = "${var.azure_tenant_id}"
+        key_permissions = []
+        secret_permissions = ["get", "set"]
+    }
+
+    enabled_for_deployment = false
+    enabled_for_disk_encryption = false
+    enabled_for_template_deployment = true
+
+    tags = "${var.tags}"
+}
+
 module "sql" {
     source = "../../shared/modules/azure-sql"
     name = "${var.env-name}"
@@ -83,11 +118,21 @@ resource "azurerm_template_deployment" "api" {
     }
 }
 
+resource "azurerm_dns_a_record" "api" {
+    name = "aap"
+    zone_name = "service.hmpps.dsd.io"
+    resource_group_name = "webops-prod"
+    ttl = "300"
+    records = ["${azurerm_template_deployment.api.outputs["ip"]}"]
+    tags = "${var.tags}"
+}
+
 resource "null_resource" "api-sync" {
     depends_on = ["azurerm_template_deployment.api"]
 
     triggers {
         swagger = "https://${azurerm_template_deployment.viper.parameters.name}.azurewebsites.net/api-docs"
+        hostname = "${azurerm_dns_a_record.api.name}.${azurerm_dns_a_record.api.zone_name}"
     }
 
     provisioner "local-exec" {
@@ -101,7 +146,9 @@ node ${path.module}/../tools/sync-api.js \
     --path 'analytics' \
     --apiId 'analytics' \
     --username 'viper' \
-    --password '${random_id.app-basic-password.b64}'
+    --password '${random_id.app-basic-password.b64}' \
+    --keyvault '${azurerm_key_vault.vault.vault_uri}' \
+    --hostname '${azurerm_dns_a_record.api.name}.${azurerm_dns_a_record.api.zone_name}'
 CMD
     }
 }
