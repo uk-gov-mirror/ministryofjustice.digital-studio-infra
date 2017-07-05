@@ -1,6 +1,10 @@
+const url = require('url');
 const request = require('request-promise');
 const azure = require('azure');
 const {ServiceClient} = require('ms-rest');
+const KeyVault = require('azure-keyvault');
+const pify = require('pify');
+const pem = pify(require('pem'), {include: ['readPkcs12', 'createPkcs12']});
 
 function parseArgs() {
   const argv = require('yargs')
@@ -34,6 +38,13 @@ function parseArgs() {
     .option('password', {
       demandOption: true
     })
+    .option('keyvault', {
+      describe: 'Vault where the hostname certificate is stored',
+      demandOption: true
+    })
+    .option('hostname', {
+      demandOption: true
+    })
     .argv;
 
   const environment = {
@@ -57,6 +68,10 @@ async function main() {
   const client = createAPIManagementClient(creds,
     args.subscriptionId, args.resourceGroupName, args.serviceName
   );
+  const keyvault = createVaultClient(
+    args.clientId, args.clientSecret, args.keyvault
+  );
+
   const swaggerDefinition = await downloadSwagger(
     args.username, args.password, args.swaggerDefinition
   );
@@ -70,14 +85,16 @@ async function main() {
     }
   });
 
-  const policy = buildPolicy(args.username, args.password);
+  await storeProperty(client, 'password', args.password, {secret: true});
+
+  const policy = buildPolicy(args.username, "{{password}}");
   await applyPolicy(client, args.apiId, policy);
   await addAPItoProduct(client, 'unlimited', args.apiId);
 
-  // upload certificate
-  // custom hostname
+  const certificate = await downloadCertificate(keyvault, args.hostname);
+  const uploadedCert = await uploadCertificate(client, "Proxy", certificate);
 
-  console.log(await getAPI(client, args.apiId));
+  await setHostname(client, "Proxy", args.hostname, uploadedCert);
 }
 
 function getenv(name) {
@@ -123,6 +140,29 @@ function createAPIManagementClient(creds, subscriptionId, resourceGroupName, ser
         return resolve(body);
       });
     });
+  };
+}
+
+function createVaultClient(clientId, clientSecret, vaultUri) {
+  const AuthenticationContext = require('adal-node').AuthenticationContext;
+  function authenticator(challenge, callback) {
+    var context = new AuthenticationContext(challenge.authorization);
+    return context.acquireTokenWithClientCredentials(
+      challenge.resource, clientId, clientSecret,
+      function(err, response) {
+        if (err) return callback(err);
+        callback(null, response.tokenType + ' ' + response.accessToken);
+      }
+    );
+  }
+  const credentials = new KeyVault.KeyVaultCredentials(authenticator);
+  const keyvaultClient = new KeyVault.KeyVaultClient(credentials);
+
+  function buildSecretId(name) {
+    return url.resolve(vaultUri, `secrets/${name}`);
+  }
+  return {
+    getSecret: (name) => keyvaultClient.getSecret(buildSecretId(name))
   };
 }
 
@@ -188,6 +228,23 @@ function updateAPIParameters(client, apiId, parameters) {
   });
 }
 
+function storeProperty(client, name, value, {secret}) {
+  console.log(`Storing property ${name}`);
+  return client({
+    method: 'PUT',
+    pathTemplate: '/properties/{propId}',
+    pathParameters: {propId: name},
+    body: {
+      name,
+      value,
+      secret: Boolean(secret)
+    },
+    headers: {
+      'If-Match': '*'
+    },
+  });
+}
+
 function applyPolicy(client, apiId, policy) {
   console.log(`Applying API ${apiId} policy`);
   return client({
@@ -226,5 +283,45 @@ function addAPItoProduct(client, productId, apiId) {
     method: 'PUT',
     pathTemplate: '/products/{productId}/apis/{apiId}',
     pathParameters: {productId, apiId},
+  });
+}
+
+function downloadCertificate(keyvaultClient, hostname) {
+  const secretName = hostname.replace(/\./g, "DOT");
+  return keyvaultClient.getSecret(secretName)
+    .then((secret) => secret.value);
+}
+
+async function uploadCertificate(client, type, certificate) {
+  console.log(`Uploading ${type} certificate`);
+
+  const p12password = "tempuploadpassword";
+  const certInfo = await pem.readPkcs12(Buffer.from(certificate, "base64"));
+  const {pkcs12} = await pem.createPkcs12(
+    certInfo.key, certInfo.cert, p12password, {certFiles: certInfo.ca}
+  );
+
+  return client({
+    method: 'POST',
+    pathTemplate: '/updatecertificate',
+    body: {
+      type,
+      certificate: pkcs12.toString('base64'),
+      certificate_password: p12password
+    },
+  });
+}
+
+function setHostname(client, type, hostname, certificate) {
+  console.log(`Setting ${type} hostname to ${hostname}`);
+
+  return client({
+    method: 'POST',
+    pathTemplate: '/updatehostname',
+    body: {
+      update: [
+        {type, hostname, certificate}
+      ]
+    }
   });
 }
