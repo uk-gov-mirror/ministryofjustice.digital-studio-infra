@@ -117,23 +117,12 @@ module "sql" {
     collation = "SQL_Latin1_General_CP1_CI_AS"
     tags = "${var.tags}"
 
-    # Use `terraform taint -module sql null_resource.db-setup` to rerun
+    db_users = {
+        app = "${random_id.sql-app-password.b64}"
+        reader = "${random_id.sql-reader-password.b64}"
+    }
+
     setup_queries = [
-<<SQL
-IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'app')
-    ALTER USER app WITH PASSWORD = '${random_id.sql-app-password.b64}';
-ELSE
-    CREATE USER app WITH PASSWORD = '${random_id.sql-app-password.b64}';
-SQL
-,
-    # Permissions for app managed by migrations, as they're quite fine grained
-<<SQL
-IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'reader')
-    ALTER USER reader WITH PASSWORD = '${random_id.sql-reader-password.b64}';
-ELSE
-    CREATE USER reader WITH PASSWORD = '${random_id.sql-reader-password.b64}';
-SQL
-,
         "GRANT SELECT TO reader"
     ]
 }
@@ -192,6 +181,15 @@ resource "azurerm_template_deployment" "insights" {
     }
 }
 
+data "external" "vault" {
+    program = ["node", "../../tools/keyvault-data.js"]
+    query {
+        vault = "${azurerm_key_vault.vault.name}"
+
+        viper_service_api_key = "viper-service-api-key"
+    }
+}
+
 resource "azurerm_template_deployment" "webapp-config" {
     name = "webapp-config"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -203,6 +201,9 @@ resource "azurerm_template_deployment" "webapp-config" {
         NODE_ENV = "production"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
         DB_URI = "mssql://app:${random_id.sql-app-password.b64}@${module.sql.db_server}:1433/${module.sql.db_name}?encrypt=true"
+        USE_VIPER_SERVICE = "false"
+        VIPER_SERVICE_URL = "https://aap-dev.hmpps.dsd.io/"
+        VIPER_SERVICE_API_KEY = "${data.external.vault.result["viper_service_api_key"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
