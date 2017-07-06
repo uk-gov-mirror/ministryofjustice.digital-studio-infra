@@ -131,9 +131,11 @@ module "sql" {
         "ALTER ROLE db_datareader ADD MEMBER atodd",
         "ALTER ROLE db_datawriter ADD MEMBER atodd",
         "ALTER ROLE db_ddladmin ADD MEMBER atodd",
+        "GRANT SHOWPLAN to atodd",
         "ALTER ROLE db_datareader ADD MEMBER mwhitfield",
         "ALTER ROLE db_datawriter ADD MEMBER mwhitfield",
         "ALTER ROLE db_ddladmin ADD MEMBER mwhitfield",
+        "GRANT SHOWPLAN to mwhitfield",
     ]
 }
 
