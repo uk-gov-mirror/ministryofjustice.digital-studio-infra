@@ -162,7 +162,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
         DB_URI = "mssql://app:${random_id.sql-app-password.b64}@${module.sql.db_server}:1433/${module.sql.db_name}?encrypt=true"
         USE_VIPER_SERVICE = "true"
-        VIPER_SERVICE_URL = "https://csra-mocks.herokuapp.com/"
+        VIPER_SERVICE_URL = "https://csra-mocks.herokuapp.com"
         VIPER_SERVICE_API_KEY = "valid-subscription-key"
     }
 
