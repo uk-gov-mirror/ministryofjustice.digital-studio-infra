@@ -16,6 +16,10 @@
         },
         "DB_URI": {
             "type": "string"
+        },
+        "APPINSIGHTS_INSTRUMENTATIONKEY": {
+            "type": "string",
+            "defaultValue": ""
         }
     },
     "resources": [
@@ -28,7 +32,8 @@
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "BASIC_AUTH_USER": "[parameters('BASIC_AUTH_USER')]",
                 "BASIC_AUTH_PASS": "[parameters('BASIC_AUTH_PASS')]",
-                "DB_URI": "[parameters('DB_URI')]"
+                "DB_URI": "[parameters('DB_URI')]",
+                "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]"
             }
         }
     ]
