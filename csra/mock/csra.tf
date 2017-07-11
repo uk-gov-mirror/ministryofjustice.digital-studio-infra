@@ -57,6 +57,47 @@ resource "azurerm_storage_container" "logs" {
     container_access_type = "private"
 }
 
+resource "azurerm_key_vault" "vault" {
+    name = "${var.app-name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    sku {
+        name = "standard"
+    }
+    tenant_id = "${var.azure_tenant_id}"
+
+    access_policy {
+        tenant_id = "${var.azure_tenant_id}"
+        object_id = "${var.azure_webops_group_oid}"
+        key_permissions = ["all"]
+        secret_permissions = ["all"]
+    }
+    access_policy {
+        tenant_id = "${var.azure_tenant_id}"
+        object_id = "${var.azure_app_service_oid}"
+        key_permissions = []
+        secret_permissions = ["get"]
+    }
+    access_policy {
+        object_id = "${var.azure_glenm_tf_oid}"
+        tenant_id = "${var.azure_tenant_id}"
+        key_permissions = []
+        secret_permissions = ["get", "set"]
+    }
+    access_policy {
+        object_id = "${var.azure_robl_tf_oid}"
+        tenant_id = "${var.azure_tenant_id}"
+        key_permissions = []
+        secret_permissions = ["get", "set"]
+    }
+
+    enabled_for_deployment = false
+    enabled_for_disk_encryption = false
+    enabled_for_template_deployment = true
+
+    tags = "${var.tags}"
+}
+
 module "sql" {
     source = "../../shared/modules/azure-sql"
     name = "${var.app-name}"
@@ -75,23 +116,12 @@ module "sql" {
     collation = "SQL_Latin1_General_CP1_CI_AS"
     tags = "${var.tags}"
 
-    # Use `terraform taint -module sql null_resource.db-setup` to rerun
+    db_users = {
+        app = "${random_id.sql-app-password.b64}"
+        reader = "${random_id.sql-reader-password.b64}"
+    }
+
     setup_queries = [
-<<SQL
-IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'app')
-    ALTER USER app WITH PASSWORD = '${random_id.sql-app-password.b64}';
-ELSE
-    CREATE USER app WITH PASSWORD = '${random_id.sql-app-password.b64}';
-SQL
-,
-    # Permissions for app managed by migrations, as they're quite fine grained
-<<SQL
-IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'reader')
-    ALTER USER reader WITH PASSWORD = '${random_id.sql-reader-password.b64}';
-ELSE
-    CREATE USER reader WITH PASSWORD = '${random_id.sql-reader-password.b64}';
-SQL
-,
         "GRANT SELECT TO reader"
     ]
 }
@@ -169,15 +199,19 @@ resource "azurerm_template_deployment" "webapp-config" {
     depends_on = ["azurerm_template_deployment.webapp"]
 }
 
-resource "azurerm_template_deployment" "webapp-hostname" {
-    name = "webapp-hostname"
+resource "azurerm_template_deployment" "webapp-ssl" {
+    name = "webapp-ssl"
     resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
-    template_body = "${file("../../shared/appservice-hostname.template.json")}"
+    template_body = "${file("../../shared/appservice-ssl.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
         hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
+        keyVaultId = "${azurerm_key_vault.vault.id}"
+        keyVaultCertName = "${replace("${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}", ".", "DOT")}"
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
