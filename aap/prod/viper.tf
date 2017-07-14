@@ -19,6 +19,20 @@ resource "azurerm_template_deployment" "viper" {
     }
 }
 
+resource "azurerm_template_deployment" "insights" {
+    name = "${var.viper-name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/insights.template.json")}"
+    parameters {
+        name = "${var.viper-name}"
+        location = "northeurope" // Not in UK yet
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
+        appServiceId = "${azurerm_template_deployment.viper.outputs["resourceId"]}"
+    }
+}
+
 resource "azurerm_template_deployment" "viper-config" {
     name = "viper-config"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -31,6 +45,7 @@ resource "azurerm_template_deployment" "viper-config" {
         BASIC_AUTH_USER = "viper"
         BASIC_AUTH_PASS = "${random_id.app-basic-password.b64}"
         DB_URI = "mssql://app:${random_id.sql-app-password.b64}@${module.sql.db_server}:1433/${module.sql.db_name}?encrypt=true"
+        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
     }
 
     depends_on = ["azurerm_template_deployment.viper"]
