@@ -80,13 +80,13 @@ resource "azurerm_key_vault" "vault" {
         object_id = "${var.azure_glenm_tf_oid}"
         tenant_id = "${var.azure_tenant_id}"
         key_permissions = []
-        secret_permissions = ["get", "list"]
+        secret_permissions = ["get", "set"]
     }
     access_policy {
         object_id = "${var.azure_robl_tf_oid}"
         tenant_id = "${var.azure_tenant_id}"
         key_permissions = []
-        secret_permissions = ["get", "list"]
+        secret_permissions = ["get", "set"]
     }
 
     enabled_for_deployment = false
@@ -176,6 +176,24 @@ resource "azurerm_template_deployment" "webapp-config" {
         NOMS_TOKEN = "${data.external.vault.result.noms_token}"
         NOMS_PRIVATE_KEY = "${data.external.vault.result.noms_private_key}"
         SESSION_SECRET = "${random_id.session-secret.b64}"
+    }
+
+    depends_on = ["azurerm_template_deployment.webapp"]
+}
+
+resource "azurerm_template_deployment" "webapp-ssl" {
+    name = "webapp-ssl"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice-ssl.template.json")}"
+
+    parameters {
+        name = "${azurerm_template_deployment.webapp.parameters.name}"
+        hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
+        keyVaultId = "${azurerm_key_vault.vault.id}"
+        keyVaultCertName = "${replace("${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}", ".", "DOT")}"
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
