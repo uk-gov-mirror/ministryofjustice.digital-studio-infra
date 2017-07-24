@@ -185,6 +185,9 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
         ip1 = "${var.ips["office"]}"
         ip2 = "${var.ips["quantum"]}"
         ip3 = "${var.ips["health-kick"]}"
+        ip4 = "82.39.108.24"   // PEN testing IP
+        ip5 = "81.134.202.16" // PEN testing IP range  81.134.202.16/28
+        subnet5 = "255.255.255.240"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
