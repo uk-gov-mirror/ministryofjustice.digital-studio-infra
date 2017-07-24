@@ -124,7 +124,7 @@ module "sql" {
     }
 
     setup_queries = [
-        "IF SCHEMA_ID('HPA') IS NULL EXEC sp_executesql 'CREATE SCHEMA HPA'",
+        "IF SCHEMA_ID('HPA') IS NULL EXEC sp_executesql \"CREATE SCHEMA HPA\"",
         "GRANT SELECT ON SCHEMA::HPA TO iisuser",
         "GRANT SELECT ON SCHEMA::IIS TO iisuser",
         "GRANT SELECT, INSERT, DELETE ON SCHEMA::NON_IIS TO iisuser",

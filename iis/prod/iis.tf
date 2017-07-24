@@ -31,7 +31,7 @@ resource "azurerm_resource_group" "group" {
 resource "random_id" "session-secret" {
     byte_length = 20
 }
-resource "random_id" "sql-user-password" {
+resource "random_id" "sql-iisuser-password" {
     byte_length = 16
 }
 
@@ -110,6 +110,17 @@ module "sql" {
     scale = "S3"
     collation = "Latin1_General_CS_AS"
     tags = "${var.tags}"
+
+    db_users {
+        iisuser = "${random_id.sql-iisuser-password.b64}"
+    }
+
+    setup_queries = [
+        "IF SCHEMA_ID('HPA') IS NULL EXEC sp_executesql \"CREATE SCHEMA HPA\"",
+        "GRANT SELECT ON SCHEMA::HPA TO iisuser",
+        "GRANT SELECT ON SCHEMA::IIS TO iisuser",
+        "GRANT SELECT, INSERT, DELETE ON SCHEMA::NON_IIS TO iisuser",
+    ]
 }
 
 resource "azurerm_sql_firewall_rule" "app-access" {
@@ -229,7 +240,7 @@ resource "azurerm_template_deployment" "webapp-config" {
     parameters {
         name = "${azurerm_template_deployment.webapp.parameters.name}"
         DB_USER = "iisuser"
-        DB_PASS = "${random_id.sql-user-password.b64}"
+        DB_PASS = "${random_id.sql-iisuser-password.b64}"
         DB_SERVER = "${module.sql.db_server}"
         DB_NAME = "${module.sql.db_name}"
         SESSION_SECRET = "${random_id.session-secret.b64}"
