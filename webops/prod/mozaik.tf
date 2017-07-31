@@ -8,7 +8,7 @@ variable "mozaik_tags" {
 
 resource "azurerm_template_deployment" "mozaik" {
     name = "mozaik"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
     template_body = "${file("../../shared/appservice.template.json")}"
     parameters {
@@ -21,7 +21,7 @@ resource "azurerm_template_deployment" "mozaik" {
 resource "azurerm_dns_cname_record" "mozaik-cname" {
     name = "overwatch-dash"
     zone_name = "service.hmpps.dsd.io"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
     ttl = "300"
     record = "${azurerm_template_deployment.mozaik.parameters.name}.azurewebsites.net"
     tags = "${var.mozaik_tags}"
@@ -29,7 +29,7 @@ resource "azurerm_dns_cname_record" "mozaik-cname" {
 
 resource "azurerm_template_deployment" "mozaik-hostname" {
     name = "mozaik-hostname"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
     template_body = "${file("../../shared/appservice-hostname.template.json")}"
 
@@ -43,7 +43,7 @@ resource "azurerm_template_deployment" "mozaik-hostname" {
 
 resource "azurerm_template_deployment" "mozaik-github" {
     name = "mozaik-github"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
     template_body = "${file("../../shared/appservice-scm.template.json")}"
 
