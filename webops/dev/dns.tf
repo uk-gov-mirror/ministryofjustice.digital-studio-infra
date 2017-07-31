@@ -1,6 +1,6 @@
 resource "azurerm_dns_zone" "noms" {
     name = "noms.dsd.io"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
     tags {
         Service = "WebOps"
         Environment = "Management"
@@ -9,7 +9,7 @@ resource "azurerm_dns_zone" "noms" {
 
 resource "azurerm_dns_zone" "hmpps" {
     name = "hmpps.dsd.io"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
     tags {
         Service = "WebOps"
         Environment = "Management"
@@ -19,7 +19,7 @@ resource "azurerm_dns_zone" "hmpps" {
 resource "azurerm_dns_ns_record" "service-hmpps" {
     name = "service"
     zone_name = "${azurerm_dns_zone.hmpps.name}"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
     ttl = "300"
 
     record {
@@ -43,7 +43,7 @@ resource "azurerm_dns_ns_record" "service-hmpps" {
 resource "azurerm_dns_ns_record" "digital-prisons" {
     name = "dp"
     zone_name = "${azurerm_dns_zone.hmpps.name}"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
     ttl = "300"
 
     record {
@@ -67,7 +67,7 @@ resource "azurerm_dns_ns_record" "digital-prisons" {
 resource "azurerm_dns_ns_record" "wmt" {
     name = "wmt"
     zone_name = "${azurerm_dns_zone.hmpps.name}"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
     ttl = "300"
 
     record {
@@ -91,7 +91,7 @@ resource "azurerm_dns_ns_record" "wmt" {
 resource "azurerm_dns_cname_record" "search" {
     name = "search"
     zone_name = "${azurerm_dns_zone.noms.name}"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
     ttl = "300"
     record = "search-noms-api.dsd.io"
 }
