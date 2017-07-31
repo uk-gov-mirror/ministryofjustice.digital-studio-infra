@@ -1,10 +1,10 @@
 variable "slackhook_app_id" {
     type = "string"
-    default = "592a1f64-d98e-46a1-8f1b-41e7a674249e"
+    default = "cd8e65cd-0b83-4aa1-953e-966a1491b2b4"
 }
 variable "slackhook_app_oid" {
     type = "string"
-    default = "745faff5-eaed-448c-83ba-d659baa902f7"
+    default = "dc341896-ab17-48ac-83b9-b17416655c0b"
 }
 
 resource "azurerm_template_deployment" "slackhook" {
@@ -13,7 +13,7 @@ resource "azurerm_template_deployment" "slackhook" {
     deployment_mode = "Incremental"
     template_body = "${file("../../shared/appservice.template.json")}"
     parameters {
-        name = "studio-slack-hook"
+        name = "studio-slack-hook-prod"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
     }
@@ -80,7 +80,7 @@ resource "azurerm_template_deployment" "slackhook-github" {
     parameters {
         name = "${azurerm_template_deployment.slackhook.parameters.name}"
         repoURL = "https://github.com/noms-digital-studio/slackhook.git"
-        branch = "master"
+        branch = "deploy"
     }
 }
 

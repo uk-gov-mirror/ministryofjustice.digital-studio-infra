@@ -1,6 +1,6 @@
 resource "azurerm_dns_zone" "service-hmpps" {
     name = "service.hmpps.dsd.io"
-    resource_group_name = "${azurerm_resource_group.webops.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
     tags {
         Service = "WebOps"
         Environment = "Management"
