@@ -60,6 +60,11 @@ resource "azurerm_template_deployment" "slackhook-config" {
     }
 }
 
+module "slackhook" {
+    source = "../../shared/modules/slackhook"
+    app_name = "${azurerm_template_deployment.slackhook.parameters.name}"
+}
+
 resource "azurerm_template_deployment" "slackhook-ssl" {
     name = "slackhook-ssl"
     resource_group_name = "${azurerm_resource_group.group.name}"
