@@ -272,6 +272,13 @@ resource "azurerm_template_deployment" "webapp-ssl" {
     depends_on = ["azurerm_template_deployment.webapp"]
 }
 
+module "slackhook" {
+    source = "../../shared/modules/slackhook"
+    app_name = "${azurerm_template_deployment.webapp.parameters.name}"
+    azure_subscription = "production"
+    channels = ["shef_changes", "hpa"]
+}
+
 resource "azurerm_dns_cname_record" "cname" {
     name = "hpa"
     zone_name = "service.hmpps.dsd.io"
