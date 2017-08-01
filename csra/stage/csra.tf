@@ -257,6 +257,12 @@ resource "github_repository_webhook" "webapp-deploy" {
   events = ["push"]
 }
 
+module "slackhook" {
+    source = "../../shared/modules/slackhook"
+    app_name = "${azurerm_template_deployment.webapp.parameters.name}"
+    channels = ["csra-ci-status"]
+}
+
 resource "azurerm_dns_cname_record" "cname" {
     name = "${var.app-name}"
     zone_name = "hmpps.dsd.io"
