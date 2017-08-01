@@ -199,6 +199,12 @@ resource "azurerm_template_deployment" "webapp-ssl" {
     depends_on = ["azurerm_template_deployment.webapp"]
 }
 
+module "slackhook" {
+    source = "../../shared/modules/slackhook"
+    app_name = "${azurerm_template_deployment.webapp.parameters.name}"
+    channels = ["nomisonthemove"]
+}
+
 resource "azurerm_dns_cname_record" "cname" {
     name = "notm-dev"
     zone_name = "hmpps.dsd.io"
