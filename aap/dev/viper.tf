@@ -92,3 +92,9 @@ resource "github_repository_webhook" "viper-deploy" {
 
   events = ["push"]
 }
+
+module "slackhook" {
+    source = "../../shared/modules/slackhook"
+    app_name = "${azurerm_template_deployment.viper.parameters.name}"
+    channels = ["api-accelerator"]
+}
