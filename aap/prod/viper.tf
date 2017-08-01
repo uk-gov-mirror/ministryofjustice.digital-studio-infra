@@ -89,3 +89,10 @@ resource "azurerm_template_deployment" "viper-whitelist" {
 
     depends_on = ["azurerm_template_deployment.viper"]
 }
+
+module "slackhook" {
+    source = "../../shared/modules/slackhook"
+    app_name = "${azurerm_template_deployment.viper.parameters.name}"
+    azure_subscription = "production"
+    channels = ["shef_changes", "api-accelerator"]
+}

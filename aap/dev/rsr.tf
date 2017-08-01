@@ -66,3 +66,9 @@ resource "github_repository_webhook" "rsr-deploy" {
 
   events = ["push"]
 }
+
+module "slackhook-rsr" {
+    source = "../../shared/modules/slackhook"
+    app_name = "${azurerm_template_deployment.rsr.parameters.name}"
+    channels = ["api-accelerator"]
+}
