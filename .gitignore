@@ -4,3 +4,4 @@ terraform.tfstate*
 *.tfplan
 graph.png
 node_modules/
+sshkey.pub
