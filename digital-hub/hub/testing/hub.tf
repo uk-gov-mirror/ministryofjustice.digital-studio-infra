@@ -15,29 +15,6 @@ resource "azurerm_network_security_group" "hub-env-testing-nsg" {
   location            = "ukwest"
   resource_group_name = "${azurerm_resource_group.hub-env-testing.name}"
 
-  security_rule {
-    name                       = "default-allow-ssh"
-    priority                   = 1000
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "TCP"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-  security_rule {
-    name                       = "allow-https"
-    priority                   = 1001
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "TCP"
-    source_port_range          = "*"
-    destination_port_range     = "443"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
 }
 
 resource "azurerm_subnet" "default" {
