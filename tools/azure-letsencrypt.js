@@ -215,12 +215,12 @@ function createCertificate(dnsClient, zoneDetails) {
     challenges: {
       'dns-01': challenge,
     },
-    agreeToTerms: true,
     debug: true,
   }).register({
     domains: [argv.hostname],
     email: 'noms-studio-webops@digital.justice.gov.uk',
-    challengeType: 'dns-01'
+    challengeType: 'dns-01',
+    agreeTos: true,
   });
 }
 
