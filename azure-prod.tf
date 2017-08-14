@@ -21,6 +21,11 @@ variable "azure_glenm_tfprod_oid" {
     default = "ad1a039a-c546-4a8f-b5ac-9ce4079b1e92"
 }
 
+variable "azure_rlazzurs_tfprod_oid" {
+    type = "string"
+    default = "3dfa627f-a505-4ce0-a6e7-4a8da91e511c"
+}
+
 provider "azurerm" {
   # NOMS Digital Studio Production 1
   subscription_id = "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
