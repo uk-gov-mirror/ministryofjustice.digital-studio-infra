@@ -16,6 +16,7 @@ resource "azurerm_template_deployment" "slackhook" {
         name = "studio-slack-hook-prod"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
+        workers = "1"
     }
 }
 
