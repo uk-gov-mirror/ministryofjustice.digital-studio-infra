@@ -15,6 +15,7 @@ resource "azurerm_template_deployment" "mozaik" {
         name = "overwatch-mozaik"
         service = "${var.mozaik_tags["Service"]}"
         environment = "${var.mozaik_tags["Environment"]}"
+        workers = "1"
     }
 }
 

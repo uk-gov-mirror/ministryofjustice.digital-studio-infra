@@ -5,6 +5,9 @@
         "name": {
             "type": "string"
         },
+        "workers": {
+            "type": "string"
+        },
         "service": {
             "type": "string"
         },
@@ -57,7 +60,7 @@
                 "name": "[parameters('name')]",
                 "workerSizeId": "0",
                 "reserved": false,
-                "numberOfWorkers": "1",
+                "numberOfWorkers": "[parameters('workers')]",
                 "hostingEnvironment": ""
             },
             "sku": {
