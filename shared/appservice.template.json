@@ -6,7 +6,7 @@
             "type": "string"
         },
         "workers": {
-            "type": "int"
+            "type": "string"
         },
         "service": {
             "type": "string"
