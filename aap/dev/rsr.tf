@@ -12,6 +12,7 @@ resource "azurerm_template_deployment" "rsr" {
         name = "${var.rsr-name}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
+        workers = "1"
     }
 }
 
