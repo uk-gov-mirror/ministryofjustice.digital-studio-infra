@@ -22,7 +22,7 @@ variable "azure_glenm_tf_oid" {
 }
 variable "azure_robl_tf_oid" {
     type = "string"
-    default = "b9bc7ac9-39e8-4212-857a-a86598fe88a5"
+    default = "ec0c3ab3-0a6e-4260-87c3-93935fe29b3e"
 }
 provider "azurerm" {
     # NOMS Digital Studio Dev & Test Environments
