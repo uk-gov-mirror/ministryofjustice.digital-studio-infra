@@ -82,6 +82,12 @@ resource "azurerm_key_vault" "vault" {
         key_permissions = []
         secret_permissions = ["get", "set"]
     }
+    access_policy {
+        object_id = "${var.azure_rlazzurs_tfprod_oid}"
+        tenant_id = "${var.azure_tenant_id}"
+        key_permissions = []
+        secret_permissions = ["get", "set"]
+    }
 
     enabled_for_deployment = false
     enabled_for_disk_encryption = false
