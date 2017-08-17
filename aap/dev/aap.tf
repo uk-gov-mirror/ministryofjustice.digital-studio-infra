@@ -111,7 +111,7 @@ module "sql" {
     }
 
     setup_queries = [
-        "GRANT SELECT TO app"
+        "GRANT SELECT, INSERT, UPDATE, DELETE TO app"
     ]
 }
 
