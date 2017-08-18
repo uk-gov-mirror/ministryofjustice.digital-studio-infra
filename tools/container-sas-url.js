@@ -19,7 +19,8 @@
  *
  * And produces the following structure as JSON via stdout:
  * {
- *   "url": "<SAS url>"
+ *   "url": "<SAS url>",
+ *   "token": "<SAS token only>"
  * }
  */
 
@@ -65,7 +66,7 @@ function main() {
     }))
     .then(({sasToken, properties}) => {
       const url = properties.primaryEndpoints.blob + container + "?" + sasToken;
-      console.log("%j", {url});
+      console.log("%j", {url, token: sasToken});
     })
     .catch((err) => {
       console.error(err.stack);
