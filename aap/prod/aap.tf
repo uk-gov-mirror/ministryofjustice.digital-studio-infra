@@ -42,6 +42,33 @@ resource "azurerm_storage_account" "storage" {
     tags = "${var.tags}"
 }
 
+resource "azurerm_storage_container" "csv" {
+    name = "csv"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    storage_account_name = "${azurerm_storage_account.storage.name}"
+    container_access_type = "private"
+}
+
+resource "null_resource" "intermediates" {
+    triggers = {
+        csv_url = "${azurerm_storage_account.storage.primary_blob_endpoint}${azurerm_storage_container.csv.name}"
+    }
+}
+
+data "external" "sas-url" {
+    program = ["node", "../../tools/container-sas-url.js"]
+    query {
+        subscription_id = "${var.azure_subscription_id}"
+        tenant_id = "${var.azure_tenant_id}"
+        resource_group = "${azurerm_resource_group.group.name}"
+        storage_account = "${azurerm_storage_account.storage.name}"
+        container = "csv"
+        permissions = "rwdl"
+        start_date = "2017-08-16T00:00:00Z"
+        end_date = "2018-08-16T00:00:00Z"
+    }
+}
+
 resource "azurerm_key_vault" "vault" {
     name = "${var.env-name}"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -101,6 +128,32 @@ module "sql" {
 
     setup_queries = [
         "GRANT SELECT, INSERT, UPDATE, DELETE TO app"
+, <<SQL
+IF NOT EXISTS (SELECT * FROM sys.symmetric_keys WHERE name = '##MS_DatabaseMasterKey##')
+    CREATE MASTER KEY ;
+SQL
+, <<SQL
+IF EXISTS (SELECT * FROM sys.database_scoped_credentials WHERE name = 'storageblob_sas')
+    ALTER DATABASE SCOPED CREDENTIAL storageblob_sas WITH
+        IDENTITY = 'SHARED ACCESS SIGNATURE',
+        SECRET = '${data.external.sas-url.result.token}';
+ELSE
+    CREATE DATABASE SCOPED CREDENTIAL storageblob_sas WITH
+        IDENTITY = 'SHARED ACCESS SIGNATURE',
+        SECRET = '${data.external.sas-url.result.token}';
+SQL
+, <<SQL
+IF EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'storageblob')
+    ALTER EXTERNAL DATA SOURCE storageblob SET
+        LOCATION = '${null_resource.intermediates.triggers.csv_url}',
+        CREDENTIAL = storageblob_sas;
+ELSE
+    CREATE EXTERNAL DATA SOURCE storageblob WITH (
+        TYPE = BLOB_STORAGE,
+        LOCATION = '${null_resource.intermediates.triggers.csv_url}',
+        CREDENTIAL = storageblob_sas
+    );
+SQL
     ]
 }
 
