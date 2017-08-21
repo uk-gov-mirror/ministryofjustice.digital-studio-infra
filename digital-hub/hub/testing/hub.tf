@@ -15,6 +15,30 @@ resource "azurerm_network_security_group" "hub-env-testing-nsg" {
   location            = "ukwest"
   resource_group_name = "${azurerm_resource_group.hub-env-testing.name}"
 
+
+  security_rule {
+    name                       = "bounce-dev-allow-ssh"
+    priority                   = 1000
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "TCP"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "51.141.40.186"
+    destination_address_prefix = "*"
+  }
+  security_rule {
+    name                       = "bounce-prod-default-allow-ssh"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "TCP"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "51.140.76.188"
+    destination_address_prefix = "*"
+  }
+
 }
 
 resource "azurerm_subnet" "default" {
