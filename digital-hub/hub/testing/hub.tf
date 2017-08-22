@@ -90,6 +90,14 @@ resource "azurerm_virtual_machine" "hub-env-testing-vm" {
     managed_disk_type = "Standard_LRS"
   }
 
+  storage_data_disk {
+    name              = "hub-env-testing-data-disk"
+    managed_disk_type = "Standard_LRS"
+    create_option     = "Empty"
+    lun               = 1
+    disk_size_gb      = "150"
+  }
+
   os_profile {
     computer_name  = "hub-env-testing"
     admin_username = "provisioning"
