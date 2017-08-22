@@ -112,3 +112,11 @@ resource "azurerm_virtual_machine" "hub-env-testing-vm" {
     }
   }
 }
+
+resource "azurerm_dns_a_record" "hub-env-testing-dns" {
+  name = "testing.hub"
+  zone_name = "service.hmpps.dsd.io"
+  resource_group_name = "webops-prod"
+  ttl = "500"
+  records = ["51.141.47.59"]
+}
