@@ -84,6 +84,12 @@ resource "azurerm_key_vault" "vault" {
         key_permissions = []
         secret_permissions = ["get", "set"]
     }
+    access_policy {
+        object_id = "${var.azure_rlazzurs_tfprod_oid}"
+        tenant_id = "${var.azure_tenant_id}"
+        key_permissions = []
+        secret_permissions = ["get", "set"]
+    }
 
     enabled_for_deployment = false
     enabled_for_disk_encryption = false
@@ -141,7 +147,7 @@ resource "azurerm_template_deployment" "webapp" {
         name = "${var.app-name}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
-        workers = "1"
+        workers = "2"
     }
 }
 
@@ -299,7 +305,7 @@ resource "azurerm_template_deployment" "stats-exposer" {
         name = "${var.app-name}-stats-exposer"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
-        workers = "1"
+        workers = "2"
     }
 }
 
