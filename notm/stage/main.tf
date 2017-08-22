@@ -1,25 +1,25 @@
 terraform {
     required_version = ">= 0.9.2"
     backend "azure" {
-        resource_group_name = "webops-prod"
-        storage_account_name = "nomsstudiowebopsprod"
+        resource_group_name = "webops"
+        storage_account_name = "nomsstudiowebops"
         container_name = "terraform"
-        key = "notm-preprod.terraform.tfstate"
-        arm_subscription_id = "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
+        key = "notm-stage.terraform.tfstate"
+        arm_subscription_id = "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
         arm_tenant_id = "747381f4-e81f-4a43-bf68-ced6a1e14edf"
     }
 }
 
 variable "app-name" {
     type = "string"
-    default = "notm-preprod"
+    default = "notm-stage"
 }
 
 variable "tags" {
     type = "map"
     default {
         Service = "NOTM"
-        Environment = "PreProd"
+        Environment = "Stage"
     }
 }
 
@@ -77,13 +77,13 @@ resource "azurerm_key_vault" "vault" {
         secret_permissions = ["get"]
     }
     access_policy {
-        object_id = "${var.azure_glenm_tfprod_oid}"
+        object_id = "${var.azure_glenm_tf_oid}"
         tenant_id = "${var.azure_tenant_id}"
         key_permissions = []
         secret_permissions = ["get", "set"]
     }
     access_policy {
-        object_id = "${var.azure_rlazzurs_tfprod_oid}"
+        object_id = "${var.azure_robl_tf_oid}"
         tenant_id = "${var.azure_tenant_id}"
         key_permissions = []
         secret_permissions = ["get", "set"]
@@ -94,8 +94,9 @@ resource "azurerm_key_vault" "vault" {
     enabled_for_template_deployment = true
 
     tags = "${var.tags}"
-}
 
+
+}
 
 data "external" "vault" {
     program = ["node", "../../tools/keyvault-data.js"]
@@ -115,7 +116,7 @@ resource "azurerm_template_deployment" "webapp" {
         name = "${var.app-name}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
-        workers = "1"
+        workers = "2"
     }
 }
 
@@ -128,8 +129,8 @@ data "external" "sas-url" {
         storage_account = "${azurerm_storage_account.storage.name}"
         container = "web-logs"
         permissions = "rwdl"
-        start_date = "2017-07-06T00:00:00Z"
-        end_date = "2217-07-06T00:00:00Z"
+        start_date = "2017-05-15T00:00:00Z"
+        end_date = "2217-05-15T00:00:00Z"
     }
 }
 
@@ -171,27 +172,11 @@ resource "azurerm_template_deployment" "webapp-config" {
         name = "${var.app-name}"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
         NODE_ENV = "production"
-        API_ENDPOINT_URL = "https://noms-api-preprod.dsd.io/elite2api/"
+        API_ENDPOINT_URL = "https://noms-api-dev.dsd.io/elite2api-stage/"
         USE_API_GATEWAY_AUTH = "yes"
         NOMS_TOKEN = "${data.external.vault.result.noms_token}"
         NOMS_PRIVATE_KEY = "${data.external.vault.result.noms_private_key}"
         SESSION_SECRET = "${random_id.session-secret.b64}"
-    }
-
-    depends_on = ["azurerm_template_deployment.webapp"]
-}
-
-resource "azurerm_template_deployment" "webapp-whitelist" {
-    name = "webapp-whitelist"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../../shared/appservice-whitelist.template.json")}"
-
-    parameters {
-        name = "${azurerm_template_deployment.webapp.parameters.name}"
-        ip1 = "${var.ips["office"]}"
-        ip2 = "${var.ips["quantum"]}"
-        ip3 = "${var.ips["health-kick"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
@@ -207,7 +192,7 @@ resource "azurerm_template_deployment" "webapp-ssl" {
         name = "${azurerm_template_deployment.webapp.parameters.name}"
         hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
         keyVaultId = "${azurerm_key_vault.vault.id}"
-        keyVaultCertName = "notm-preprodDOTserviceDOThmppsDOTdsdDOTio"
+        keyVaultCertName = "${replace("${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}", ".", "DOT")}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
     }
@@ -218,14 +203,13 @@ resource "azurerm_template_deployment" "webapp-ssl" {
 module "slackhook" {
     source = "../../shared/modules/slackhook"
     app_name = "${azurerm_template_deployment.webapp.parameters.name}"
-    azure_subscription = "production"
     channels = ["nomisonthemove"]
 }
 
 resource "azurerm_dns_cname_record" "cname" {
-    name = "notm-preprod"
-    zone_name = "service.hmpps.dsd.io"
-    resource_group_name = "webops-prod"
+    name = "notm-stage"
+    zone_name = "hmpps.dsd.io"
+    resource_group_name = "webops"
     ttl = "300"
     record = "${var.app-name}.azurewebsites.net"
     tags = "${var.tags}"

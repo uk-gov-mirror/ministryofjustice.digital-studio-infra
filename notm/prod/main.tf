@@ -4,7 +4,7 @@ terraform {
         resource_group_name = "webops-prod"
         storage_account_name = "nomsstudiowebopsprod"
         container_name = "terraform"
-        key = "notm-preprod.terraform.tfstate"
+        key = "notm-prod.terraform.tfstate"
         arm_subscription_id = "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
         arm_tenant_id = "747381f4-e81f-4a43-bf68-ced6a1e14edf"
     }
@@ -12,14 +12,14 @@ terraform {
 
 variable "app-name" {
     type = "string"
-    default = "notm-preprod"
+    default = "notm"
 }
 
 variable "tags" {
     type = "map"
     default {
         Service = "NOTM"
-        Environment = "PreProd"
+        Environment = "Prod"
     }
 }
 
@@ -171,7 +171,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         name = "${var.app-name}"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
         NODE_ENV = "production"
-        API_ENDPOINT_URL = "https://noms-api-preprod.dsd.io/elite2api/"
+        API_ENDPOINT_URL = "https://noms-api.service.justice.gov.uk/elite2api/"
         USE_API_GATEWAY_AUTH = "yes"
         NOMS_TOKEN = "${data.external.vault.result.noms_token}"
         NOMS_PRIVATE_KEY = "${data.external.vault.result.noms_private_key}"
@@ -207,7 +207,7 @@ resource "azurerm_template_deployment" "webapp-ssl" {
         name = "${azurerm_template_deployment.webapp.parameters.name}"
         hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
         keyVaultId = "${azurerm_key_vault.vault.id}"
-        keyVaultCertName = "notm-preprodDOTserviceDOThmppsDOTdsdDOTio"
+        keyVaultCertName = "notmDOTserviceDOThmppsDOTdsdDOTio"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
     }
@@ -223,7 +223,7 @@ module "slackhook" {
 }
 
 resource "azurerm_dns_cname_record" "cname" {
-    name = "notm-preprod"
+    name = "notm"
     zone_name = "service.hmpps.dsd.io"
     resource_group_name = "webops-prod"
     ttl = "300"
