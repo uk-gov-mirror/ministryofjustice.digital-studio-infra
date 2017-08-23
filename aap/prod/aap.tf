@@ -127,7 +127,7 @@ module "sql" {
     }
 
     setup_queries = [
-        "GRANT SELECT, INSERT, UPDATE, DELETE TO app"
+        "GRANT SELECT, INSERT, UPDATE, DELETE, ADMINISTER DATABASE BULK OPERATIONS TO app"
 , <<SQL
 IF NOT EXISTS (SELECT * FROM sys.symmetric_keys WHERE name = '##MS_DatabaseMasterKey##')
     CREATE MASTER KEY ;
