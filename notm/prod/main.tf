@@ -12,7 +12,7 @@ terraform {
 
 variable "app-name" {
     type = "string"
-    default = "notm"
+    default = "notm-prod"
 }
 
 variable "tags" {
