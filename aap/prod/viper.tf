@@ -16,7 +16,7 @@ resource "azurerm_template_deployment" "viper" {
         name = "${var.viper-name}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
-        workers = "1"
+        workers = "2"
     }
 }
 
