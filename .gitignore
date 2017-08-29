@@ -5,3 +5,4 @@ terraform.tfstate*
 graph.png
 node_modules/
 sshkey.pub
+*.swp
