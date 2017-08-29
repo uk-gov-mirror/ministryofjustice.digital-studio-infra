@@ -8,6 +8,12 @@
         "workers": {
             "type": "string"
         },
+        "sku_tier": {
+            "type": "string"
+        },
+        "sku_name": {
+            "type": "string"
+        },
         "service": {
             "type": "string"
         },
@@ -64,8 +70,8 @@
                 "hostingEnvironment": ""
             },
             "sku": {
-                "Tier": "Standard",
-                "Name": "S1"
+                "Tier": "[parameters('sku_tier')]",
+                "Name": "[parameters('sku_name')]"
             }
         }
     ],
