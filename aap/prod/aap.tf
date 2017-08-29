@@ -167,7 +167,7 @@ resource "azurerm_template_deployment" "api" {
         name = "${var.env-name}"
         publisherEmail = "noms-studio-webops@digital.justice.gov.uk"
         publisherName = "HMPPS"
-        sku = "Developer"
+        sku = "Standard"
     }
 }
 
