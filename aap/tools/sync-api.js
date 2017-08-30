@@ -197,6 +197,9 @@ function deleteAPI(client, apiId) {
 }
 
 function importAPI(client, apiId, path, definition) {
+  if (!definition.host || !definition.schemes) {
+    throw new Error("Missing host or schemes in swagger definition");
+  }
   console.log(`Importing API ${apiId} to azure...`);
   return client({
     method: 'PUT',

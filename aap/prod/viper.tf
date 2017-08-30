@@ -58,10 +58,15 @@ resource "azurerm_template_deployment" "viper-ssl" {
     name = "viper-ssl"
     resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
-    template_body = "${file("../../shared/appservice-sslonly.template.json")}"
+    template_body = "${file("../../shared/appservice-ssl.template.json")}"
 
     parameters {
         name = "${azurerm_template_deployment.viper.parameters.name}"
+        hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
+        keyVaultId = "${azurerm_key_vault.vault.id}"
+        keyVaultCertName = "${replace("${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}", ".", "DOT")}"
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
     }
 
     depends_on = ["azurerm_template_deployment.viper"]
@@ -98,4 +103,13 @@ module "slackhook" {
     app_name = "${azurerm_template_deployment.viper.parameters.name}"
     azure_subscription = "production"
     channels = ["shef_changes", "api-accelerator"]
+}
+
+resource "azurerm_dns_cname_record" "cname" {
+    name = "viper"
+    zone_name = "service.hmpps.dsd.io"
+    resource_group_name = "webops-prod"
+    ttl = "300"
+    record = "${var.viper-name}.azurewebsites.net"
+    tags = "${var.tags}"
 }
