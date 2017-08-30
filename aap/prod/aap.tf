@@ -96,6 +96,12 @@ resource "azurerm_key_vault" "vault" {
         key_permissions = []
         secret_permissions = ["get", "set"]
     }
+    access_policy {
+        object_id = "${var.azure_rlazzurs_tfprod_oid}"
+        tenant_id = "${var.azure_tenant_id}"
+        key_permissions = []
+        secret_permissions = ["get", "set"]
+    }
 
     enabled_for_deployment = false
     enabled_for_disk_encryption = false
@@ -184,7 +190,7 @@ resource "null_resource" "api-sync" {
     depends_on = ["azurerm_template_deployment.api"]
 
     triggers {
-        swagger = "https://${azurerm_template_deployment.viper.parameters.name}.azurewebsites.net/api-docs"
+        swagger = "https://${azurerm_template_deployment.viper-ssl.parameters.hostname}/api-docs"
         hostname = "${azurerm_dns_a_record.api.name}.${azurerm_dns_a_record.api.zone_name}"
     }
 
@@ -195,7 +201,7 @@ node ${path.module}/../tools/sync-api.js \
     --subscriptionId '${var.azure_subscription_id}' \
     --resourceGroupName '${azurerm_resource_group.group.name}' \
     --serviceName '${azurerm_template_deployment.api.parameters.name}' \
-    --swaggerDefinition 'https://${azurerm_template_deployment.viper.parameters.name}.azurewebsites.net/api-docs' \
+    --swaggerDefinition 'https://${azurerm_template_deployment.viper-ssl.parameters.hostname}/api-docs' \
     --path 'analytics' \
     --apiId 'analytics' \
     --username 'viper' \

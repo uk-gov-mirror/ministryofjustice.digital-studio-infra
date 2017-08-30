@@ -195,7 +195,7 @@ resource "null_resource" "api-sync" {
     depends_on = ["azurerm_template_deployment.api"]
 
     triggers {
-        swagger = "https://${azurerm_template_deployment.viper.parameters.name}.azurewebsites.net/api-docs"
+        swagger = "https://${azurerm_template_deployment.viper-ssl.parameters.hostname}/api-docs"
         hostname = "${azurerm_dns_a_record.api.name}.${azurerm_dns_a_record.api.zone_name}"
     }
 
@@ -206,7 +206,7 @@ node ${path.module}/../tools/sync-api.js \
     --subscriptionId '${var.azure_subscription_id}' \
     --resourceGroupName '${azurerm_resource_group.group.name}' \
     --serviceName '${azurerm_template_deployment.api.parameters.name}' \
-    --swaggerDefinition 'https://${azurerm_template_deployment.viper.parameters.name}.azurewebsites.net/api-docs' \
+    --swaggerDefinition 'https://${azurerm_template_deployment.viper-ssl.parameters.hostname}/api-docs' \
     --path 'analytics' \
     --apiId 'analytics' \
     --username 'viper' \
