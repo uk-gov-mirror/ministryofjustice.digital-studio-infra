@@ -16,6 +16,8 @@ resource "azurerm_template_deployment" "mozaik" {
         service = "${var.mozaik_tags["Service"]}"
         environment = "${var.mozaik_tags["Environment"]}"
         workers = "1"
+        sku_name = "S1"
+        sku_tier = "Standard"
     }
 }
 

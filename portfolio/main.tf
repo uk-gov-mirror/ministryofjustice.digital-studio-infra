@@ -38,6 +38,8 @@ resource "azurerm_template_deployment" "app" {
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
         workers = "1"
+        sku_name = "S1"
+        sku_tier = "Standard"
     }
 }
 
