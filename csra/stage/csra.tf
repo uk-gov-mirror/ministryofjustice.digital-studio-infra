@@ -136,8 +136,8 @@ resource "azurerm_template_deployment" "webapp" {
         name = "${var.app-name}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
-        workers = "1"
-        sku_name = "S1"
+        workers = "2"
+        sku_name = "S2"
         sku_tier = "Standard"
     }
 }
