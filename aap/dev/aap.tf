@@ -25,6 +25,9 @@ variable "tags" {
 resource "random_id" "sql-app-password" {
     byte_length = 32
 }
+resource "random_id" "sql-ci-password" {
+    byte_length = 32
+}
 
 resource "azurerm_resource_group" "group" {
     name = "${var.env-name}"
@@ -165,6 +168,38 @@ ELSE
         CREDENTIAL = storageblob_sas
     );
 SQL
+    ]
+}
+
+module "sql-ci" {
+    source = "../../shared/modules/azure-sql"
+    name = "${var.env-name}-ci"
+    resource_group = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    administrator_login = "aapci"
+    firewall_rules = [
+        {
+            label = "Allow azure access"
+            start = "0.0.0.0"
+            end = "0.0.0.0"
+        },
+        {
+            label = "Open to the world"
+            start = "0.0.0.0"
+            end = "255.255.255.255"
+        },
+    ]
+    audit_storage_account = "${azurerm_storage_account.storage.name}"
+    edition = "Basic"
+    collation = "SQL_Latin1_General_CP1_CI_AS"
+    tags = "${var.tags}"
+
+    db_users {
+        ci = "${random_id.sql-ci-password.b64}"
+    }
+
+    setup_queries = [
+        "GRANT SELECT, INSERT, UPDATE, DELETE, ADMINISTER DATABASE BULK OPERATIONS TO ci"
     ]
 }
 
