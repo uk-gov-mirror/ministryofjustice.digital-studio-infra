@@ -56,9 +56,10 @@ resource "azurerm_virtual_network" "hub-jenkins-dev-vnet" {
 
 
 resource "azurerm_network_interface" "hub-jenkins-dev-ni" {
-  name                = "hub-jenkins-dev-ni"
-  location            = "ukwest"
-  resource_group_name = "${azurerm_resource_group.hub-jenkins-dev.name}"
+  name                      = "hub-jenkins-dev-ni"
+  location                  = "ukwest"
+  resource_group_name       = "${azurerm_resource_group.hub-jenkins-dev.name}"
+  network_security_group_id = "${azurerm_network_security_group.hub-jenkins-dev-nsg.id}"
 
   ip_configuration {
     name                          = "hub-jenkins-dev-ni-ip"

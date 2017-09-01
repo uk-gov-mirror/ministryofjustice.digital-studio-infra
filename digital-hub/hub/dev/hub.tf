@@ -55,10 +55,10 @@ resource "azurerm_virtual_network" "hub-env-dev-vnet" {
 }
 
 resource "azurerm_network_interface" "hub-env-dev-ni" {
-  name                = "hub-env-dev-ni"
-  location            = "ukwest"
-  resource_group_name = "${azurerm_resource_group.hub-env-dev.name}"
-
+  name                      = "hub-env-dev-ni"
+  location                  = "ukwest"
+  resource_group_name       = "${azurerm_resource_group.hub-env-dev.name}"
+  network_security_group_id = "${azurerm_network_security_group.hub-env-dev-nsg.id}"
   ip_configuration {
     name                          = "hub-env-dev-ni-ip"
     subnet_id                     = "${azurerm_subnet.default.id}"

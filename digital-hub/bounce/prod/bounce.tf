@@ -43,9 +43,10 @@ resource "azurerm_virtual_network" "hub-bounce-prod-vnet" {
 }
 
 resource "azurerm_network_interface" "hub-bounce-prod-ni" {
-  name                = "hub-bounce-prod-ni"
-  location            = "uksouth"
-  resource_group_name = "${azurerm_resource_group.hub-bounce-prod.name}"
+  name                      = "hub-bounce-prod-ni"
+  location                  = "uksouth"
+  resource_group_name       = "${azurerm_resource_group.hub-bounce-prod.name}"
+  network_security_group_id = "${azurerm_network_security_group.hub-bounce-prod-nsg.id}"
 
   ip_configuration {
     name                          = "hub-bounce-prod-ni-ip"
@@ -86,7 +87,7 @@ resource "azurerm_virtual_machine" "hub-bounce-prod-vm" {
     disable_password_authentication = true
     ssh_keys {
       path = "/home/provisioning/.ssh/authorized_keys"
-      key_data = "${file(“${path.module}/sshkey.pub”)}"
+      key_data = "${file("${path.module}/sshkey.pub")}"
     }
   }
 }

@@ -44,9 +44,10 @@ resource "azurerm_virtual_network" "hub-bounce-dev-vnet" {
 
 
 resource "azurerm_network_interface" "hub-bounce-dev-ni" {
-  name                = "hub-bounce-dev-ni"
-  location            = "ukwest"
-  resource_group_name = "${azurerm_resource_group.hub-bounce-dev.name}"
+  name                      = "hub-bounce-dev-ni"
+  location                  = "ukwest"
+  resource_group_name       = "${azurerm_resource_group.hub-bounce-dev.name}"
+  network_security_group_id = "${azurerm_network_security_group.hub-bounce-dev-nsg.id}"
 
   ip_configuration {
     name                          = "hub-bounce-dev-ni-ip"
@@ -87,7 +88,7 @@ resource "azurerm_virtual_machine" "hub-bounce-dev-vm" {
     disable_password_authentication = true
     ssh_keys {
       path = "/home/provisioning/.ssh/authorized_keys"
-      key_data = "${file(“${path.module}/sshkey.pub”)}"
+      key_data = "${file("${path.module}/sshkey.pub")}"
     }
   }
 }

@@ -56,9 +56,10 @@ resource "azurerm_virtual_network" "hub-env-testing-vnet" {
 }
 
 resource "azurerm_network_interface" "hub-env-testing-ni" {
-  name                = "hub-env-testing-ni"
-  location            = "ukwest"
-  resource_group_name = "${azurerm_resource_group.hub-env-testing.name}"
+  name                      = "hub-env-testing-ni"
+  location                  = "ukwest"
+  resource_group_name       = "${azurerm_resource_group.hub-env-testing.name}"
+  network_security_group_id = "${azurerm_network_security_group.hub-env-testing-nsg.id}"
 
   ip_configuration {
     name                          = "hub-env-testing-ni-ip"
