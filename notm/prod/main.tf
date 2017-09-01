@@ -116,7 +116,7 @@ resource "azurerm_template_deployment" "webapp" {
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
         workers = "2"
-        sku_name = "S1"
+        sku_name = "S2"
         sku_tier = "Standard"
     }
 }
@@ -173,7 +173,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         name = "${var.app-name}"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
         NODE_ENV = "production"
-        API_ENDPOINT_URL = "https://noms-api.service.justice.gov.uk/elite2api/"
+        API_ENDPOINT_URL = "https://noms-api-preprod.dsd.io/elite2api-prod/"
         USE_API_GATEWAY_AUTH = "yes"
         NOMS_TOKEN = "${data.external.vault.result.noms_token}"
         NOMS_PRIVATE_KEY = "${data.external.vault.result.noms_private_key}"
