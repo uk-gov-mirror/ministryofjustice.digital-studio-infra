@@ -33,6 +33,10 @@ variable "scale" {
     default = ""
     # eg "S3"
 }
+variable "space_gb" {
+    type = "string"
+    default = "2"
+}
 variable "collation" {
     type = "string"
     default = "SQL_Latin1_General_CP1_CI_AS"
@@ -103,6 +107,8 @@ resource "azurerm_sql_database" "db" {
     location = "${var.location}"
     server_name = "${azurerm_sql_server.sql.name}"
     edition = "${var.edition}"
+    requested_service_objective_name = "${var.scale}"
+    max_size_bytes = "${var.space_gb * 1024 * 1024 * 1024}"
     collation = "${var.collation}"
     tags = "${var.tags}"
     lifecycle {
