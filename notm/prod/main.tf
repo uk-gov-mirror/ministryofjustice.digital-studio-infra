@@ -194,6 +194,8 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
         ip1 = "${var.ips["office"]}"
         ip2 = "${var.ips["quantum"]}"
         ip3 = "${var.ips["health-kick"]}"
+        ip4 = "${var.ips["digitalprisons1"]}"
+        ip5 = "${var.ips["digitalprisons2"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
