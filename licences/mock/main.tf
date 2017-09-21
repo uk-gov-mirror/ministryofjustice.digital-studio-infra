@@ -27,6 +27,13 @@ resource "random_id" "session-secret" {
     byte_length = 40
 }
 
+resource "random_id" "sql-app-password" {
+    byte_length = 32
+}
+resource "random_id" "sql-reader-password" {
+    byte_length = 32
+}
+
 resource "azurerm_resource_group" "group" {
     name = "${var.app-name}"
     location = "ukwest"
@@ -89,6 +96,34 @@ resource "azurerm_key_vault" "vault" {
     enabled_for_template_deployment = true
 
     tags = "${var.tags}"
+}
+
+module "sql" {
+    source = "../../shared/modules/azure-sql"
+    name = "${var.app-name}"
+    resource_group = "${azurerm_resource_group.group.name}"
+    location = "${azurerm_resource_group.group.location}"
+    administrator_login = "lic"
+    firewall_rules = [
+        {
+            label = "Open to the world"
+            start = "0.0.0.0"
+            end = "255.255.255.255"
+        },
+    ]
+    audit_storage_account = "${azurerm_storage_account.storage.name}"
+    edition = "Basic"
+    collation = "SQL_Latin1_General_CP1_CI_AS"
+    tags = "${var.tags}"
+
+    db_users = {
+        app = "${random_id.sql-app-password.b64}"
+        reader = "${random_id.sql-reader-password.b64}"
+    }
+
+    setup_queries = [
+        "GRANT SELECT TO reader"
+    ]
 }
 
 resource "azurerm_template_deployment" "webapp" {
