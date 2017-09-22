@@ -246,7 +246,7 @@ resource "github_repository_webhook" "webapp-deploy" {
 module "slackhook" {
     source = "../../shared/modules/slackhook"
     app_name = "${azurerm_template_deployment.webapp.parameters.name}"
-    channels = ["licences"]
+    channels = ["licences-dev"]
 }
 
 resource "azurerm_dns_cname_record" "cname" {
