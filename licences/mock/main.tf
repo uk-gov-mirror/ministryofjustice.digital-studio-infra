@@ -30,9 +30,6 @@ resource "random_id" "session-secret" {
 resource "random_id" "sql-app-password" {
     byte_length = 32
 }
-resource "random_id" "sql-reader-password" {
-    byte_length = 32
-}
 
 resource "azurerm_resource_group" "group" {
     name = "${var.app-name}"
@@ -103,7 +100,7 @@ module "sql" {
     name = "${var.app-name}"
     resource_group = "${azurerm_resource_group.group.name}"
     location = "${azurerm_resource_group.group.location}"
-    administrator_login = "lic"
+    administrator_login = "licences"
     firewall_rules = [
         {
             label = "Open to the world"
@@ -118,11 +115,11 @@ module "sql" {
 
     db_users = {
         app = "${random_id.sql-app-password.b64}"
-        reader = "${random_id.sql-reader-password.b64}"
     }
 
     setup_queries = [
-        "GRANT SELECT TO reader"
+        "ALTER ROLE db_datareader ADD MEMBER app",
+        "ALTER ROLE db_datawriter ADD MEMBER app"
     ]
 }
 
