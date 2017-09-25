@@ -120,6 +120,7 @@ module "sql" {
     audit_storage_account = "${azurerm_storage_account.storage.name}"
     edition = "Standard"
     scale = "S3"
+    space_gb = 250
     collation = "Latin1_General_CS_AS"
     tags = "${var.tags}"
 
