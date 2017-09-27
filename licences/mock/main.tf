@@ -195,7 +195,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         DB_PASS = "${random_id.sql-app-password.b64}"
         DB_SERVER = "${module.sql.db_server}"
         DB_NAME = "${module.sql.db_name}"
-        NOMIS_API_URL = "https://licences-mocks.hmpps.dsd.io"
+        NOMIS_API_URL = "https://licences-mocks.herokuapp.com/"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
