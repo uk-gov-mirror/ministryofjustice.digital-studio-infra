@@ -5,6 +5,18 @@
         "name": {
             "type": "string"
         },
+        "DB_SERVER": {
+            "type": "string"
+        },
+        "DB_USER": {
+            "type": "string"
+        },
+        "DB_PASS": {
+            "type": "secureString"
+        },
+        "DB_NAME": {
+            "type": "string"
+        },
         "NODE_ENV": {
             "type": "string"
         },
@@ -14,6 +26,9 @@
         "APPINSIGHTS_INSTRUMENTATIONKEY": {
             "type": "string",
             "defaultValue": ""
+        },
+        "NOMIS_API_URL": {
+            "type": "string"
         }
     },
     "resources": [
@@ -23,9 +38,14 @@
             "type": "Microsoft.Web/sites/config",
             "properties": {
                 "WEBSITE_NODE_DEFAULT_VERSION": "8.5.0",
+                "DB_SERVER": "[parameters('DB_SERVER')]",
+                "DB_USER": "[parameters('DB_USER')]",
+                "DB_PASS": "[parameters('DB_PASS')]",
+                "DB_NAME": "[parameters('DB_NAME')]",
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "SESSION_SECRET": "[parameters('SESSION_SECRET')]",
-                "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]"
+                "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
+                "NOMIS_API_URL": "[parameters('NOMIS_API_URL')]"
             }
         }
     ]
