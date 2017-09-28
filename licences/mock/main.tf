@@ -191,6 +191,11 @@ resource "azurerm_template_deployment" "webapp-config" {
         NODE_ENV = "production"
         SESSION_SECRET = "${random_id.session-secret.b64}"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
+        DB_USER = "app"
+        DB_PASS = "${random_id.sql-app-password.b64}"
+        DB_SERVER = "${module.sql.db_server}"
+        DB_NAME = "${module.sql.db_name}"
+        NOMIS_API_URL = "https://licences-mocks.herokuapp.com/"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
