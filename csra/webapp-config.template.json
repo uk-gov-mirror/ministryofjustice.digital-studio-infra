@@ -15,9 +15,6 @@
         "DB_URI": {
             "type": "string"
         },
-        "USE_VIPER_SERVICE": {
-            "type": "string"
-        },
         "VIPER_SERVICE_URL": {
             "type": "string"
         },
@@ -35,7 +32,6 @@
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
                 "DB_URI": "[parameters('DB_URI')]",
-                "USE_VIPER_SERVICE": "[parameters('USE_VIPER_SERVICE')]",
                 "VIPER_SERVICE_URL": "[parameters('VIPER_SERVICE_URL')]",
                 "VIPER_SERVICE_API_KEY": "[parameters('VIPER_SERVICE_API_KEY')]"
             }
