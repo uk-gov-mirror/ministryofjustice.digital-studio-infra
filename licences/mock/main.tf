@@ -123,8 +123,11 @@ module "sql" {
     }
 
     setup_queries = [
-        "ALTER ROLE db_datareader ADD MEMBER app",
-        "ALTER ROLE db_datawriter ADD MEMBER app"
+        "DROP USER app",
+        "ALTER ROLE db_datareader ADD MEMBER ui",
+        "ALTER ROLE db_datawriter ADD MEMBER ui",
+        "ALTER ROLE db_datareader ADD MEMBER api",
+        "ALTER ROLE db_datawriter ADD MEMBER api"
     ]
 }
 
@@ -142,20 +145,6 @@ data "external" "sas-url" {
     }
 }
 
-resource "azurerm_template_deployment" "webapp-weblogs" {
-    name = "webapp-weblogs"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../../shared/appservice-weblogs.template.json")}"
-
-    parameters {
-        name = "${var.env-name}"
-        storageSAS = "${data.external.sas-url.result["url"]}"
-    }
-
-    depends_on = ["azurerm_template_deployment.webapp"]
-}
-
 resource "azurerm_template_deployment" "insights" {
     name = "${var.env-name}"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -166,6 +155,5 @@ resource "azurerm_template_deployment" "insights" {
         location = "northeurope" // Not in UK yet
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
-        appServiceId = "${azurerm_template_deployment.webapp.outputs["resourceId"]}"
     }
 }

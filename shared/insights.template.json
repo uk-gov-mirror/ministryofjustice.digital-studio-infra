@@ -15,7 +15,8 @@
             "type": "string"
         },
         "appServiceId": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": ""
         }
     },
     "resources": [
