@@ -1,15 +1,15 @@
-variable "licences-api-name" {
+variable "api-name" {
   type = "string"
   default = "licences-api-mock"
 }
 
-resource "azurerm_template_deployment" "licences-api" {
-  name = "licences-api"
+resource "azurerm_template_deployment" "api" {
+  name = "api"
   resource_group_name = "${azurerm_resource_group.group.name}"
   deployment_mode = "Incremental"
   template_body = "${file("../../shared/appservice.template.json")}"
   parameters {
-    name = "${var.licences-api-name}"
+    name = "${var.api-name}"
     service = "${var.tags["Service"]}"
     environment = "${var.tags["Environment"]}"
     workers = "1"
@@ -18,14 +18,14 @@ resource "azurerm_template_deployment" "licences-api" {
   }
 }
 
-resource "azurerm_template_deployment" "licences-api-config" {
-  name = "licences-api-config"
+resource "azurerm_template_deployment" "api-config" {
+  name = "api-config"
   resource_group_name = "${azurerm_resource_group.group.name}"
   deployment_mode = "Incremental"
   template_body = "${file("../webapp-config.template.json")}"
 
   parameters {
-    name = "${var.licences-api-name}"
+    name = "${var.api-name}"
     NODE_ENV = "production"
     SESSION_SECRET = "${random_id.session-secret.b64}"
     APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
@@ -36,48 +36,48 @@ resource "azurerm_template_deployment" "licences-api-config" {
     NOMIS_API_URL = "https://licences-nomis-mocks.herokuapp.com/"
   }
 
-  depends_on = ["azurerm_template_deployment.webapp"]
+  depends_on = ["azurerm_template_deployment.api"]
 }
 
-resource "azurerm_template_deployment" "licences-api-ssl" {
-  name = "licences-api-ssl"
+resource "azurerm_template_deployment" "api-ssl" {
+  name = "api-ssl"
   resource_group_name = "${azurerm_resource_group.group.name}"
   deployment_mode = "Incremental"
   template_body = "${file("../../shared/appservice-ssl.template.json")}"
 
   parameters {
-    name = "${azurerm_template_deployment.licences-api.parameters.name}"
-    hostname = "${azurerm_dns_cname_record.licences-api.name}.${azurerm_dns_cname_record.licences-api.zone_name}"
+    name = "${azurerm_template_deployment.api.parameters.name}"
+    hostname = "${azurerm_dns_cname_record.api.name}.${azurerm_dns_cname_record.api.zone_name}"
     keyVaultId = "${azurerm_key_vault.vault.id}"
     keyVaultCertName = "${replace("${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}", ".", "DOT")}"
     service = "${var.tags["Service"]}"
     environment = "${var.tags["Environment"]}"
   }
 
-  depends_on = ["azurerm_template_deployment.webapp"]
+  depends_on = ["azurerm_template_deployment.api"]
 }
 
-resource "azurerm_template_deployment" "licences-api-github" {
-  name = "licences-api-github"
+resource "azurerm_template_deployment" "api-github" {
+  name = "api-github"
   resource_group_name = "${azurerm_resource_group.group.name}"
   deployment_mode = "Incremental"
   template_body = "${file("../../shared/appservice-scm.template.json")}"
 
   parameters {
-    name = "${var.licences-api-name}"
+    name = "${var.api-name}"
     repoURL = "https://github.com/noms-digital-studio/licences-api"
     branch = "deploy-to-mock"
   }
 
-  depends_on = ["azurerm_template_deployment.licences-api"]
+  depends_on = ["azurerm_template_deployment.api"]
 }
 
-resource "github_repository_webhook" "webapp-deploy" {
-  repository = "licences"
+resource "github_repository_webhook" "api-deploy" {
+  repository = "licences-api"
 
   name = "web"
   configuration {
-    url = "${azurerm_template_deployment.licences-api-github.outputs["deployTrigger"]}?scmType=GitHub"
+    url = "${azurerm_template_deployment.api-github.outputs["deployTrigger"]}?scmType=GitHub"
     content_type = "form"
     insecure_ssl = false
   }
@@ -88,15 +88,15 @@ resource "github_repository_webhook" "webapp-deploy" {
 
 module "slackhook" {
   source = "../../shared/modules/slackhook"
-  app_name = "${azurerm_template_deployment.licences-api.parameters.name}"
+  app_name = "${azurerm_template_deployment.api.parameters.name}"
   channels = ["licences-dev"]
 }
 
-resource "azurerm_dns_cname_record" "licences-api" {
+resource "azurerm_dns_cname_record" "api" {
   name = "licences-api-mock"
   zone_name = "hmpps.dsd.io"
   resource_group_name = "webops"
   ttl = "300"
-  record = "${var.licences-api-name}.azurewebsites.net"
+  record = "${azurerm_template_deployment.api.parameters.name}.azurewebsites.net"
   tags = "${var.tags}"
 }
