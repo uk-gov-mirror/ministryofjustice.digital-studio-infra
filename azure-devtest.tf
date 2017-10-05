@@ -30,4 +30,5 @@ provider "azurerm" {
     # client_id = "..." use ARM_CLIENT_ID env var
     # client_secret = "..." use ARM_CLIENT_SECRET env var
     tenant_id = "${var.azure_tenant_id}"
+    version = "0.2.0"
 }
