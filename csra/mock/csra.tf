@@ -206,7 +206,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         USE_VIPER_SERVICE = "true"
         VIPER_SERVICE_URL = "https://csra-mocks.herokuapp.com"
         VIPER_SERVICE_API_KEY = "valid-subscription-key"
-        ELITE2_URL = "https://csra-mocks.herokuapp.com/elite2api"
+        ELITE2_URL = "https://csra-mocks.herokuapp.com/elite2api/"
         ELITE2_API_GATEWAY_TOKEN = "xxx.yyy.zzz"
         ELITE2_API_GATEWAY_PRIVATE_KEY = "${data.external.vault.result.elite_api_gateway_private_key}"
     }
