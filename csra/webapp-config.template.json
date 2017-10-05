@@ -20,6 +20,15 @@
         },
         "VIPER_SERVICE_API_KEY": {
             "type": "string"
+        },
+        "ELITE2_URL": {
+            "type": "string"
+        },
+        "ELITE2_API_GATEWAY_TOKEN": {
+            "type": "string"
+        },
+        "ELITE2_API_GATEWAY_PRIVATE_KEY": {
+            "type": "string"
         }
     },
     "resources": [
@@ -33,7 +42,10 @@
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
                 "DB_URI": "[parameters('DB_URI')]",
                 "VIPER_SERVICE_URL": "[parameters('VIPER_SERVICE_URL')]",
-                "VIPER_SERVICE_API_KEY": "[parameters('VIPER_SERVICE_API_KEY')]"
+                "VIPER_SERVICE_API_KEY": "[parameters('VIPER_SERVICE_API_KEY')]",
+                "ELITE2_URL": "[parameters('ELITE2_URL')]",
+                "ELITE2_API_GATEWAY_TOKEN": "[parameters('ELITE2_API_GATEWAY_TOKEN')]",
+                "ELITE2_API_GATEWAY_PRIVATE_KEY": "[parameters('ELITE2_API_GATEWAY_PRIVATE_KEY')]"
             }
         }
     ]
