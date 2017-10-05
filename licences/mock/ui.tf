@@ -22,7 +22,7 @@ resource "azurerm_template_deployment" "ui-config" {
   name = "ui-config"
   resource_group_name = "${azurerm_resource_group.group.name}"
   deployment_mode = "Incremental"
-  template_body = "${file("../webapp-config.template.json")}"
+  template_body = "${file("../ui-config.template.json")}"
 
   parameters {
     name = "${var.ui-name}"
@@ -49,7 +49,7 @@ resource "azurerm_template_deployment" "ui-ssl" {
     name = "${azurerm_template_deployment.ui.parameters.name}"
     hostname = "${azurerm_dns_cname_record.ui.name}.${azurerm_dns_cname_record.ui.zone_name}"
     keyVaultId = "${azurerm_key_vault.vault.id}"
-    keyVaultCertName = "${replace("${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}", ".", "DOT")}"
+    keyVaultCertName = "${replace("${azurerm_dns_cname_record.ui.name}.${azurerm_dns_cname_record.ui.zone_name}", ".", "DOT")}"
     service = "${var.tags["Service"]}"
     environment = "${var.tags["Environment"]}"
   }
@@ -75,7 +75,7 @@ resource "azurerm_template_deployment" "ui-github" {
 resource "github_repository_webhook" "ui-deploy" {
   repository = "licences"
 
-  name = "ui"
+  name = "web"
   configuration {
     url = "${azurerm_template_deployment.ui-github.outputs["deployTrigger"]}?scmType=GitHub"
     content_type = "form"
@@ -86,7 +86,19 @@ resource "github_repository_webhook" "ui-deploy" {
   events = ["push"]
 }
 
-module "slackhook" {
+resource "azurerm_template_deployment" "ui-weblogs" {
+    name = "ui-weblogs"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice-weblogs.template.json")}"
+
+    parameters {
+        name = "${azurerm_template_deployment.ui.parameters.name}"
+        storageSAS = "${data.external.sas-url.result["url"]}"
+    }
+}
+
+module "slackhook-ui" {
   source = "../../shared/modules/slackhook"
   app_name = "${azurerm_template_deployment.ui.parameters.name}"
   channels = ["licences-dev"]

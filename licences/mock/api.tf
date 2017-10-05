@@ -22,7 +22,7 @@ resource "azurerm_template_deployment" "api-config" {
   name = "api-config"
   resource_group_name = "${azurerm_resource_group.group.name}"
   deployment_mode = "Incremental"
-  template_body = "${file("../webapp-config.template.json")}"
+  template_body = "${file("../api-config.template.json")}"
 
   parameters {
     name = "${var.api-name}"
@@ -49,7 +49,7 @@ resource "azurerm_template_deployment" "api-ssl" {
     name = "${azurerm_template_deployment.api.parameters.name}"
     hostname = "${azurerm_dns_cname_record.api.name}.${azurerm_dns_cname_record.api.zone_name}"
     keyVaultId = "${azurerm_key_vault.vault.id}"
-    keyVaultCertName = "${replace("${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}", ".", "DOT")}"
+    keyVaultCertName = "${replace("${azurerm_dns_cname_record.api.name}.${azurerm_dns_cname_record.api.zone_name}", ".", "DOT")}"
     service = "${var.tags["Service"]}"
     environment = "${var.tags["Environment"]}"
   }
@@ -86,7 +86,19 @@ resource "github_repository_webhook" "api-deploy" {
   events = ["push"]
 }
 
-module "slackhook" {
+resource "azurerm_template_deployment" "api-weblogs" {
+    name = "api-weblogs"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice-weblogs.template.json")}"
+
+    parameters {
+        name = "${azurerm_template_deployment.api.parameters.name}"
+        storageSAS = "${data.external.sas-url.result["url"]}"
+    }
+}
+
+module "slackhook-api" {
   source = "../../shared/modules/slackhook"
   app_name = "${azurerm_template_deployment.api.parameters.name}"
   channels = ["licences-dev"]
