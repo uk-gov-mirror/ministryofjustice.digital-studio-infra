@@ -209,7 +209,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         USE_VIPER_SERVICE = "false"
         VIPER_SERVICE_URL = "https://aap-dev.hmpps.dsd.io/"
         VIPER_SERVICE_API_KEY = "${data.external.vault.result["viper_service_api_key"]}"
-        ELITE2_URL = "https://noms-api-dev.dsd.io/elite2api"
+        ELITE2_URL = "https://noms-api-dev.dsd.io/elite2api/"
         ELITE2_API_GATEWAY_TOKEN = "${data.external.vault.result.elite_api_gateway_token}"
         ELITE2_API_GATEWAY_PRIVATE_KEY = "${data.external.vault.result.elite_api_gateway_private_key}"
     }
