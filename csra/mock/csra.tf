@@ -183,6 +183,15 @@ resource "azurerm_template_deployment" "insights" {
     }
 }
 
+data "external" "vault" {
+    program = ["node", "../../tools/keyvault-data.js"]
+    query {
+        vault = "${azurerm_key_vault.vault.name}"
+
+        elite_api_gateway_private_key = "elite-api-gateway-private-key"
+    }
+}
+
 resource "azurerm_template_deployment" "webapp-config" {
     name = "webapp-config"
     resource_group_name = "${azurerm_resource_group.group.name}"
@@ -196,6 +205,9 @@ resource "azurerm_template_deployment" "webapp-config" {
         DB_URI = "mssql://app:${random_id.sql-app-password.b64}@${module.sql.db_server}:1433/${module.sql.db_name}?encrypt=true"
         VIPER_SERVICE_URL = "https://csra-mocks.herokuapp.com"
         VIPER_SERVICE_API_KEY = "valid-subscription-key"
+        ELITE2_URL = "https://csra-mocks.herokuapp.com/elite2api/"
+        ELITE2_API_GATEWAY_TOKEN = "xxx.yyy.zzz"
+        ELITE2_API_GATEWAY_PRIVATE_KEY = "${data.external.vault.result.elite_api_gateway_private_key}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
