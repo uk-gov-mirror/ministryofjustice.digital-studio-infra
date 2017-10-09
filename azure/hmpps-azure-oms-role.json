@@ -1,0 +1,16 @@
+{
+  "Name": "hmpps-azure-oms-role",
+  "IsCustom": true,
+  "Description": "Permissions for hmpps-azure-oms CI job",
+  "Actions": [
+    "Microsoft.Compute/virtualMachines/read",
+    "Microsoft.OperationalInsights/workspaces/api/query/action"
+  ],
+  "NotActions": [
+
+  ],
+  "AssignableScopes": [
+    "/subscriptions/b1f3cebb-4988-4ff9-9259-f02ad7744fcb",
+    "/subscriptions/1d95dcda-65b2-4273-81df-eb979c6b547b"
+  ]
+}
