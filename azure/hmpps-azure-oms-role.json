@@ -4,6 +4,7 @@
   "Description": "Permissions for hmpps-azure-oms CI job",
   "Actions": [
     "Microsoft.Compute/virtualMachines/read",
+    "Microsoft.Compute/virtualMachines/instanceView/read",
     "Microsoft.OperationalInsights/workspaces/api/*"
   ],
   "NotActions": [
