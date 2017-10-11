@@ -18,3 +18,11 @@ az role assignment create --role hmpps-azure-oms-role \
   --assignee dfb01dcd-118b-40f4-8716-9c349c5189ca \
   --scope '/subscriptions/1d95dcda-65b2-4273-81df-eb979c6b547b'
 ```
+
+## App Service Deployment Reader Role
+
+A role which allows people to see details of deployments on a web app
+
+```
+az role definition update --role-definition ./appservice-deployment-reader.json
+```
