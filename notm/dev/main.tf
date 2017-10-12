@@ -104,7 +104,7 @@ data "external" "vault" {
         vault = "${azurerm_key_vault.vault.name}"
         noms_token = "noms-token"
         noms_private_key = "noms-private-key"
-        google_analytics_id = "google_analytics_id"
+        google_analytics_id = "google-analytics-id"
     }
 }
 
