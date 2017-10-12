@@ -24,7 +24,7 @@
         "NOMS_PRIVATE_KEY": {
             "type": "secureString"
         },
-        "GOOGLE_ANALTICS_ID": {
+        "GOOGLE_ANALYTICS_ID": {
             "type": "secureString"
         },
         "SESSION_SECRET": {
