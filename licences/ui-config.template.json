@@ -29,6 +29,9 @@
         },
         "LICENCES_API_URL": {
             "type": "string"
+        },
+        "NOMIS_API_URL": {
+            "type": "string"
         }
     },
     "resources": [
