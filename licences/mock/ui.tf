@@ -33,7 +33,8 @@ resource "azurerm_template_deployment" "ui-config" {
     DB_PASS = "${random_id.sql-ui-password.b64}"
     DB_SERVER = "${module.sql.db_server}"
     DB_NAME = "${module.sql.db_name}"
-    LICENCES_API_URL = "https://licences-api-mock.hmpps.dsd.io/"
+    LICENCES_API_URL = "https://licences-api-mock.hmpps.dsd.io/",
+    NOMIS_API_URL = "https://licences-nomis-mocks.herokuapp.com/"
   }
 
   depends_on = ["azurerm_template_deployment.ui"]

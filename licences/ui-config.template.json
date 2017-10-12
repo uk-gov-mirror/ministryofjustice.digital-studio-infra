@@ -45,7 +45,8 @@
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "SESSION_SECRET": "[parameters('SESSION_SECRET')]",
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
-                "LICENCES_API_URL": "[parameters('LICENCES_API_URL')]"
+                "LICENCES_API_URL": "[parameters('LICENCES_API_URL')]",
+                "NOMIS_API_URL": "[parameters('NOMIS_API_URL')]"
             }
         }
     ]
