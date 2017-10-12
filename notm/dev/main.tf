@@ -104,6 +104,7 @@ data "external" "vault" {
         vault = "${azurerm_key_vault.vault.name}"
         noms_token = "noms-token"
         noms_private_key = "noms-private-key"
+        google_anayltics_id = "google_anayltics_id"
     }
 }
 
@@ -178,6 +179,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         USE_API_GATEWAY_AUTH = "yes"
         NOMS_TOKEN = "${data.external.vault.result.noms_token}"
         NOMS_PRIVATE_KEY = "${data.external.vault.result.noms_private_key}"
+        GOOGLE_ANALYTICS_ID = "${data.external.vault.result.google_anayltics_id}"
         SESSION_SECRET = "${random_id.session-secret.b64}"
     }
 
