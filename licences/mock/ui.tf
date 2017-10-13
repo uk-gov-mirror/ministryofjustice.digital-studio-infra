@@ -18,6 +18,15 @@ resource "azurerm_template_deployment" "ui" {
   }
 }
 
+data "external" "vault" {
+  program = ["node", "../../tools/keyvault-data.js"]
+  query {
+    vault = "${azurerm_key_vault.vault.name}"
+
+    elite_api_gateway_private_key = "elite-api-gateway-private-key"
+  }
+}
+
 resource "azurerm_template_deployment" "ui-config" {
   name = "ui-config"
   resource_group_name = "${azurerm_resource_group.group.name}"
@@ -34,7 +43,9 @@ resource "azurerm_template_deployment" "ui-config" {
     DB_SERVER = "${module.sql.db_server}"
     DB_NAME = "${module.sql.db_name}"
     LICENCES_API_URL = "https://licences-api-mock.hmpps.dsd.io/",
-    NOMIS_API_URL = "https://licences-nomis-mocks.herokuapp.com/"
+    NOMIS_API_URL = "https://licences-nomis-mocks.herokuapp.com/",
+    NOMIS_GW_TOKEN = "xxx.yyy.zzz",
+    NOMIS_GW_KEY = "${data.external.vault.result.elite_api_gateway_private_key}"
   }
 
   depends_on = ["azurerm_template_deployment.ui"]

@@ -32,6 +32,12 @@
         },
         "NOMIS_API_URL": {
             "type": "string"
+        },
+        "NOMIS_GW_TOKEN": {
+            "type": "string"
+        },
+        "NOMIS_GW_KEY": {
+            "type": "string"
         }
     },
     "resources": [
@@ -49,7 +55,9 @@
                 "SESSION_SECRET": "[parameters('SESSION_SECRET')]",
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
                 "LICENCES_API_URL": "[parameters('LICENCES_API_URL')]",
-                "NOMIS_API_URL": "[parameters('NOMIS_API_URL')]"
+                "NOMIS_API_URL": "[parameters('NOMIS_API_URL')]",
+                "NOMIS_GW_TOKEN": "[parameters('NOMIS_GW_TOKEN')]",
+                "NOMIS_GW_KEY": "[parameters('NOMIS_GW_KEY')]"
             }
         }
     ]
