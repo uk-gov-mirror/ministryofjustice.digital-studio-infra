@@ -41,6 +41,24 @@ resource "azurerm_dns_cname_record" "rsr" {
     tags = "${var.tags}"
 }
 
+resource "azurerm_template_deployment" "rsr-ssl" {
+    name = "rsr-ssl"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    deployment_mode = "Incremental"
+    template_body = "${file("../../shared/appservice-ssl.template.json")}"
+
+    parameters {
+        name = "${azurerm_template_deployment.rsr.parameters.name}"
+        hostname = "${azurerm_dns_cname_record.rsr.name}.${azurerm_dns_cname_record.rsr.zone_name}"
+        keyVaultId = "${azurerm_key_vault.vault.id}"
+        keyVaultCertName = "${replace("${azurerm_dns_cname_record.rsr.name}.${azurerm_dns_cname_record.rsr.zone_name}", ".", "DOT")}"
+        service = "${var.tags["Service"]}"
+        environment = "${var.tags["Environment"]}"
+    }
+
+    depends_on = ["azurerm_template_deployment.rsr"]
+}
+
 resource "azurerm_template_deployment" "rsr-github" {
     name = "rsr-github"
     resource_group_name = "${azurerm_resource_group.group.name}"
