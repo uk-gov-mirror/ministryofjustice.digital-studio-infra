@@ -42,7 +42,6 @@ resource "azurerm_template_deployment" "ui-config" {
     DB_PASS = "${random_id.sql-ui-password.b64}"
     DB_SERVER = "${module.sql.db_server}"
     DB_NAME = "${module.sql.db_name}"
-    LICENCES_API_URL = "https://licences-api-mock.hmpps.dsd.io/",
     NOMIS_API_URL = "https://licences-nomis-mocks.herokuapp.com/",
     NOMIS_GW_TOKEN = "xxx.yyy.zzz",
     NOMIS_GW_KEY = "${data.external.vault.result.elite_api_gateway_private_key}"
