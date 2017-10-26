@@ -119,15 +119,11 @@ module "sql" {
 
     db_users = {
         ui = "${random_id.sql-ui-password.b64}",
-        api = "${random_id.sql-api-password.b64}"
     }
 
     setup_queries = [
-        "DROP USER app",
         "ALTER ROLE db_datareader ADD MEMBER ui",
         "ALTER ROLE db_datawriter ADD MEMBER ui",
-        "ALTER ROLE db_datareader ADD MEMBER api",
-        "ALTER ROLE db_datawriter ADD MEMBER api"
     ]
 }
 
