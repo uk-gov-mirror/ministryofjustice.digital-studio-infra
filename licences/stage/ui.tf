@@ -45,7 +45,8 @@ resource "azurerm_template_deployment" "ui-config" {
     DB_NAME = "${module.sql.db_name}"
     NOMIS_API_URL = "https://noms-api-dev.dsd.io/elite2api-stage/",
     NOMIS_GW_TOKEN = "${data.external.vault.result.elite_api_gateway_token}",
-    NOMIS_GW_KEY = "${data.external.vault.result.elite_api_gateway_private_key}"
+    NOMIS_GW_KEY = "${data.external.vault.result.elite_api_gateway_private_key}",
+    ENABLE_TEST_UTILS = true
   }
 
   depends_on = ["azurerm_template_deployment.ui"]
