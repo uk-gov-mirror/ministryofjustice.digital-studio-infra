@@ -35,7 +35,7 @@ resource "azurerm_template_deployment" "ui-config" {
 
   parameters {
     name = "${var.ui-name}"
-    NODE_ENV = "production"
+    NODE_ENV = "test"
     SESSION_SECRET = "${random_id.session-secret.b64}"
     APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
     DB_USER = "ui"
