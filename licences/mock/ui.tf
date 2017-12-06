@@ -44,7 +44,8 @@ resource "azurerm_template_deployment" "ui-config" {
     DB_NAME = "${module.sql.db_name}"
     NOMIS_API_URL = "https://licences-nomis-mocks.herokuapp.com/",
     NOMIS_GW_TOKEN = "xxx.yyy.zzz",
-    NOMIS_GW_KEY = "${data.external.vault.result.elite_api_gateway_private_key}"
+    NOMIS_GW_KEY = "${data.external.vault.result.elite_api_gateway_private_key}",
+    ENABLE_TEST_UTILS = true
   }
 
   depends_on = ["azurerm_template_deployment.ui"]
