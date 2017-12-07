@@ -22,18 +22,21 @@ resource "azurerm_app_service" "ui" {
   app_service_plan_id = "${azurerm_app_service_plan.ui.id}"
 
   app_settings {
-    WEBSITE_NODE_DEFAULT_VERSION   = "8.4.0"
-    NODE_ENV                       = "production"
-    SESSION_SECRET                 = "${random_id.session-secret.b64}"
+    WEBSITE_NODE_DEFAULT_VERSION = "8.4.0"
+
+    NODE_ENV          = "production"
+    SESSION_SECRET    = "${random_id.session-secret.b64}"
+    DB_USER           = "ui"
+    DB_PASS           = "${random_id.sql-ui-password.b64}"
+    DB_SERVER         = "${module.sql.db_server}"
+    DB_NAME           = "${module.sql.db_name}"
+    NOMIS_API_URL     = "https://licences-nomis-mocks.herokuapp.com/elite2api"
+    ENABLE_TEST_UTILS = true
+
     APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
-    DB_USER                        = "ui"
-    DB_PASS                        = "${random_id.sql-ui-password.b64}"
-    DB_SERVER                      = "${module.sql.db_server}"
-    DB_NAME                        = "${module.sql.db_name}"
-    NOMIS_API_URL                  = "https://licences-nomis-mocks.herokuapp.com/elite2api"
-    NOMIS_GW_TOKEN                 = "xxx.yyy.zzz"
-    NOMIS_GW_KEY                   = "${data.external.vault.result.elite_api_gateway_private_key}"
-    ENABLE_TEST_UTILS              = true
+
+    NOMIS_GW_TOKEN = "xxx.yyy.zzz"
+    NOMIS_GW_KEY   = "${data.external.vault.result.elite_api_gateway_private_key}"
   }
 }
 
