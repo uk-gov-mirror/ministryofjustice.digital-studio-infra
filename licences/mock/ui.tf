@@ -30,7 +30,7 @@ resource "azurerm_app_service" "ui" {
     DB_PASS                        = "${random_id.sql-ui-password.b64}"
     DB_SERVER                      = "${module.sql.db_server}"
     DB_NAME                        = "${module.sql.db_name}"
-    NOMIS_API_URL                  = "https://licences-nomis-mocks.herokuapp.com/"
+    NOMIS_API_URL                  = "https://licences-nomis-mocks.herokuapp.com/elite2api"
     NOMIS_GW_TOKEN                 = "xxx.yyy.zzz"
     NOMIS_GW_KEY                   = "${data.external.vault.result.elite_api_gateway_private_key}"
     ENABLE_TEST_UTILS              = true
