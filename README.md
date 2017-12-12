@@ -23,11 +23,13 @@ ARM_CLIENT_ID=xxxxx
 ARM_CLIENT_SECRET=xxxxx
 ```
 
-Some environments might interact with the github api, you'll need to go get an API key from the admin UI to make that work.
+Some environments might interact with the github api, you'll need to go get an API key from the admin UI to make that work. 
 
 ```
 GITHUB_TOKEN=xxxx
 ```
+
+Fetch the token from Settings->Developer Settings->Personal Access Tokens->Generate new token
 
 ### Required Setup
 
