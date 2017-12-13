@@ -114,16 +114,6 @@ function createVaultClient(clientId, clientSecret) {
     });
   }
 
-  function authenticator2(challenge, callback) {
-    var context = new AuthenticationContext(challenge.authorization);
-    return context.acquireTokenWithClientCredentials(
-      challenge.resource, clientId, clientSecret,
-      function(err, response) {
-        if (err) return callback(err);
-        callback(null, );
-      }
-    );
-  }
 }
 
 function getAzureAuthorizationFromCli(resource, callback) {
