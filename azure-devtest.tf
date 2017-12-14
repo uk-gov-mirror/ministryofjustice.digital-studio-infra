@@ -24,11 +24,18 @@ variable "azure_robl_tf_oid" {
     type = "string"
     default = "ec0c3ab3-0a6e-4260-87c3-93935fe29b3e"
 }
-provider "azurerm" {
-    # NOMS Digital Studio Dev & Test Environments
-    subscription_id = "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
-    # client_id = "..." use ARM_CLIENT_ID env var
-    # client_secret = "..." use ARM_CLIENT_SECRET env var
-    tenant_id = "${var.azure_tenant_id}"
-    version = "0.2.0"
+
+variable "azure_secret_permissions_all" {
+  type = "list"
+
+  default = [
+    "backup",
+    "delete",
+    "get",
+    "list",
+    "purge",
+    "recover",
+    "restore",
+    "set",
+  ]
 }
