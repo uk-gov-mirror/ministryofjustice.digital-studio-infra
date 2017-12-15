@@ -45,6 +45,7 @@ resource "azurerm_subnet" "default" {
   resource_group_name  = "${azurerm_resource_group.hub-jenkins-dev.name}"
   virtual_network_name = "${azurerm_virtual_network.hub-jenkins-dev-vnet.name}"
   address_prefix       = "10.0.2.0/24"
+  network_security_group_id = "${azurerm_network_security_group.hub-jenkins-dev-nsg.id}"
 }
 
 resource "azurerm_virtual_network" "hub-jenkins-dev-vnet" {
