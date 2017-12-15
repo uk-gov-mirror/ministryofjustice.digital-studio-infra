@@ -26,10 +26,3 @@ variable "azure_rlazzurs_tfprod_oid" {
     default = "3dfa627f-a505-4ce0-a6e7-4a8da91e511c"
 }
 
-provider "azurerm" {
-  # NOMS Digital Studio Production 1
-  subscription_id = "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
-  # client_id = "..." use ARM_CLIENT_ID env var
-  # client_secret = "..." use ARM_CLIENT_SECRET env var
-  tenant_id = "${var.azure_tenant_id}"
-}
