@@ -1,15 +1,3 @@
-terraform {
-    required_version = ">= 0.9.2"
-    backend "azure" {
-        resource_group_name = "webops-prod"
-        storage_account_name = "nomsstudiowebopsprod"
-        container_name = "terraform"
-        key = "aap-prod.terraform.tfstate"
-        arm_subscription_id = "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
-        arm_tenant_id = "747381f4-e81f-4a43-bf68-ced6a1e14edf"
-    }
-}
-
 variable "env-name" {
     type = "string"
     default = "aap-prod"
@@ -36,7 +24,8 @@ resource "azurerm_storage_account" "storage" {
     name = "${replace(var.env-name, "-", "")}storage"
     resource_group_name = "${azurerm_resource_group.group.name}"
     location = "${azurerm_resource_group.group.location}"
-    account_type = "Standard_RAGRS"
+    account_tier = "Standard"
+    account_replication_type = "RAGRS"
     enable_blob_encryption = true
 
     tags = "${var.tags}"
@@ -56,7 +45,7 @@ resource "null_resource" "intermediates" {
 }
 
 data "external" "sas-url" {
-    program = ["node", "../../tools/container-sas-url.js"]
+    program = ["node", "../../tools/container-sas-url-cli-auth.js"]
     query {
         subscription_id = "${var.azure_subscription_id}"
         tenant_id = "${var.azure_tenant_id}"
@@ -81,26 +70,14 @@ resource "azurerm_key_vault" "vault" {
     access_policy {
         tenant_id = "${var.azure_tenant_id}"
         object_id = "${var.azure_webops_group_oid}"
-        key_permissions = ["all"]
-        secret_permissions = ["all"]
+        key_permissions = []
+        secret_permissions = "${var.azure_secret_permissions_all}"
     }
     access_policy {
         tenant_id = "${var.azure_tenant_id}"
         object_id = "${var.azure_app_service_oid}"
         key_permissions = []
         secret_permissions = ["get"]
-    }
-    access_policy {
-        object_id = "${var.azure_glenm_tfprod_oid}"
-        tenant_id = "${var.azure_tenant_id}"
-        key_permissions = []
-        secret_permissions = ["get", "set"]
-    }
-    access_policy {
-        object_id = "${var.azure_rlazzurs_tfprod_oid}"
-        tenant_id = "${var.azure_tenant_id}"
-        key_permissions = []
-        secret_permissions = ["get", "set"]
     }
 
     enabled_for_deployment = false
