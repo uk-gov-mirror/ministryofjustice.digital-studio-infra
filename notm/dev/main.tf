@@ -37,9 +37,8 @@ resource "azurerm_storage_account" "storage" {
     name = "${replace(var.app-name, "-", "")}storage"
     resource_group_name = "${azurerm_resource_group.group.name}"
     location = "${azurerm_resource_group.group.location}"
-#    account_type = "Standard_RAGRS"
     account_tier = "Standard"
-    account_replication_type = "GRS"
+    account_replication_type = "RAGRS"
     enable_blob_encryption = true
 
     tags = "${var.tags}"
@@ -114,7 +113,7 @@ resource "azurerm_template_deployment" "webapp" {
 }
 
 data "external" "sas-url" {
-    program = ["node", "../../tools/container-sas-url.js"]
+    program = ["node", "../../tools/container-sas-url-cli-auth.js"]
     query {
         subscription_id = "${var.azure_subscription_id}"
         tenant_id = "${var.azure_tenant_id}"
