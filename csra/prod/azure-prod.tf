@@ -1,1 +1,1 @@
-../../azure-prod.tf
+../../azure-prod-common.tf
