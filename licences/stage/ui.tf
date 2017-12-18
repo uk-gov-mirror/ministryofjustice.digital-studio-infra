@@ -41,7 +41,7 @@ resource "azurerm_app_service" "ui" {
 }
 
 data "external" "vault" {
-  program = ["node", "../../tools/keyvault-data.js"]
+  program = ["node", "../../tools/keyvault-data-cli-auth.js"]
 
   query {
     vault = "${azurerm_key_vault.vault.name}"
