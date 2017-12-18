@@ -1,15 +1,3 @@
-terraform {
-    required_version = ">= 0.9.0"
-    backend "azure" {
-        resource_group_name = "webops-prod"
-        storage_account_name = "nomsstudiowebopsprod"
-        container_name = "terraform"
-        key = "webops-prod.terraform.tfstate"
-        arm_subscription_id = "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
-        arm_tenant_id = "747381f4-e81f-4a43-bf68-ced6a1e14edf"
-    }
-}
-
 variable "tags" {
     type = "map"
     default {
@@ -36,20 +24,14 @@ resource "azurerm_key_vault" "vault" {
     access_policy {
         tenant_id = "${var.azure_tenant_id}"
         object_id = "${var.azure_webops_group_oid}"
-        key_permissions = ["all"]
-        secret_permissions = ["all"]
+        key_permissions = []
+        secret_permissions = "${var.azure_secret_permissions_all}"
     }
     access_policy {
         tenant_id = "${var.azure_tenant_id}"
         object_id = "${var.azure_app_service_oid}"
         key_permissions = []
         secret_permissions = ["get"]
-    }
-    access_policy {
-        object_id = "${var.azure_glenm_tfprod_oid}"
-        tenant_id = "${var.azure_tenant_id}"
-        key_permissions = []
-        secret_permissions = ["get", "set"]
     }
     access_policy {
         object_id = "${var.slackhook_app_oid}"
