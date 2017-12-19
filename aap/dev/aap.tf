@@ -227,7 +227,7 @@ resource "null_resource" "api-sync" {
 
   provisioner "local-exec" {
     command = <<CMD
-node ${path.module}/../tools/sync-api.js \
+node ${path.module}/../tools/sync-api-cli-auth.js \
     --tenantId '${var.azure_tenant_id}' \
     --subscriptionId '${var.azure_subscription_id}' \
     --resourceGroupName '${azurerm_resource_group.group.name}' \
