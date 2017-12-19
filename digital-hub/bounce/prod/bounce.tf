@@ -75,11 +75,21 @@ resource "azurerm_virtual_machine" "hub-bounce-prod-vm" {
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
+    disk_size_gb       = "30"
+  }
+
+  storage_data_disk {
+    name              = "hub-bounce-storage"
+    caching           = "None"
+    create_option     = "Attach"
+    managed_disk_type = "Standard_LRS"
+    lun               = 0
+    disk_size_gb      = "200"
   }
 
   os_profile {
     computer_name  = "hub-bounce-prod"
-    admin_username = "provisioning"
+    admin_username = "lazzurs"
     admin_password = "ThisIsDisabled111!"
   }
 
