@@ -57,7 +57,7 @@ resource "azurerm_key_vault" "vault" {
     	tenant_id = "${var.azure_tenant_id}"
     	object_id = "${var.azure_webops_group_oid}"
     	key_permissions = []
-    	secret_permissions = ["${var.azure_secret_permissions_all}"]
+    	secret_permissions = "${var.azure_secret_permissions_all}"
 	}
 
 	access_policy {
