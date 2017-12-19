@@ -6,4 +6,3 @@ graph.png
 node_modules/
 sshkey.pub
 *.swp
-/nbproject/private/
