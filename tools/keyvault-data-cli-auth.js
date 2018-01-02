@@ -1,10 +1,6 @@
 /**
  * Terraform external data source for reading data from an azure key vault
  *
- * Requires environment variables for azure auth:
- *   ARM_CLIENT_ID
- *   ARM_CLIENT_SECRET
- *
  * Expects the following structure as JSON via stdin:
  * {
  *   "vault": "<name of vault>",
