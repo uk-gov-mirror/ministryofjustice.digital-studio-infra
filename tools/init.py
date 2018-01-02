@@ -2,6 +2,7 @@
 import json, subprocess
 import sys
 import os.path
+import shutil
 
 from pprint import pprint
 
@@ -11,9 +12,9 @@ gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
     stdout=subprocess.PIPE, encoding='utf8',
     check=True
-).stdout
+).stdout.rstrip()
 
-templatePath = os.path.join(gitRoot.rstrip(), 'tools', 'templates')
+templatePath = os.path.join(gitRoot, 'tools', 'templates')
 
 j2_env = Environment(loader=FileSystemLoader(templatePath))
 
@@ -34,7 +35,14 @@ template = j2_env.get_template(templateFile)
 
 keyName = ''.join([appDir , '-' , environment])
 
-rendered_file = template.render(key_name=keyName)
+if not os.path.isfile("./azure.json"):
+    src = ''.join([gitRoot,"/tools/templates/azure.json"])
+    dst = "."
+    shutil.copy2(src,dst)
+
+providerConfig = json.load(open("./azure.json"))
+
+rendered_file = template.render(key_name=keyName,terraform_version=providerConfig["terraform_version"],azurerm_version=providerConfig["azurerm_version"])
 
 with open("config.tf.json", "w") as f:
     f.write(rendered_file)
