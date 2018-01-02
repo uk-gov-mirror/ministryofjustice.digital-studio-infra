@@ -1,5 +1,43 @@
 #!/usr/bin/env python3
 import json, subprocess
+import sys
+import os.path
+
+from pprint import pprint
+
+from jinja2 import Environment, FileSystemLoader
+
+gitRoot = subprocess.run(
+    ["git", "rev-parse", "--show-toplevel"],
+    stdout=subprocess.PIPE, encoding='utf8',
+    check=True
+).stdout
+
+templatePath = os.path.join(gitRoot.rstrip(), 'tools', 'templates')
+
+j2_env = Environment(loader=FileSystemLoader(templatePath))
+
+cwd = os.path.basename(os.getcwd())
+
+appDir = os.path.split(os.path.dirname(os.getcwd()))[1]
+
+prodEnvs = ['prod','preprod']
+
+environment = 'dev'
+
+if cwd in prodEnvs:
+    environment = 'prod'
+
+templateFile = ''.join(['common-' , environment , '.jinja'])
+
+template = j2_env.get_template(templateFile)
+
+keyName = ''.join([appDir , '-' , environment])
+
+rendered_file = template.render(key_name=keyName)
+
+with open("config.tf.json", "w") as f:
+    f.write(rendered_file)
 
 config = json.load(open("./config.tf.json"))
 

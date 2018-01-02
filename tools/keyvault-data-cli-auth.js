@@ -35,10 +35,10 @@ main();
 function main() {
   const input = loadInput();
 
-  const clientId = process.env.ARM_CLIENT_ID;
-  const clientSecret = process.env.ARM_CLIENT_SECRET;
+//  const clientId = '';//process.env.ARM_CLIENT_ID;
+//  const clientSecret = '';//process.env.ARM_CLIENT_SECRET;
 
-  const client = createVaultClient(clientId, clientSecret);
+  const client = createVaultClient();
 
   const vaultUri = buildVaultUri(input.vault)
 
@@ -67,6 +67,7 @@ function main() {
 
 function loadInput() {
   const data = JSON.parse(fs.readFileSync(0, 'utf8'));
+
   input = {
     vault: "",
     secrets: []
@@ -81,6 +82,7 @@ function loadInput() {
       });
     }
   });
+
   return input;
 }
 
@@ -101,7 +103,7 @@ function buildVaultUri(vaultName) {
 
 const AuthenticationContext = require('adal-node').AuthenticationContext;
 
-function createVaultClient(clientId, clientSecret) {
+function createVaultClient() {
 
   const credentials = new KeyVault.KeyVaultCredentials(authenticator);
 
@@ -119,7 +121,7 @@ function createVaultClient(clientId, clientSecret) {
 function getAzureAuthorizationFromCli(resource, callback) {
   const exec = require('child_process').exec;
   exec(
-    'az account get-access-token --resource "' + resource  + '"', 
+    'az account get-access-token --resource "' + resource  + '"',
     function(err, result) {
       if (err) return callback(err);
       try {
