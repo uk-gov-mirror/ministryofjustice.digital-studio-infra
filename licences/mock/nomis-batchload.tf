@@ -32,11 +32,9 @@ resource "azurerm_app_service" "nomis-batchload" {
     DB_NAME           = "${module.sql-nomis-batchload.db_name}"
     BATCH_USER_ROLES = "LICENCE_ADMIN"
     BATCH_SYSTEM_USER = "NOMIS_BATCH"
-    BATCH_SYSTEM_PASSWORD = ""
+    BATCH_SYSTEM_PASSWORD = "${data.external.vault-nomis-batchload.result.elite-api-gateway-batch-system-key}"
     BATCH_SYSTEM_USER_ROLES = "SYSTEM_USER"
-
     NOMIS_API_URL     = "https://licences-nomis-mocks.herokuapp.com/elite2api"
-
     NOMIS_GW_TOKEN = "xxx.yyy.zzz"
     NOMIS_GW_KEY   = "${data.external.vault-nomis-batchload.result.elite_api_gateway_private_key}"
   }
@@ -49,6 +47,7 @@ data "external" "vault-nomis-batchload" {
     vault = "${azurerm_key_vault.vault.name}"
 
     elite_api_gateway_private_key = "elite-api-gateway-private-key"
+    elite_api_gateway_batch_system_key = "elite-api-gateway-batch-system-key"
   }
 }
 
