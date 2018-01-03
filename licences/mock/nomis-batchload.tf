@@ -30,6 +30,11 @@ resource "azurerm_app_service" "nomis-batchload" {
     DB_PASS           = "${random_id.sql-nomis-batchload-password.b64}"
     DB_SERVER         = "${module.sql-nomis-batchload.db_server}"
     DB_NAME           = "${module.sql-nomis-batchload.db_name}"
+    BATCH_USER_ROLES = "LEI_LICENCE_ADMIN"
+    BATCH_SYSTEM_USER = "NOMIS_BATCH"
+    BATCH_SYSTEM_PASSWORD = ""
+    BATCH_SYSTEM_USER_ROLES = "LEI_SYSTEM_USER"
+
     NOMIS_API_URL     = "https://licences-nomis-mocks.herokuapp.com/elite2api"
 
     NOMIS_GW_TOKEN = "xxx.yyy.zzz"
