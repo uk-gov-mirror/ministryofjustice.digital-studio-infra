@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json, subprocess
+import subprocess
 import sys
 import os.path
 
