@@ -1,4 +1,27 @@
 #!/usr/bin/env python3
+
+ # Terraform external data source for reading data from an azure key vault
+ #
+ # Expects the following structure as JSON via stdin:
+ # {
+ #    "vault": "<name of vault>",
+ #    "<secret output name 1>": "<secret vault name 1>",
+ #    "<secret output name 2>": "<secret vault name 2>",
+ #    "<secret output name 3>": "<secret vault name 3>",
+ #    "<secret output name 4>": "<secret vault name 4>",
+ #    ...
+ #  }
+ #
+ #  And produces the following structure as JSON via stdout:
+ #  {
+ #   "<secret output name 1>": "<secret value 1>",
+ #   "<secret output name 2>": "<secret value 2>",
+ #   "<secret output name 3>": "<secret value 3>",
+ #    "<secret output name 4>": "<secret value 4>",
+ #    ...
+ #  }
+
+
 import json, subprocess
 import sys
 import os.path
