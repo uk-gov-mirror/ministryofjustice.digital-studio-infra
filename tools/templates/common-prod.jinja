@@ -5,7 +5,7 @@
     }
   },
   "terraform": {
-    "required_version": "~> 0.11.0",
+    "required_version": "{{ terraform_version }}",
     "backend": {
       "azurerm": {
         "resource_group_name": "webops-prod",
@@ -19,7 +19,7 @@
     "azurerm": {
       "tenant_id": "747381f4-e81f-4a43-bf68-ced6a1e14edf",
       "subscription_id": "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
-      "version": "0.3.3"
+      "version": "{{ azurerm_version }}"
     }
   }
 }
