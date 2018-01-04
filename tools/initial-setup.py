@@ -3,23 +3,56 @@ import subprocess
 import sys
 import os.path
 
+# get the root path for the repository
+
 gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
     stdout=subprocess.PIPE, encoding='utf8',
     check=True
-).stdout
+).stdout.rstrip()
 
-scriptPath = ''.join([gitRoot.rstrip(),"/tools/init.py"])
+# Install Python requirements
 
+def installDependencies():
+    requirements = ''.join([gitRoot,"/tools/requirements.txt"])
 
-subprocess.run(
-    ["chmod", "+x", scriptPath],
-    check=True
-)
+    if subprocess.run(
+        ["pip3", "install","-r",requirements],
+        check=True
+    ):
+        print("Dependency check completed")
+        return True
+    else:
+        print("The dependency check could not be completed")
+        return False
 
-# Activate relevant subscription in CLI
-if not os.symlink(scriptPath,'/usr/bin/diginit'):
+# Setup the symlink to init.py
+
+def createLinks():
+
+    scriptPath = ''.join([gitRoot,"/tools/init.py"])
+
     subprocess.run(
-    ["sudo", "ln", "-s", scriptPath, "/usr/bin/diginit"],
-    check=True
+        ["chmod", "+x", scriptPath],
+        check=True
     )
+
+    symlink = '/usr/bin/diginit'
+
+    # Activate relevant subscription in CLI
+    if not os.path.islink(symlink):
+        if subprocess.run(
+        ["sudo", "ln", "-s", scriptPath, "/usr/bin/diginit"],
+        check=True
+        ):
+            print("Symlink created")
+            return True
+        else:
+            print("Symlink could not be created")
+            return False
+    else:
+        print("Symlink already exists")
+        return True
+
+if installDependencies() and createLinks():
+    print("Setup complete")
