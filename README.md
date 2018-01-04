@@ -2,7 +2,7 @@
 
 **Never check passwords or other similar secrets into source control**
 
-Each directory represents a distinct project, and is effectively a seperate terraform environment.
+Each directory represents a distinct project, and is effectively a separate terraform environment.
 
 ## Setup
 
@@ -12,7 +12,10 @@ Each directory represents a distinct project, and is effectively a seperate terr
  * [Node.JS 8+](https://nodejs.org/)
  * [Yarn](https://yarnpkg.com/en/)
  * [Python 3.6] (https://www.python.org/)
+ * [Jinja2] (http://jinja.pocoo.org/docs/2.10/)
+ * [Azure CLI 2.0] (https://docs.microsoft.com/en-us/cli/azure/overview?view=azure-cli-latest)
 
+### Environment initialization
 
 Install dependencies from npm using yarn from (package.json):
 
@@ -28,7 +31,11 @@ GITHUB_TOKEN=xxxx
 
 Fetch the token from Settings->Developer Settings->Personal Access Tokens->Generate new token
 
-Run the repository setup script (tools/init-repo.py) to include the python init script globally via a symlink to /usr/bin/digint.
+Run the repository setup script to include the python init script globally via a symlink to /usr/bin/digint.
+
+```
+python3 tools/initial-setup.py
+```
 
 ### Terraform initialization
 
