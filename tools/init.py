@@ -4,8 +4,6 @@ import sys
 import os.path
 import shutil
 
-from pprint import pprint
-
 from jinja2 import Environment, FileSystemLoader
 
 gitRoot = subprocess.run(

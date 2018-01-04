@@ -12,7 +12,7 @@ Each directory represents a distinct project, and is effectively a separate terr
  * [Node.JS 8+](https://nodejs.org/)
  * [Yarn](https://yarnpkg.com/en/)
  * [Python 3.6] (https://www.python.org/)
- * [Jinja2] (http://jinja.pocoo.org/docs/2.10/)
+ * [pip] (https://pip.pypa.io/en/stable/)
  * [Azure CLI 2.0] (https://docs.microsoft.com/en-us/cli/azure/overview?view=azure-cli-latest)
 
 ### Environment initialization
