@@ -5,57 +5,67 @@ import sys
 import os.path
 import shutil
 
-from jinja2 import Environment, FileSystemLoader
-
 gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
     stdout=subprocess.PIPE, encoding='utf8',
     check=True
 ).stdout.rstrip()
 
-templatePath = os.path.join(gitRoot, 'tools', 'templates')
-
-j2_env = Environment(loader=FileSystemLoader(templatePath))
-
+# Derive the backend key name from the path
 cwd = os.path.basename(os.getcwd())
 
 appDir = os.path.split(os.path.dirname(os.getcwd()))[1]
 
+keyName = ''.join([appDir, '-', cwd, '.terraform.tfstate'])
+
+# Check if this is a prod or dev environment
 prodEnvs = ['prod', 'preprod']
 
-environment = 'dev'
+environment = 'devtest'
 
 if cwd in prodEnvs:
     environment = 'prod'
 
-templateFile = ''.join(['common-', environment, '.jinja'])
-
-template = j2_env.get_template(templateFile)
-
-keyName = ''.join([appDir, '-', environment])
-
-if not os.path.isfile("./azure.json"):
-    src = ''.join([gitRoot, "/tools/templates/azure.json"])
+if not os.path.isfile("./azure-versions.json"):
+    src = ''.join([gitRoot, "/tools/templates/azure-versions.json"])
     dst = "."
     shutil.copy2(src, dst)
 
-providerConfig = json.load(open("./azure.json"))
+versions = json.load(open("./azure-versions.json"))
 
-rendered_file = template.render(
-    key_name=keyName,
-    terraform_version=providerConfig["terraform_version"],
-    azurerm_version=providerConfig["azurerm_version"]
-    )
+providerConfig = json.load(
+    open(gitRoot + "/tools/templates/azure-provider-config.json"))
+
+configTfJson = {
+    'terraform': {
+        'required_version': versions["terraform_version"],
+        'backend': {
+            'azurerm': {
+                'resource_group_name': providerConfig[environment]["resource_group_name"],
+                'storage_account_name': providerConfig[environment]["storage_account_name"],
+                'container_name': 'terraform',
+                'key': keyName
+            }
+        }
+    },
+    'provider': {
+        'azurerm': {
+            'tenant_id': providerConfig[environment]["tenant_id"],
+            'subscription_id': providerConfig[environment]["subscription_id"],
+            'version': versions["azurerm_version"]
+        }
+    }
+}
+
+jsonFile = json.dumps(configTfJson, indent=2)
 
 with open("config.tf.json", "w") as f:
-    f.write(rendered_file)
+    f.write(jsonFile)
 
 config = json.load(open("./config.tf.json"))
 
-backend = config["terraform"]["backend"]["azurerm"]
-provider = config["provider"]["azurerm"]
-
-subscription_params = ["--subscription", provider["subscription_id"]]
+subscription_params = ["--subscription",
+                       providerConfig[environment]["subscription_id"]]
 
 # Ensure that CLI is logged in and can access the relevant subscription
 subprocess.run(
@@ -72,8 +82,8 @@ subprocess.run(
 # Extract storage account key for remote state
 key = subprocess.run(
     ["az", "storage", "account", "keys", "list",
-        "--resource-group", backend["resource_group_name"],
-        "--account-name", backend["storage_account_name"],
+        "--resource-group", providerConfig[environment]["resource_group_name"],
+        "--account-name", providerConfig[environment]["storage_account_name"],
         "--query", "[0].value",
         "--output", "tsv",
      ],
