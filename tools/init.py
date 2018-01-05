@@ -28,9 +28,9 @@ key = subprocess.run(
         "--query", "[0].value",
         "--output", "tsv",
     ],
-    stdout=subprocess.PIPE, encoding='utf8',
+    stdout=subprocess.PIPE, 
     check=True
-).stdout
+).stdout.decode()
 
 # Init terraform with acquired storage account key
 subprocess.run(
