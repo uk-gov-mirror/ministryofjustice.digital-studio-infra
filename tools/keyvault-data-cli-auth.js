@@ -1,10 +1,6 @@
 /**
  * Terraform external data source for reading data from an azure key vault
  *
- * Requires environment variables for azure auth:
- *   ARM_CLIENT_ID
- *   ARM_CLIENT_SECRET
- *
  * Expects the following structure as JSON via stdin:
  * {
  *   "vault": "<name of vault>",
@@ -35,10 +31,10 @@ main();
 function main() {
   const input = loadInput();
 
-//  const clientId = '';//process.env.ARM_CLIENT_ID;
-//  const clientSecret = '';//process.env.ARM_CLIENT_SECRET;
+  const clientId = process.env.ARM_CLIENT_ID;
+  const clientSecret = process.env.ARM_CLIENT_SECRET;
 
-  const client = createVaultClient();
+  const client = createVaultClient(clientId, clientSecret);
 
   const vaultUri = buildVaultUri(input.vault)
 
@@ -67,7 +63,6 @@ function main() {
 
 function loadInput() {
   const data = JSON.parse(fs.readFileSync(0, 'utf8'));
-
   input = {
     vault: "",
     secrets: []
@@ -82,7 +77,6 @@ function loadInput() {
       });
     }
   });
-
   return input;
 }
 
@@ -103,7 +97,7 @@ function buildVaultUri(vaultName) {
 
 const AuthenticationContext = require('adal-node').AuthenticationContext;
 
-function createVaultClient() {
+function createVaultClient(clientId, clientSecret) {
 
   const credentials = new KeyVault.KeyVaultCredentials(authenticator);
 
@@ -121,7 +115,7 @@ function createVaultClient() {
 function getAzureAuthorizationFromCli(resource, callback) {
   const exec = require('child_process').exec;
   exec(
-    'az account get-access-token --resource "' + resource  + '"',
+    'az account get-access-token --resource "' + resource  + '"', 
     function(err, result) {
       if (err) return callback(err);
       try {
