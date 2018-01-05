@@ -8,8 +8,8 @@
     "required_version": "{{ terraform_version }}",
     "backend": {
       "azurerm": {
-        "resource_group_name": "webops",
-        "storage_account_name": "nomsstudiowebops",
+        "resource_group_name": "{{ resource_group_name }}",
+        "storage_account_name": "{{ storage_account_name }}",
         "container_name": "terraform",
         "key": "{{ key_name }}.terraform.tfstate"
       }
@@ -17,8 +17,8 @@
   },
   "provider": {
     "azurerm": {
-      "tenant_id": "747381f4-e81f-4a43-bf68-ced6a1e14edf",
-      "subscription_id": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+      "tenant_id": "{{ tenant_id }}",
+      "subscription_id": "{{ subscription_id }}",
       "version": "{{ azurerm_version }}"
     }
   }
