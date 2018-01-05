@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import json, subprocess
+import json
+import subprocess
 import sys
 import os.path
 import shutil
@@ -20,27 +21,31 @@ cwd = os.path.basename(os.getcwd())
 
 appDir = os.path.split(os.path.dirname(os.getcwd()))[1]
 
-prodEnvs = ['prod','preprod']
+prodEnvs = ['prod', 'preprod']
 
 environment = 'dev'
 
 if cwd in prodEnvs:
     environment = 'prod'
 
-templateFile = ''.join(['common-' , environment , '.jinja'])
+templateFile = ''.join(['common-', environment, '.jinja'])
 
 template = j2_env.get_template(templateFile)
 
-keyName = ''.join([appDir , '-' , environment])
+keyName = ''.join([appDir, '-', environment])
 
 if not os.path.isfile("./azure.json"):
-    src = ''.join([gitRoot,"/tools/templates/azure.json"])
+    src = ''.join([gitRoot, "/tools/templates/azure.json"])
     dst = "."
-    shutil.copy2(src,dst)
+    shutil.copy2(src, dst)
 
 providerConfig = json.load(open("./azure.json"))
 
-rendered_file = template.render(key_name=keyName,terraform_version=providerConfig["terraform_version"],azurerm_version=providerConfig["azurerm_version"])
+rendered_file = template.render(
+    key_name=keyName,
+    terraform_version=providerConfig["terraform_version"],
+    azurerm_version=providerConfig["azurerm_version"]
+    )
 
 with open("config.tf.json", "w") as f:
     f.write(rendered_file)
@@ -71,7 +76,7 @@ key = subprocess.run(
         "--account-name", backend["storage_account_name"],
         "--query", "[0].value",
         "--output", "tsv",
-    ],
+     ],
     stdout=subprocess.PIPE, encoding='utf8',
     check=True
 ).stdout
