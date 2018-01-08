@@ -13,11 +13,12 @@ gitRoot = subprocess.run(
 
 # Install Python requirements
 
+
 def installDependencies():
-    requirements = ''.join([gitRoot,"/tools/requirements.txt"])
+    requirements = ''.join([gitRoot, "/tools/requirements.txt"])
 
     if subprocess.run(
-        ["pip3", "install","-r",requirements],
+        ["pip3", "install", "-r", requirements],
         check=True
     ):
         print("Dependency check completed")
@@ -28,22 +29,23 @@ def installDependencies():
 
 # Setup the symlink to init.py
 
+
 def createLinks():
 
-    scriptPath = ''.join([gitRoot,"/tools/init.py"])
+    scriptPath = ''.join([gitRoot, "/tools/init.py"])
 
     subprocess.run(
         ["chmod", "+x", scriptPath],
         check=True
     )
 
-    symlink = '/usr/bin/diginit'
+    symlink = '/usr/local/bin/diginit'
 
     # Activate relevant subscription in CLI
     if not os.path.islink(symlink):
         if subprocess.run(
-        ["sudo", "ln", "-s", scriptPath, "/usr/bin/diginit"],
-        check=True
+            ["sudo", "ln", "-s", scriptPath, "/usr/local/bin/diginit"],
+            check=True
         ):
             print("Symlink created")
             return True
@@ -53,6 +55,7 @@ def createLinks():
     else:
         print("Symlink already exists")
         return True
+
 
 if installDependencies() and createLinks():
     print("Setup complete")
