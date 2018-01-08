@@ -31,7 +31,7 @@ GITHUB_TOKEN=xxxx
 
 Fetch the token from Settings->Developer Settings->Personal Access Tokens->Generate new token
 
-Run the repository setup script to include the python init script globally via a symlink to /usr/bin/digint.
+Run the repository setup script to include the python init script globally via a symlink to /usr/local/bin/digint.
 
 ```
 python3 tools/initial-setup.py
@@ -66,6 +66,8 @@ e.g.
 ```
 terraform plan
 ```
+
+You can override the Terraform and Azure verions by copying the config file tools/config/azure-versions.json to your local Terraform directory.
 
 ### Terraform initialization (using service principal authentication)
 

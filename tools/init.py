@@ -27,14 +27,14 @@ if cwd in prodEnvs:
     environment = 'prod'
 
 if not os.path.isfile("./azure-versions.json"):
-    src = ''.join([gitRoot, "/tools/templates/azure-versions.json"])
+    src = ''.join([gitRoot, "/tools/config/azure-versions.json"])
     dst = "."
     shutil.copy2(src, dst)
 
 versions = json.load(open("./azure-versions.json"))
 
 providerConfig = json.load(
-    open(gitRoot + "/tools/templates/azure-provider-config.json"))
+    open(gitRoot + "/tools/config/azure-provider-config.json"))
 
 configTfJson = {
     'terraform': {
