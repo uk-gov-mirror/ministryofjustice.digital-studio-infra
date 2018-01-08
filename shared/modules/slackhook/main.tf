@@ -50,14 +50,14 @@ resource "null_resource" "create-hook-user" {
         command = <<CMD
 set -e
 
-node ${path.module}/keyvault-store.js \
+node ${path.module}/keyvault-store-cli-auth.js \
     --subscriptionId '${null_resource.intermediates.triggers.azure_subscription_id}' \
     --tenantId '${var.azure_tenant_id}' \
     --vaultUri '${null_resource.intermediates.triggers.vault_uri}' \
     --secretName 'slackhook-user-${var.app_name}' \
     --secretValue '${random_id.hook-password.hex}' \
 
-node ${path.module}/kudu-webhook.js \
+node ${path.module}/kudu-webhook-cli-auth.js \
     --subscriptionId '${null_resource.intermediates.triggers.azure_subscription_id}' \
     --tenantId '${var.azure_tenant_id}' \
     --appName '${var.app_name}' \
