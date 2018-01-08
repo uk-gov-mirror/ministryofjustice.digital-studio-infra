@@ -38,6 +38,18 @@
         },
         "ENABLE_TEST_UTILS": {
             "type": "bool"
+        },
+        "BATCH_USER_ROLES": {
+            "type": "string"
+        },
+        "BATCH_SYSTEM_USER": {
+            "type": "string"
+        },
+        "BATCH_SYSTEM_PASSWORD": {
+            "type": "string"
+        },
+        "BATCH_SYSTEM_USER_ROLES": {
+            "type": "string"
         }
     },
     "resources": [
@@ -57,7 +69,11 @@
                 "NOMIS_API_URL": "[parameters('NOMIS_API_URL')]",
                 "NOMIS_GW_TOKEN": "[parameters('NOMIS_GW_TOKEN')]",
                 "NOMIS_GW_KEY": "[parameters('NOMIS_GW_KEY')]",
-                "ENABLE_TEST_UTILS": "[parameters('ENABLE_TEST_UTILS')]"
+                "ENABLE_TEST_UTILS": "[parameters('ENABLE_TEST_UTILS')]",
+                "BATCH_USER_ROLES": "[parameters('BATCH_USER_ROLES')]",
+                "BATCH_SYSTEM_USER":"[parameters('BATCH_SYSTEM_USER')]",
+                "BATCH_SYSTEM_PASSWORD":"[parameters('BATCH_SYSTEM_PASSWORD')]",
+                "BATCH_SYSTEM_USER_ROLES": "[parameters('BATCH_SYSTEM_USER_ROLES')]"
             }
         }
     ]
