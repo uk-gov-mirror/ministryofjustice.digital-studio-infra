@@ -48,9 +48,9 @@ def getSecrets(inputItems, vaultName):
             ["az", "keyvault", "secret", "show", "--vault-name",
              vaultName, "--name", value
              ],
-            stdout=subprocess.PIPE, encoding='utf8',
+            stdout=subprocess.PIPE,
             check=True
-        ).stdout
+        ).stdout.decode()
 
         data = json.loads(secret)
 
