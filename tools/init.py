@@ -86,8 +86,8 @@ key = subprocess.run(
         "--account-name", providerConfig[environment]["storage_account_name"],
         "--query", "[0].value",
         "--output", "tsv",
-     ],
-    stdout=subprocess.PIPE,
+    ],
+    stdout=subprocess.PIPE, 
     check=True
 ).stdout.decode()
 

@@ -20,7 +20,7 @@ resource "random_id" "sql-ui-password" {
   byte_length = 32
 }
 
-resource "random_id" "sql-api-password" {
+resource "random_id" "sql-nomis-batchload-password" {
   byte_length = 32
 }
 
@@ -73,13 +73,6 @@ resource "azurerm_key_vault" "vault" {
     secret_permissions = ["get"]
   }
 
-  access_policy {
-    object_id          = "${var.azure_glenm_tf_oid}"
-    tenant_id          = "${var.azure_tenant_id}"
-    key_permissions    = []
-    secret_permissions = ["get", "set"]
-  }
-
   enabled_for_deployment          = false
   enabled_for_disk_encryption     = false
   enabled_for_template_deployment = true
@@ -114,6 +107,36 @@ module "sql" {
   setup_queries = [
     "ALTER ROLE db_datareader ADD MEMBER ui",
     "ALTER ROLE db_datawriter ADD MEMBER ui",
+  ]
+}
+
+module "sql-nomis-batchload" {
+  source              = "../../shared/modules/azure-sql"
+  name                = "nomis-batchload-${var.env-name}"
+  resource_group      = "${azurerm_resource_group.group.name}"
+  location            = "${azurerm_resource_group.group.location}"
+  administrator_login = "licences"
+
+  firewall_rules = [
+    {
+      label = "Open to the world"
+      start = "0.0.0.0"
+      end   = "255.255.255.255"
+    },
+  ]
+
+  audit_storage_account = "${azurerm_storage_account.storage.name}"
+  edition               = "Basic"
+  collation             = "SQL_Latin1_General_CP1_CI_AS"
+  tags                  = "${var.tags}"
+
+  db_users = {
+    app = "${random_id.sql-nomis-batchload-password.b64}"
+  }
+
+  setup_queries = [
+    "ALTER ROLE db_datareader ADD MEMBER app",
+    "ALTER ROLE db_datawriter ADD MEMBER app",
   ]
 }
 
