@@ -51,7 +51,7 @@ def generate_sas(input_query):
 
     result["url"] = ''.join(
         ['https://', input_query['storage_account'], '.blob.core.windows.net/',
-         inputQuery['container'], '?', sas_token])
+         input_query['container'], '?', sas_token])
     result["token"] = sas_token
 
     return(json.dumps(result))
