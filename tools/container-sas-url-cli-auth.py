@@ -29,10 +29,6 @@
 import json
 import subprocess
 import sys
-import os.path
-import shutil
-
-from pprint import pprint
 
 inputQuery = json.load(sys.stdin)
 
