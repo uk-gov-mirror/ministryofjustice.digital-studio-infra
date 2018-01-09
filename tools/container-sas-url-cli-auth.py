@@ -32,7 +32,7 @@ import sys
 from python_modules import azure_account
 
 
-def generate_sas(inputQuery):
+def generate_sas(input_query):
 
     result = {"url": "", "token": ""}
 
