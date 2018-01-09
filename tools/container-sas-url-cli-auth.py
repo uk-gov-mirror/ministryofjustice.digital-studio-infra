@@ -32,17 +32,17 @@ import sys
 from python_modules import azure_account
 
 
-def generateSAS(inputQuery):
+def generate_sas(inputQuery):
 
     result = {"url": "", "token": ""}
 
-    sasToken = subprocess.run(
+    sas_token = subprocess.run(
         ["az", "storage", "container", "generate-sas",
-         "--name", inputQuery['container'],
-         "--account-name", inputQuery['storage_account'],
-         "--permissions", inputQuery['permissions'],
-         "--start", inputQuery['start_date'],
-         "--expiry", inputQuery['end_date'],
+         "--name", input_query['container'],
+         "--account-name", input_query['storage_account'],
+         "--permissions", input_query['permissions'],
+         "--start", input_query['start_date'],
+         "--expiry", input_query['end_date'],
          "-o", "tsv"
          ],
         stdout=subprocess.PIPE,
@@ -50,15 +50,15 @@ def generateSAS(inputQuery):
     ).stdout.decode().rstrip()
 
     result["url"] = ''.join(
-        ['https://', inputQuery['storage_account'], '.blob.core.windows.net/',
-         inputQuery['container'], '?', sasToken])
-    result["token"] = sasToken
+        ['https://', input_query['storage_account'], '.blob.core.windows.net/',
+         inputQuery['container'], '?', sas_token])
+    result["token"] = sas_token
 
     return(json.dumps(result))
 
 
-inputQuery = json.load(sys.stdin)
+input_query = json.load(sys.stdin)
 
-azure_account.azure_user_access(inputQuery['subscription_id'])
+azure_account.azure_user_access(input_query['subscription_id'])
 
-print(generateSAS(inputQuery))
+print(generate_sas(input_query))
