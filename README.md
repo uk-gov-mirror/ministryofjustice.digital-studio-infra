@@ -2,7 +2,7 @@
 
 **Never check passwords or other similar secrets into source control**
 
-Each directory represents a distinct project, and is effectively a seperate terraform environment.
+Each directory represents a distinct project, and is effectively a separate terraform environment.
 
 ## Setup
 
@@ -11,7 +11,11 @@ Each directory represents a distinct project, and is effectively a seperate terr
  * [terraform 0.11.1+](http://terraform.io/)
  * [Node.JS 8+](https://nodejs.org/)
  * [Yarn](https://yarnpkg.com/en/)
+ * [Python 3.6] (https://www.python.org/)
+ * [pip] (https://pip.pypa.io/en/stable/)
+ * [Azure CLI 2.0] (https://docs.microsoft.com/en-us/cli/azure/overview?view=azure-cli-latest)
 
+### Environment initialization
 
 Install dependencies from npm using yarn from (package.json):
 
@@ -19,7 +23,7 @@ Install dependencies from npm using yarn from (package.json):
 yarn install
 ```
 
-Some environments might interact with the github api, you'll need to go get an API key from the admin UI to make that work. 
+Some environments might interact with the github api, you'll need to go get an API key from the admin UI to make that work.
 
 ```
 GITHUB_TOKEN=xxxx
@@ -27,9 +31,13 @@ GITHUB_TOKEN=xxxx
 
 Fetch the token from Settings->Developer Settings->Personal Access Tokens->Generate new token
 
+Run the repository setup script to include the python init script globally via a symlink to /usr/local/bin/digint.
 
+```
+python3 tools/initial-setup.py
+```
 
-### Terraform initialization 
+### Terraform initialization
 
 In order to authenticate with the Azure RM APIs you'll need to be able to login via the azure cli.  e.g.
 
@@ -43,7 +51,7 @@ Then switch the directory for the project you wish to terraform, and run the pyt
 
 e.g.
 ```~ $ cd digital-studio-infra/webops/dev/
-~/digital-studio-infra/webops/dev (master) $ python3 init.py
+~/digital-studio-infra/webops/dev (master) $ diginit
 ```
 
 This should report:
@@ -52,12 +60,14 @@ This should report:
 Terraform has been successfully initialized!
 ```
 
-You are now ready to run terraform commands: 
+You are now ready to run terraform commands:
 
 e.g.
 ```
 terraform plan
 ```
+
+You can override the Terraform and Azure verions by copying the config file tools/config/azure-versions.json to your local Terraform directory.
 
 ### Terraform initialization (using service principal authentication)
 

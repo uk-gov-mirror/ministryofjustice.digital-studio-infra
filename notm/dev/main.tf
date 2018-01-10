@@ -76,7 +76,7 @@ resource "azurerm_key_vault" "vault" {
 }
 
 data "external" "vault" {
-    program = ["node", "../../tools/keyvault-data-cli-auth.js"]
+   program = ["python3", "../../tools/keyvault-data-cli-auth.py"]
     query {
         vault = "${azurerm_key_vault.vault.name}"
         noms_token = "noms-token"
@@ -84,6 +84,7 @@ data "external" "vault" {
         google_analytics_id = "google-analytics-id"
     }
 }
+
 
 resource "azurerm_template_deployment" "webapp" {
     name = "webapp"
