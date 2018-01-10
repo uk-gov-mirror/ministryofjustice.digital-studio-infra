@@ -7,9 +7,9 @@ import os.path
 
 gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
-    stdout=subprocess.PIPE, encoding='utf8',
+    stdout=subprocess.PIPE,
     check=True
-).stdout.rstrip()
+).stdout.decode().rstrip()
 
 # Install Python requirements
 
