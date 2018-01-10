@@ -7,9 +7,9 @@ import shutil
 
 gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
-    stdout=subprocess.PIPE, encoding='utf8',
+    stdout=subprocess.PIPE,
     check=True
-).stdout.rstrip()
+).stdout.decode().rstrip()
 
 # Derive the backend key name from the path
 cwd = os.path.basename(os.getcwd())
@@ -86,8 +86,8 @@ key = subprocess.run(
         "--account-name", providerConfig[environment]["storage_account_name"],
         "--query", "[0].value",
         "--output", "tsv",
-    ],
-    stdout=subprocess.PIPE, 
+     ],
+    stdout=subprocess.PIPE,
     check=True
 ).stdout.decode()
 
