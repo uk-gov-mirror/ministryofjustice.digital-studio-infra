@@ -6,16 +6,16 @@ import os.path
 import shutil
 import time
 
-prodEnvs = ['prod', 'preprod']
+storageAccounts = ['prod', 'preprod', 'stage', 'dev']
 
 cwd = os.path.basename(os.getcwd())
 appDir = os.path.split(os.path.dirname(os.getcwd()))[1]
 resourceGroup = appDir+"-"+cwd
 
-if cwd in prodEnvs:
-  newStorageAccount = appDir + "prod" + "storage"
+if cwd in storageAccounts:
+  newStorageAccount = appDir + cwd + "storage"
 else:
-  newStorageAccount = appDir + "storage"
+  newStorageAccount = appDir + "devstorage"
 
 config = json.load(open("config.tf.json"))
 
@@ -71,3 +71,48 @@ config['terraform']['backend']['azurerm']['resource_group_name'] = resourceGroup
 
 with open('config.tf.json', 'w') as outfile:
     json.dump(config, outfile, indent=4) 
+
+subscription_params = ["--subscription",
+                       config['provider']['azurerm']["subscription_id"]]
+
+subprocess.run(
+    ["az", "account", "set", *subscription_params],
+    check=True
+)
+
+# Extract storage account key for remote state
+key = subprocess.run(
+    ["az", "storage", "account", "keys", "list",
+        "--resource-group", resourceGroup,
+        "--account-name", newStorageAccount,
+        "--query", "[0].value",
+        "--output", "tsv",
+     ],
+    stdout=subprocess.PIPE,
+    check=True
+).stdout.decode()
+
+# Make sure the container exists
+response = json.loads(subprocess.run(
+    ["az", "storage", "container", "exists",
+    "--account-name", newStorageAccount,
+    "--name", "terraform",
+    ],
+    stdout=subprocess.PIPE,
+    check=True
+).stdout.decode())
+
+if response["exists"] == False:
+  subprocess.run(
+    ["az", "storage","container", "create",
+    "--account-name", newStorageAccount,
+    "--name", "terraform"
+    ],
+    stdout=subprocess.PIPE,
+    check=True
+  )
+
+subprocess.run(
+    ["terraform", "init", "-backend-config", "access_key=%s" % key],
+    check=True
+)
