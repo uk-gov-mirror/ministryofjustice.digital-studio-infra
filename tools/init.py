@@ -4,6 +4,7 @@ import subprocess
 import sys
 import os.path
 import shutil
+from time import gmtime, strftime
 
 gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
@@ -90,6 +91,22 @@ key = subprocess.run(
     stdout=subprocess.PIPE,
     check=True
 ).stdout.decode()
+
+# Init terraform with acquired storage account key
+date_stamp = strftime("%Y-%m-%dT%H:%M:%S", gmtime())
+
+backup_file = ".terraform/teststate." + date_stamp
+
+current_state = subprocess.run(
+    ["terraform", "state",  "pull"],
+    stdout=subprocess.PIPE,
+    check=True
+).stdout.decode()
+
+with open(backup_file, "w") as f:
+    f.write(backup_file)
+
+exit()
 
 # Init terraform with acquired storage account key
 subprocess.run(
