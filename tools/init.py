@@ -5,6 +5,9 @@ import sys
 import os.path
 import shutil
 
+from python_modules import state_backup
+
+
 gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
     stdout=subprocess.PIPE,
@@ -90,6 +93,8 @@ key = subprocess.run(
     stdout=subprocess.PIPE,
     check=True
 ).stdout.decode()
+
+state_backup.backup()
 
 # Init terraform with acquired storage account key
 subprocess.run(
