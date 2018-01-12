@@ -5,6 +5,9 @@ import sys
 import os.path
 import shutil
 from time import gmtime, strftime
+import glob
+import fnmatch
+
 
 gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
@@ -92,10 +95,10 @@ key = subprocess.run(
     check=True
 ).stdout.decode()
 
-# Init terraform with acquired storage account key
+# Create a backup of the state
 date_stamp = strftime("%Y-%m-%dT%H:%M:%S", gmtime())
 
-backup_file = ".terraform/teststate." + date_stamp
+backup_file = ".terraform/tfstate." + date_stamp + ".backup"
 
 current_state = subprocess.run(
     ["terraform", "state",  "pull"],
@@ -104,9 +107,13 @@ current_state = subprocess.run(
 ).stdout.decode()
 
 with open(backup_file, "w") as f:
-    f.write(backup_file)
+    f.write(current_state)
 
-exit()
+while len(fnmatch.filter(os.listdir('.terraform'), 'tfstate.*.backup')) > 5:
+    oldest = min(
+        glob.iglob('.terraform/tfstate.*.backup'), key=os.path.getctime)
+
+    os.remove(oldest)
 
 # Init terraform with acquired storage account key
 subprocess.run(
