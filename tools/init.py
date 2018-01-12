@@ -109,6 +109,7 @@ current_state = subprocess.run(
 with open(backup_file, "w") as f:
     f.write(current_state)
 
+# Retain the 5 most recent backups
 while len(fnmatch.filter(os.listdir('.terraform'), 'tfstate.*.backup')) > 5:
     oldest = min(
         glob.iglob('.terraform/tfstate.*.backup'), key=os.path.getctime)
