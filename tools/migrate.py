@@ -15,7 +15,8 @@ resourceGroup = appDir+"-"+cwd
 if cwd in storageAccounts:
   newStorageAccount = appDir + cwd + "storage"
 else:
-  newStorageAccount = appDir + "devstorage"
+    # If we have an unknown storage account, we're going to assume it is dev
+    newStorageAccount = appDir + "devstorage"
 
 config = json.load(open("config.tf.json"))
 
@@ -113,11 +114,14 @@ if response["exists"] == False:
     check=True
   )
   
-subprocess.run(
+state = json.dumps(subprocess.run(
     ["terraform", "state","pull"],
     stdout=subprocess.PIPE,
     check=True
-)
+).stdout.decode())
+
+with open('.terraform.tfstate.backup', 'w') as outfile:
+    json.dump(state, outfile, indent=4) 
 
 subprocess.run(
     ["terraform", "init",
