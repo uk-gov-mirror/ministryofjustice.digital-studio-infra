@@ -29,19 +29,25 @@ environment = 'devtest'
 if cwd in prodEnvs:
     environment = 'prod'
 
-if not os.path.isfile("./azure-versions.json"):
-    src = ''.join([gitRoot, "/tools/config/azure-versions.json"])
+if not os.path.isfile("./dso.json"):
+    src = ''.join([gitRoot, "/tools/config/dso.json"])
     dst = "."
     shutil.copy2(src, dst)
 
-versions = json.load(open("./azure-versions.json"))
-
+appEnvConfig = json.load(open("./dso.json"))
+    
 providerConfig = json.load(
     open(gitRoot + "/tools/config/azure-provider-config.json"))
 
+if 'storage_account_name' in appEnvConfig:
+  providerConfig[environment]["storage_account_name"] = appEnvConfig['storage_account_name']
+
+if 'resource_group_name' in appEnvConfig:
+  providerConfig[environment]["resource_group_name"] = appEnvConfig['resource_group_name']
+
 configTfJson = {
     'terraform': {
-        'required_version': versions["terraform_version"],
+        'required_version': appEnvConfig["terraform_version"],
         'backend': {
             'azurerm': {
                 'resource_group_name': providerConfig[environment]["resource_group_name"],
@@ -55,7 +61,7 @@ configTfJson = {
         'azurerm': {
             'tenant_id': providerConfig[environment]["tenant_id"],
             'subscription_id': providerConfig[environment]["subscription_id"],
-            'version': versions["azurerm_version"]
+            'version': appEnvConfig["azurerm_version"]
         }
     }
 }
