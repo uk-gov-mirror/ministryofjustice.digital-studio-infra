@@ -104,7 +104,7 @@ key = subprocess.run(
 if os.path.exists("./.terraform/.dso-init"): 
   state_backup.backup()
 else:
-  open("./.terraform/.dso-init", 'a').write("# Flag to denote first run of init.py comepleted")
+  open("./.terraform/.dso-init", 'a').write("# Flag to denote first run of init.py comepleted").close()
 
 response = json.loads(subprocess.run(
     ["az", "storage", "container", "exists",
