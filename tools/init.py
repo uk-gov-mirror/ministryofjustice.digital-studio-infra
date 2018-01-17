@@ -101,10 +101,8 @@ key = subprocess.run(
 ).stdout.decode()
 
 # Use dso-init to flag first time run, subsequent runs will backup state
-if os.path.exists("./.terraform/.dso-init"): 
+if os.path.exists("./.terraform"): 
   state_backup.backup()
-else:
-  open("./.terraform/.dso-init", 'a').write("# Flag to denote first run of init.py comepleted").close()
 
 response = json.loads(subprocess.run(
     ["az", "storage", "container", "exists",
