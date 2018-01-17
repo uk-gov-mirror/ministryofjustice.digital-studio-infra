@@ -100,7 +100,30 @@ key = subprocess.run(
     check=True
 ).stdout.decode()
 
-state_backup.backup()
+# Use dso-init to flag first time run, subsequent runs will backup state
+if os.path.exists("./.terraform/.dso-init"): 
+  state_backup.backup()
+else:
+  open("./.terraform/.dso-init", 'a').write("# Flag to denote first run of init.py comepleted").close()
+
+response = json.loads(subprocess.run(
+    ["az", "storage", "container", "exists",
+    "--account-name", providerConfig[environment]["storage_account_name"],
+    "--name", "terraform",
+    ],
+    stdout=subprocess.PIPE,
+    check=True
+).stdout.decode())
+
+if response["exists"] == False:
+  subprocess.run(
+    ["az", "storage","container", "create",
+    "--account-name", providerConfig[environment]["storage_account_name"],
+    "--name", "terraform"
+    ],
+    stdout=subprocess.PIPE,
+    check=True
+  )
 
 # Init terraform with acquired storage account key
 subprocess.run(
