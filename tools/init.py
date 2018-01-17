@@ -100,7 +100,7 @@ key = subprocess.run(
     check=True
 ).stdout.decode()
 
-
+# Use dso-init to flag first time run, subsequent runs will backup state
 if os.path.exists("./.terraform/.dso-init"): 
   state_backup.backup()
 else:
