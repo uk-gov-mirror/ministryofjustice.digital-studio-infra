@@ -2,6 +2,6 @@
 "comment": "This file's purpose is to allow you to override values in config.tf.json, which is regenerated when init.py or diginit are invoked.",
 "terraform_version": "~> 0.11.0",
 "azurerm_version": "0.3.3",
-"storage_account_name": "notmdevstorage",
+"storage_account_name": "notmstagestorage",
 "resource_group_name": "notm-stage"
 }
