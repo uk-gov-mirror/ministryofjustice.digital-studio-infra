@@ -59,6 +59,6 @@ def generate_sas(input_query):
 
 input_query = json.load(sys.stdin)
 
-azure_account.azure_user_access(input_query['subscription_id'])
+azure_account.azure_set_subscription(input_query['subscription_id'])
 
 print(generate_sas(input_query))
