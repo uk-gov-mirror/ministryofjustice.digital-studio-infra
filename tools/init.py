@@ -7,6 +7,8 @@ import shutil
 
 from python_modules import state_backup
 
+if os.path.exists("./.terraform"): 
+  state_backup.backup()
 
 gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
@@ -101,8 +103,6 @@ key = subprocess.run(
 ).stdout.decode()
 
 # Use dso-init to flag first time run, subsequent runs will backup state
-if os.path.exists("./.terraform"): 
-  state_backup.backup()
 
 response = json.loads(subprocess.run(
     ["az", "storage", "container", "exists",
