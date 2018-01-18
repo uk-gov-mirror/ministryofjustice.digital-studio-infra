@@ -28,6 +28,8 @@ import sys
 import os.path
 import shutil
 
+from python_modules import azure_account
+
 from pprint import pprint
 
 args = json.load(sys.stdin)
@@ -59,9 +61,6 @@ def getSecrets(inputItems, vaultName):
     return json.dumps(secrets)
 
 
-subprocess.run(
-    ["az", "account", "get-access-token"],
-    check=True, stdout=subprocess.DEVNULL
-)
+azure_account.azure_access_token()
 
 print(getSecrets(inputItems, vaultName))
