@@ -7,7 +7,6 @@ import shutil
 
 from python_modules import state_backup
 
-
 gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
     stdout=subprocess.PIPE,
@@ -66,6 +65,9 @@ configTfJson = {
     }
 }
 
+if os.path.exists("./.terraform"): 
+  state_backup.backup()
+
 jsonFile = json.dumps(configTfJson, indent=2)
 
 with open("config.tf.json", "w") as f:
@@ -101,8 +103,6 @@ key = subprocess.run(
 ).stdout.decode()
 
 # Use dso-init to flag first time run, subsequent runs will backup state
-if os.path.exists("./.terraform"): 
-  state_backup.backup()
 
 response = json.loads(subprocess.run(
     ["az", "storage", "container", "exists",
