@@ -44,21 +44,17 @@ function main() {
   let dnsClient, certDetails, secretName;
   const keyVaultClient = createKeyVaultClient();
   createDNSClient()
-    .then((_dnsClient) => { dnsClient = _dnsClient;
-     })
+    .then((_dnsClient) => { dnsClient = _dnsClient; })
     .then(() => {
-
       return lookupZoneDetails(dnsClient);
-
     })
     .then((zoneDetails) => {
-     console.log(zoneDetails);
       return createCertificate(dnsClient, zoneDetails);
     })
     .then((result) => {
       console.log("Got certificates from letsencrypt");
       certDetails = result;
-/*
+
       if (argv.vault == '-') {
         console.log("Skipping vault upload");
         return null;
@@ -70,8 +66,8 @@ function main() {
         "", // password
         {certFiles: [certDetails.chain]}
       );
-    })*/
-/*    .then((pkcs12file) => {
+    })
+    .then((pkcs12file) => {
       if (!pkcs12file) {
         return;
       }
@@ -90,7 +86,7 @@ function main() {
             expires: certDetails._expiresAt
           }
         }
-      )*/
+      )
     })
     .catch((err) => {
       console.error(err.stack);
@@ -102,7 +98,7 @@ function createDNSClient() {
   return Promise.resolve()
 		.then(() => {
 			const creds = loadLocalCredentials(argv.subscription);
-			return azure.createDnsManagementClient(creds, argv.subscription)
+			return azure.createDnsManagementClient(creds, argv.subscription) 
 		});
 }
 function createKeyVaultClient() {
@@ -179,15 +175,10 @@ function buildKeyAuthorization(key) {
     );
 }
 
-/**********************************************/
 function createCertificate(dnsClient, zoneDetails) {
-
-  return opts;
-
   const challenge = {
     getOptions: () => ({}),
     set(opts, domain, key, value, callback) {
-
       const keyAuthorization = buildKeyAuthorization(value);
       console.log('Creating %s %s', domain, keyAuthorization);
       dnsClient.recordSets.createOrUpdate(
@@ -214,7 +205,7 @@ function createCertificate(dnsClient, zoneDetails) {
       ).then((r) => callback(), callback);
     }
   }
-  return '';/*LE.create({
+  return LE.create({
     server: 'production',
     store: require('le-store-certbot').create({
       configDir: argv.certbot,
@@ -228,10 +219,8 @@ function createCertificate(dnsClient, zoneDetails) {
     email: 'noms-studio-webops@digital.justice.gov.uk',
     challengeType: 'dns-01',
     agreeTos: true,
-  });*/
+  });
 }
-
-/*************************************************/
 
 const exec = require('child_process').execSync;
 function loadLocalCredentials(subscriptionId) {
