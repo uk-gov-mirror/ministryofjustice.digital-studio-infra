@@ -1,15 +1,10 @@
 {
-  "variable": {
-    "notice": {
-      "default": "This file is JSON so that init.py can read it easily"
-    }
-  },
   "terraform": {
     "required_version": "~> 0.11.0",
     "backend": {
       "azurerm": {
-        "resource_group_name": "webops",
-        "storage_account_name": "nomsstudiowebops",
+        "resource_group_name": "notm-stage",
+        "storage_account_name": "notmstagestorage",
         "container_name": "terraform",
         "key": "notm-stage.terraform.tfstate"
       }
