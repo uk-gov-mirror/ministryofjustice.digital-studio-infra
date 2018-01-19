@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 
 parser = argparse.ArgumentParser(description='Create/update azure webapp kudu webhooks')
 parser.add_argument('--appName', help='App Service name', required=True)
-parser.add_argument('--urls', help='json array of the webhook urls, optionally base64 encoded', required=True)
+parser.add_argument('--urls', help='json array of the webhook urls, base64 encoded', required=True)
 args = parser.parse_args()
 
 newhookurls = json.loads((base64.b64decode(args.urls).decode()))
