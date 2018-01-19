@@ -31,7 +31,7 @@ def req(method, path, data={}, params={}):
     url = urljoin(KUDU_API, '/api/' + path)
     url = url + '?' + urlencode(params)
     data = json.dumps(data)
-    data = data.encode('ascii')
+    data = data.encode('utf-8')
     logging.info("Requesting %s %s" % (method,url))
     if method == 'POST':
         headers.update({'Content-type': 'application/json'})
