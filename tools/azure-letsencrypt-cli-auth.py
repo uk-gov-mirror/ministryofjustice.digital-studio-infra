@@ -72,21 +72,29 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
     manual_cleanup_hook = "letsencrypt/cleanup.py {host} {zone} {resource_group}".format(
         host=host_challenge_name, zone=zone, resource_group=resource_group)
 
-    cert_details = subprocess.run(
-        ["sudo", certbot, "certonly", "--manual",
-         "--email", "noms-studio-webops@digital.justice.gov.uk",
-         "--preferred-challenges", "dns",
-         "-d", fqdn,
-         "--manual-auth-hook", manual_auth_hook,
-         "--manual-cleanup-hook", manual_cleanup_hook,
-         "--manual-public-ip-logging-ok",
-         "--duplicate"
-         ],
-        stdout=subprocess.PIPE,
-        check=True
-    ).stdout.decode()
+    try:
+        certificate = subprocess.run(
+            ["sudo", certbot, "certonly", "--manual",
+             "--email", "noms-studio-webops@digital.justice.gov.uk",
+             "--preferred-challenges", "dns",
+             "-d", fqdn,
+             "--manual-auth-hook", manual_auth_hook,
+             "--manual-cleanup-hook", manual_cleanup_hook,
+             "--manual-public-ip-logging-ok",
+             "--duplicate"
+             ],
+            stdout=subprocess.PIPE,
+            check=True
+        ).stdout.decode()
+    except subprocess.CalledProcessError:
+        sys.exit("There was an error creating the certificate")
 
-    return cert_details
+    path_to_cert = "/etc/letsencrypt/live/" + fqdn + "/fullchain.pem"
+
+    if os.path.exists(path_to_cert):
+        return True
+    else:
+        return False
 
 
 def create_pkcs12(fqdn):
@@ -106,12 +114,17 @@ def create_pkcs12(fqdn):
         check=True
     ).stdout.decode()
 
-    return export_path
+    if os.path.exists(export_path):
+        return export_path
+    else:
+        return False
 
 
-def store_certificate(cert_file, vault, fqdn):
+def store_certificate(vault, fqdn):
 
     name = fqdn.replace(".", "DOT")
+
+    cert_file = create_pkcs12(fqdn)
 
     cert_dates = get_certificate_expiry(fqdn)
 
@@ -189,9 +202,9 @@ azure_account.azure_set_subscription(args.subscription_id)
 if not get_zone_details(args.resource_group, args.zone):
     sys.exit("Failed to find existing zone " + args.zone)
 
-create_certificate(args.hostname, args.zone, fqdn,
-                   args.resource_group, args.certbot)
+if create_certificate(args.hostname, args.zone, fqdn,
+                      args.resource_group, args.certbot):
 
-cert_file = create_pkcs12(fqdn)
-
-store_certificate(cert_file, args.vault, fqdn)
+    store_certificate(args.vault, fqdn)
+else:
+    sys.exit("There was a problem creating the certificate")
