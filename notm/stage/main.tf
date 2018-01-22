@@ -60,6 +60,13 @@ resource "azurerm_key_vault" "vault" {
     	secret_permissions = "${var.azure_secret_permissions_all}"
 	}
 
+    access_policy {
+        tenant_id = "${var.azure_tenant_id}"
+        object_id = "${var.azure_notm_group_oid}"
+        key_permissions = []
+        secret_permissions = "${var.azure_secret_permissions_all}"
+    }
+    
 	access_policy {
     	tenant_id = "${var.azure_tenant_id}"
     	object_id = "${var.azure_app_service_oid}"

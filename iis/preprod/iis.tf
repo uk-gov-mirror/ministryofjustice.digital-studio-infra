@@ -70,7 +70,7 @@ resource "azurerm_key_vault" "vault" {
     
     access_policy {
         tenant_id = "${var.azure_tenant_id}"
-        object_id = "${var.azure_iis_service_oid}"
+        object_id = "${var.azure_iis_group_oid}"
         key_permissions = []
         secret_permissions = "${var.azure_secret_permissions_all}"
     }
