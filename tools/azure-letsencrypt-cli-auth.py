@@ -15,9 +15,9 @@ from datetime import datetime
 
 from python_modules import azure_account
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+    description='Script to create Letsencrypt SSL certificates and store in Azure Key Vault')
 
-#-db DATABSE -u USERNAME -p PASSWORD -size 20
 parser.add_argument("-z", "--zone", help="DNS Zone")
 parser.add_argument("-n", "--hostname", help="Hostname")
 parser.add_argument("-g", "--resource-group", help="Resource Group")
