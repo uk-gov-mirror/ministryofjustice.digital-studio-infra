@@ -61,12 +61,14 @@ resource "azurerm_key_vault" "vault" {
         key_permissions = []
         secret_permissions = "${var.azure_secret_permissions_all}"
     }
-    access_policy {
+
+        access_policy {
         tenant_id = "${var.azure_tenant_id}"
         object_id = "${var.azure_app_service_oid}"
         key_permissions = []
         secret_permissions = ["get"]
     }
+    
     enabled_for_deployment = false
     enabled_for_disk_encryption = false
     enabled_for_template_deployment = true
