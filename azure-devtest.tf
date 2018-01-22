@@ -6,7 +6,7 @@ variable "azure_tenant_id" {
     type = "string"
     default = "747381f4-e81f-4a43-bf68-ced6a1e14edf"
 }
-variable "azure_app_service_oid" {
+variable "azure_aap_service_oid" {
   type = "string"
   default = "5b2509b1-64bd-4117-b839-9b0c2b02e02c"
 }
@@ -33,10 +33,6 @@ variable "azure_nomis_api_group_oid" {
 variable "azure_iis_group_oid" {
 	type = "string"
 	default = "cce161c1-f0fb-499f-bbef-cf7788cc3928"
-}
-variable "azure_nomis_aap_group_oid" {
-	type = "string"
-	default = "e48a63e8-9b32-427a-8cd5-12b5faacb50a"
 }
 
 
