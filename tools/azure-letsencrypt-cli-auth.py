@@ -7,6 +7,11 @@ import subprocess
 import os
 import sys
 import argparse
+import base64
+import re
+
+from time import gmtime, strftime, strptime
+from datetime import datetime
 
 from python_modules import azure_account
 
@@ -23,7 +28,7 @@ parser.add_argument("-v", "--vault", help="KeyVault to store certificate in")
 
 args = parser.parse_args()
 
-domain = args.hostname + '.' + args.zone
+fqdn = args.hostname + '.' + args.zone
 
 
 def get_zone_details(resource_group, zone):
@@ -49,9 +54,9 @@ def get_zone_details(resource_group, zone):
         return False
 
 
-def create_certificate(hostname, zone, domain, resource_group, certbot_location):
+def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
 
-    # Ensure the hook scripts are executable and that teh log file is writable
+    # Ensure the hook scripts are executable and that the log file is writable
     subprocess.run(
         ["sudo", "chmod", "-R", "770", "letsencrypt"],
         check=True
@@ -71,7 +76,7 @@ def create_certificate(hostname, zone, domain, resource_group, certbot_location)
         ["sudo", certbot, "certonly", "--manual",
          "--email", "noms-studio-webops@digital.justice.gov.uk",
          "--preferred-challenges", "dns",
-         "-d", domain,
+         "-d", fqdn,
          "--manual-auth-hook", manual_auth_hook,
          "--manual-cleanup-hook", manual_cleanup_hook,
          "--manual-public-ip-logging-ok",
@@ -84,11 +89,11 @@ def create_certificate(hostname, zone, domain, resource_group, certbot_location)
     return cert_details
 
 
-def create_pkcs12(domain):
+def create_pkcs12(fqdn):
 
-    path_to_cert = "/etc/letsencrypt/live/" + domain + "/fullchain.pem"
-    path_to_key = "/etc/letsencrypt/live/" + domain + "/privkey.pem"
-    export_path = "letsencrypt/certificates/" + domain + ".p12"
+    path_to_cert = "/etc/letsencrypt/live/" + fqdn + "/fullchain.pem"
+    path_to_key = "/etc/letsencrypt/live/" + fqdn + "/privkey.pem"
+    export_path = "letsencrypt/certificates/" + fqdn + ".p12"
 
     subprocess.run(
         ["sudo", "openssl", "pkcs12", "-export",
@@ -104,14 +109,32 @@ def create_pkcs12(domain):
     return export_path
 
 
-def store_certificate(cert_file, vault, domain):
+def store_certificate(cert_file, vault, fqdn):
 
-    name = domain.replace(".", "DOT")
+    name = fqdn.replace(".", "DOT")
+
+    cert_dates = get_certificate_expiry(fqdn)
+
+    open_pkcs12 = open(cert_file, 'rb').read()
+    cert_encoded = base64.encodestring(open_pkcs12)
 
     subprocess.run(
-        ["az", "keyvault", "certificate", "import",
+        ["az", "keyvault", "secret", "set",
          "--file", cert_file,
+         "--encoding", "base64",
          "--name", name,
+         "--vault-name", vault
+         ],
+        stdout=subprocess.PIPE,
+        check=True
+    ).stdout.decode()
+
+    subprocess.run(
+        ["az", "keyvault", "secret", "set-attributes",
+         "--name", name,
+         "--content-type", "application/x-pkcs12",
+         "--expires", cert_dates["end"],
+         "--not-before", cert_dates["start"],
          "--vault-name", "notm-dev"
          ],
         stdout=subprocess.PIPE,
@@ -119,14 +142,56 @@ def store_certificate(cert_file, vault, domain):
     ).stdout.decode()
 
 
+def get_certificate_expiry(fqdn):
+
+    cert_dates = {}
+
+    cert_expiry_data = subprocess.run(
+        ["sudo", "openssl", "x509",
+         "-startdate",
+         "-enddate",
+         "-noout",
+         "-in", "/etc/letsencrypt/live/" + fqdn + "/fullchain.pem",
+         "-inform", "pem"
+         ],
+        stdout=subprocess.PIPE,
+        check=True
+    ).stdout.decode()
+
+    cert_expiry = cert_expiry_data.splitlines(True)
+
+    for certdate in cert_expiry:
+
+        if certdate.find("notBefore") != -1:
+            start_end = "start"
+
+        elif certdate.find("notAfter") != -1:
+            start_end = "end"
+        else:
+            sys.exit("The certificate appears to have missing dates")
+
+        certdate = certdate.rstrip()
+        certdate = re.sub(r"not(After|Before)=", '', certdate)
+
+        expiry_date_from_string = strptime(
+            certdate, "%b %d %H:%M:%S %Y %Z")
+
+        formatted_expiry_date = strftime(
+            "%Y-%m-%dT%H:%M:%SZ", expiry_date_from_string)
+
+        cert_dates[start_end] = formatted_expiry_date
+
+    return cert_dates
+
+
 azure_account.azure_set_subscription(args.subscription_id)
 
 if not get_zone_details(args.resource_group, args.zone):
     sys.exit("Failed to find existing zone " + args.zone)
 
-create_certificate(
-    args.hostname, args.zone, domain, args.resource_group, args.certbot)
+create_certificate(args.hostname, args.zone, fqdn,
+                   args.resource_group, args.certbot)
 
-cert_file = create_pkcs12(domain)
+cert_file = create_pkcs12(fqdn)
 
-store_certificate(cert_file, args.vault, domain)
+store_certificate(cert_file, args.vault, fqdn)
