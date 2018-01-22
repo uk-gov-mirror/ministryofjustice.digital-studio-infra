@@ -5,7 +5,7 @@ import json
 import logging
 import subprocess
 import sys
-import base64
+from base64 import b64decode 
 import pymssql  
 
 parser = argparse.ArgumentParser(description='Helper script to augment terraform mssql setup, manage db users, execute SQL')
@@ -64,11 +64,11 @@ def execute_sql(sql):
 
 if args.users != None:
     #decode base64 and load json into dict
-    users = json.loads((base64.b64decode(args.users).decode()))
+    users = json.loads((b64decode(args.users).decode()))
     setup_users(users)
 
 if args.queries != None:
-    queries = json.loads((base64.b64decode(args.queries).decode()))
+    queries = json.loads((b64decode(args.queries).decode()))
     sql_setup(queries)
 
 logging.info("Closing connection.")
