@@ -64,6 +64,12 @@ resource "azurerm_key_vault" "vault" {
     }
     access_policy {
         tenant_id = "${var.azure_tenant_id}"
+        object_id = "${var.azure_csra_service_oid}"
+        key_permissions = []
+        secret_permissions = "${var.azure_secret_permissions_all}"
+    }
+    access_policy {
+        tenant_id = "${var.azure_tenant_id}"
         object_id = "${var.azure_app_service_oid}"
         key_permissions = []
         secret_permissions = ["get"]
