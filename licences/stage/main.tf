@@ -70,14 +70,14 @@ resource "azurerm_key_vault" "vault" {
     tenant_id          = "${var.azure_tenant_id}"
     object_id          = "${var.azure_app_service_oid}"
     key_permissions    = []
-    secret_permissions = ["get"]
+    secret_permissions = "${var.azure_secret_permissions_all}"
   }
 
   access_policy {
-    object_id          = "${var.azure_glenm_tf_oid}"
     tenant_id          = "${var.azure_tenant_id}"
+    object_id          = "${var.azure_licenses_group_oid}"
     key_permissions    = []
-    secret_permissions = ["get", "set"]
+    secret_permissions = ["get"]
   }
 
   enabled_for_deployment          = false
