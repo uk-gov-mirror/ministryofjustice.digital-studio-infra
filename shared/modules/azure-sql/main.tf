@@ -126,7 +126,7 @@ resource "null_resource" "user-setup" {
     provisioner "local-exec" {
         # Base64 to handle quoting issues
         command = <<CMD
-node ${path.module}/db-setup.js \
+${path.module}/db-setup.py \
     --server '${azurerm_sql_server.sql.fully_qualified_domain_name}' \
     --username '${var.administrator_login}' \
     --password '${random_id.sql-admin-password.b64}' \
@@ -146,7 +146,7 @@ resource "null_resource" "db-setup" {
     provisioner "local-exec" {
         # Base64 to handle quoting issues
         command = <<CMD
-node ${path.module}/db-setup.js \
+${path.module}/db-setup.py \
     --server '${azurerm_sql_server.sql.fully_qualified_domain_name}' \
     --username '${var.administrator_login}' \
     --password '${random_id.sql-admin-password.b64}' \
