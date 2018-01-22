@@ -1,4 +1,4 @@
-#variable "env-name" {
+variable "env-name" {
   type    = "string"
   default = "aap-dev"
 }
