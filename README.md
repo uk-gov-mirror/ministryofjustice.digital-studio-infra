@@ -15,6 +15,15 @@ Each directory represents a distinct project, and is effectively a separate terr
  * [pip] (https://pip.pypa.io/en/stable/)
  * [Azure CLI 2.0] (https://docs.microsoft.com/en-us/cli/azure/overview?view=azure-cli-latest)
 
+### Python MSSQL client
+
+For Macs:
+```
+brew install freetds@0.91
+brew link --force freetds@0.91
+pip install pymssql
+```
+
 ### Environment initialization
 
 Install dependencies from npm using yarn from (package.json):
