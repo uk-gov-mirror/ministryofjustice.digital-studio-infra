@@ -1,4 +1,0 @@
-{
-"terraform_version": "~> 0.11.0",
-"azurerm_version": "0.3.3"
-}
