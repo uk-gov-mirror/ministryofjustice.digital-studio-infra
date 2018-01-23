@@ -56,9 +56,9 @@ def get_zone_details(resource_group, zone):
 
 def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
 
-    # Ensure the hook scripts are executable and that the log file is writable
+    # Ensure the hook scripts are executable
     subprocess.run(
-        ["sudo", "chmod", "-R", "770", "letsencrypt"],
+        ["sudo", "chmod", "-R", "550", "letsencrypt"],
         check=True
     )
 
@@ -74,14 +74,14 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
 
     try:
         certificate = subprocess.run(
-            ["sudo", certbot, "certonly", "--manual",
+            [certbot, "certonly", "--manual",
              "--email", "noms-studio-webops@digital.justice.gov.uk",
              "--preferred-challenges", "dns",
              "-d", fqdn,
              "--manual-auth-hook", manual_auth_hook,
              "--manual-cleanup-hook", manual_cleanup_hook,
              "--manual-public-ip-logging-ok",
-             "--duplicate"
+             "--force-renewal"
              ],
             stdout=subprocess.PIPE,
             check=True
@@ -104,7 +104,7 @@ def create_pkcs12(fqdn):
     export_path = "letsencrypt/certificates/" + fqdn + ".p12"
 
     subprocess.run(
-        ["sudo", "openssl", "pkcs12", "-export",
+        ["openssl", "pkcs12", "-export",
          "-inkey", path_to_key,
          "-in", path_to_cert,
          "-out", export_path,
@@ -160,7 +160,7 @@ def get_certificate_expiry(fqdn):
     cert_dates = {}
 
     cert_expiry_data = subprocess.run(
-        ["sudo", "openssl", "x509",
+        ["openssl", "x509",
          "-startdate",
          "-enddate",
          "-noout",
