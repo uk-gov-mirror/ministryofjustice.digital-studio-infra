@@ -38,7 +38,7 @@ variable "azure_aap_group_oid" {
 	type = "string"
 	default = "e48a63e8-9b32-427a-8cd5-12b5faacb50a"
 }
-variable "azure_licenses_group_oid" {
+variable "azure_licences_group_oid" {
 	type = "string"
 	default = "deb8884e-c108-4aa5-995c-14609c0cc7d2"
 }
