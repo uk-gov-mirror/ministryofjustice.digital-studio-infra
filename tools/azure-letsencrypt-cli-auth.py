@@ -56,12 +56,6 @@ def get_zone_details(resource_group, zone):
 
 def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
 
-    # Ensure the hook scripts are executable
-    # subprocess.run(
-    #     ["sudo", "chmod", "-R", "550", "letsencrypt"],
-    #     check=True
-    # )
-
     host_challenge_name = '_acme-challenge.' + hostname
 
     manual_auth_hook = "python3 letsencrypt/authenticator.py {host} {zone} {resource_group}".format(
@@ -80,6 +74,9 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
              "--manual-cleanup-hook", manual_cleanup_hook,
              "--manual-public-ip-logging-ok",
              "--force-renewal"
+             "--config-dir", certbot_location,
+             "--work-dir", certbot_location,
+             "--logs-dir", certbot_location
              ],
             stdout=subprocess.PIPE,
             check=True
