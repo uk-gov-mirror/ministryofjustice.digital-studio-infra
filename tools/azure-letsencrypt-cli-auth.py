@@ -66,14 +66,14 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
 
     try:
         certificate = subprocess.run(
-            [certbot_location, "certonly", "--manual",
+            ["certbot", "certonly", "--manual",
              "--email", "noms-studio-webops@digital.justice.gov.uk",
              "--preferred-challenges", "dns",
              "-d", fqdn,
              "--manual-auth-hook", manual_auth_hook,
              "--manual-cleanup-hook", manual_cleanup_hook,
              "--manual-public-ip-logging-ok",
-             "--force-renewal"
+             "--force-renewal",
              "--config-dir", certbot_location,
              "--work-dir", certbot_location,
              "--logs-dir", certbot_location
