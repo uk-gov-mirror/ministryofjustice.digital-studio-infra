@@ -23,7 +23,7 @@ parser.add_argument("-n", "--hostname", help="Hostname")
 parser.add_argument("-g", "--resource-group", help="Resource Group")
 parser.add_argument("-s", "--subscription-id", help="Subscription ID")
 parser.add_argument("-c", "--certbot",
-                    help="Certbot installation directory")
+                    help="Certbot installation directory e.g. /usr/usr/local/opt/letsencrypt/bin/certbot")
 parser.add_argument("-v", "--vault", help="KeyVault to store certificate in")
 
 args = parser.parse_args()
@@ -62,8 +62,6 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
     #     check=True
     # )
 
-    certbot = certbot_location + "certbot"
-
     host_challenge_name = '_acme-challenge.' + hostname
 
     manual_auth_hook = "python3 letsencrypt/authenticator.py {host} {zone} {resource_group}".format(
@@ -74,7 +72,7 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
 
     try:
         certificate = subprocess.run(
-            [certbot, "certonly", "--manual",
+            [certbot_location, "certonly", "--manual",
              "--email", "noms-studio-webops@digital.justice.gov.uk",
              "--preferred-challenges", "dns",
              "-d", fqdn,
