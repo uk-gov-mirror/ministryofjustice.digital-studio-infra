@@ -16,15 +16,16 @@ from datetime import datetime
 from python_modules import azure_account
 
 parser = argparse.ArgumentParser(
-    description='Script to create Letsencrypt SSL certificates and store in Azure Key Vault')
+    description='Script to create LetsEncrypt SSL certificates and store in Azure Key Vault')
 
 parser.add_argument("-z", "--zone", help="DNS Zone")
 parser.add_argument("-n", "--hostname", help="Hostname")
-parser.add_argument("-g", "--resource-group", help="Resource Group")
-parser.add_argument("-s", "--subscription-id", help="Subscription ID")
+parser.add_argument("-g", "--resource-group", help="Azure Resource Group")
+parser.add_argument("-s", "--subscription-id", help="Azure Subscription ID")
 parser.add_argument("-c", "--certbot",
-                    help="Certbot installation directory e.g. /usr/usr/local/opt/letsencrypt/bin/certbot")
-parser.add_argument("-v", "--vault", help="KeyVault to store certificate in")
+                    help="Certbot configuration directory set during 'certbot register'. User must have write permissions.")
+parser.add_argument(
+    "-v", "--vault", help="Azure Key Vault to store certificate in")
 
 args = parser.parse_args()
 
@@ -56,13 +57,15 @@ def get_zone_details(resource_group, zone):
 
 def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
 
+    path_to_hook_scripts = azure_account.get_git_root() + '/tools/letsencrypt'
+
     host_challenge_name = '_acme-challenge.' + hostname
 
-    manual_auth_hook = "python3 letsencrypt/authenticator.py {host} {zone} {resource_group}".format(
-        host=host_challenge_name, zone=zone, resource_group=resource_group)
+    manual_auth_hook = "python3 {path_to_scripts}/authenticator.py {host} {zone} {resource_group}".format(
+        host=host_challenge_name, zone=zone, resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
 
-    manual_cleanup_hook = "python3 letsencrypt/cleanup.py {host} {zone} {resource_group}".format(
-        host=host_challenge_name, zone=zone, resource_group=resource_group)
+    manual_cleanup_hook = "python3 {path_to_scripts}/cleanup.py {host} {zone} {resource_group}".format(
+        host=host_challenge_name, zone=zone, resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
 
     try:
         certificate = subprocess.run(
