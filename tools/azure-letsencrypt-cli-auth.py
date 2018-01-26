@@ -67,6 +67,8 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
     manual_cleanup_hook = "python3 {path_to_scripts}/cleanup.py {host} {zone} {resource_group}".format(
         host=host_challenge_name, zone=zone, resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
 
+    print("Creating certificate")
+
     try:
         certificate = subprocess.run(
             ["certbot", "certonly", "--manual",
@@ -87,19 +89,20 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
     except subprocess.CalledProcessError:
         sys.exit("There was an error creating the certificate")
 
-    path_to_cert = "/etc/letsencrypt/live/" + fqdn + "/fullchain.pem"
+    path_to_cert = certbot_location + "/live/" + fqdn + "/fullchain.pem"
 
     if os.path.exists(path_to_cert):
+        print("Certificate created")
         return True
     else:
         return False
 
 
-def create_pkcs12(fqdn):
+def create_pkcs12(fqdn, certbot_location):
 
-    path_to_cert = "/etc/letsencrypt/live/" + fqdn + "/fullchain.pem"
-    path_to_key = "/etc/letsencrypt/live/" + fqdn + "/privkey.pem"
-    export_path = "letsencrypt/certificates/" + fqdn + ".p12"
+    path_to_cert = certbot_location + "/live/" + fqdn + "/fullchain.pem"
+    path_to_key = certbot_location + "/live/" + fqdn + "/privkey.pem"
+    export_path = certbot_location + "/live/" + fqdn + ".p12"
 
     subprocess.run(
         ["openssl", "pkcs12", "-export",
@@ -115,21 +118,21 @@ def create_pkcs12(fqdn):
     if os.path.exists(export_path):
         return export_path
     else:
-        return False
+        sys.exit("There was a problem creating the certificate")
 
 
-def store_certificate(vault, fqdn):
+def store_certificate(vault, fqdn, certbot_location):
 
     name = fqdn.replace(".", "DOT")
 
-    cert_file = create_pkcs12(fqdn)
+    cert_file = create_pkcs12(fqdn, certbot_location)
 
-    cert_dates = get_certificate_expiry(fqdn)
+    cert_dates = get_local_certificate_expiry(fqdn, certbot_location)
 
     open_pkcs12 = open(cert_file, 'rb').read()
     cert_encoded = base64.encodestring(open_pkcs12)
 
-    subprocess.run(
+    set_secret = subprocess.run(
         ["az", "keyvault", "secret", "set",
          "--file", cert_file,
          "--encoding", "base64",
@@ -138,22 +141,32 @@ def store_certificate(vault, fqdn):
          ],
         stdout=subprocess.PIPE,
         check=True
-    ).stdout.decode()
+    )
 
-    subprocess.run(
-        ["az", "keyvault", "secret", "set-attributes",
-         "--name", name,
-         "--content-type", "application/x-pkcs12",
-         "--expires", cert_dates["end"],
-         "--not-before", cert_dates["start"],
-         "--vault-name", "notm-dev"
-         ],
-        stdout=subprocess.PIPE,
-        check=True
-    ).stdout.decode()
+    print(set_secret)
+
+    if set_secret.returncode == 0:
+        set_secret_attributes = subprocess.run(
+            ["az", "keyvault", "secret", "set-attributes",
+             "--name", name,
+             "--content-type", "application/x-pkcs12",
+             "--expires", cert_dates["end"],
+             "--not-before", cert_dates["start"],
+             "--vault-name", "notm-dev"
+             ],
+            stdout=subprocess.PIPE,
+            check=True
+        )
+
+        if set_secret_attributes.returncode == 0:
+            return True
+        else:
+            sys.exit("Could not set secret attributes in key vault.")
+    else:
+        sys.exit("Could not set secret in key vault.")
 
 
-def get_certificate_expiry(fqdn):
+def get_local_certificate_expiry(fqdn, certbot_location):
 
     cert_dates = {}
 
@@ -162,7 +175,7 @@ def get_certificate_expiry(fqdn):
          "-startdate",
          "-enddate",
          "-noout",
-         "-in", "/etc/letsencrypt/live/" + fqdn + "/fullchain.pem",
+         "-in", certbot_location + "/live/" + fqdn + "/fullchain.pem",
          "-inform", "pem"
          ],
         stdout=subprocess.PIPE,
@@ -171,7 +184,51 @@ def get_certificate_expiry(fqdn):
 
     cert_expiry = cert_expiry_data.splitlines(True)
 
-    for certdate in cert_expiry:
+    return get_certificate_dates(cert_expiry)
+
+
+def get_remote_certificate_expiry(fqdn):
+
+    #    Use subprocess to run the shell command 'echo "Q" | openssl s_client -servername NAME -connect HOST:PORT 2>/dev/null | openssl x509 -noout -dates'
+
+    echo = subprocess.run(
+        ["echo", "Q"],
+        stdout=subprocess.PIPE,
+        check=True
+    )
+
+    openssl_sclient = subprocess.run(
+        ["openssl", "s_client",
+         "-servername", fqdn,
+         "-connect", fqdn + ":443"
+         ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        input=echo.stdout,
+        check=True
+    )
+
+    openssl_dates = subprocess.run(
+        ["openssl", "x509",
+         "-startdate",
+         "-enddate",
+         "-noout"
+         ],
+        stdout=subprocess.PIPE,
+        input=openssl_sclient.stdout,
+        check=True
+    ).stdout.decode()
+
+    cert_expiry = openssl_dates.splitlines(True)
+
+    return get_certificate_dates(cert_expiry)
+
+
+def get_certificate_dates(openssl_response):
+
+    cert_dates = {}
+
+    for certdate in openssl_response:
 
         if certdate.find("notBefore") != -1:
             start_end = "start"
@@ -195,6 +252,40 @@ def get_certificate_expiry(fqdn):
     return cert_dates
 
 
+def check_cname_exits(host, zone, resource_group):
+    # az network dns record-set cname show -n notm-deva -g webops -z hmpps.dsd.io
+    cname = subprocess.run(
+        ["az", "network", "dns", "record-set",
+         "cname", "show",
+         "-n", host,
+         "-z", zone,
+         "-g", resource_group
+         ],
+        stdout=subprocess.PIPE,
+        check=True
+    ).stdout.decode()
+
+    if cname:
+        return True
+    else:
+        return False
+
+
+if check_cname_exits(args.hostname, args.zone, args.resource_group):
+
+    remote_expiry = get_remote_certificate_expiry(fqdn)
+    cert_end_date = datetime.strptime(
+        remote_expiry['end'], "%Y-%m-%dT%H:%M:%SZ")
+
+    present_date = datetime.now()
+
+    if cert_end_date > present_date:
+        print("Certificate does not need renewing until " +
+              cert_end_date.strftime('%d %b %Y'))
+        sys.exit()
+else:
+    print("CNAME doesn't exist. No expiry date to check.")
+
 azure_account.azure_set_subscription(args.subscription_id)
 
 if not get_zone_details(args.resource_group, args.zone):
@@ -203,6 +294,5 @@ if not get_zone_details(args.resource_group, args.zone):
 if create_certificate(args.hostname, args.zone, fqdn,
                       args.resource_group, args.certbot):
 
-    store_certificate(args.vault, fqdn)
-else:
-    sys.exit("There was a problem creating the certificate")
+if store_certificate(args.vault, fqdn, args.certbot):
+    print("Certificate successfully created.")
