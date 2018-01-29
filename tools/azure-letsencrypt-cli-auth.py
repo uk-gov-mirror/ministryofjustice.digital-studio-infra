@@ -9,11 +9,14 @@ import sys
 import argparse
 import base64
 import re
+import logging
 
 from time import gmtime, strftime, strptime
 from datetime import datetime
 
 from python_modules import azure_account
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 parser = argparse.ArgumentParser(
     description='Script to create LetsEncrypt SSL certificates and store in Azure Key Vault')
@@ -67,7 +70,7 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
     manual_cleanup_hook = "python3 {path_to_scripts}/cleanup.py {host} {zone} {resource_group}".format(
         host=host_challenge_name, zone=zone, resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
 
-    print("Creating certificate")
+    logging.info("Creating certificate")
 
     try:
         certificate = subprocess.run(
@@ -92,9 +95,10 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
     path_to_cert = certbot_location + "/live/" + fqdn + "/fullchain.pem"
 
     if os.path.exists(path_to_cert):
-        print("Certificate created")
+        logging.info("Certificate created")
         return True
     else:
+        logging.error("There was an error creating the certificate")
         return False
 
 
@@ -132,18 +136,20 @@ def store_certificate(vault, fqdn, certbot_location):
     open_pkcs12 = open(cert_file, 'rb').read()
     cert_encoded = base64.encodestring(open_pkcs12)
 
-    set_secret = subprocess.run(
-        ["az", "keyvault", "secret", "set",
-         "--file", cert_file,
-         "--encoding", "base64",
-         "--name", name,
-         "--vault-name", vault
-         ],
-        stdout=subprocess.PIPE,
-        check=True
-    )
+    try:
+        set_secret = subprocess.run(
+            ["az", "keyvault", "secret", "set",
+             "--file", cert_file,
+             "--encoding", "base64",
+             "--name", name,
+             "--vault-name", vault
+             ],
+            stdout=subprocess.PIPE,
+            check=True
+        )
 
-    print(set_secret)
+    except subprocess.CalledProcessError:
+        sys.exit("There was an error saving to the key vault")
 
     if set_secret.returncode == 0:
         set_secret_attributes = subprocess.run(
@@ -280,11 +286,11 @@ if check_cname_exits(args.hostname, args.zone, args.resource_group):
     present_date = datetime.now()
 
     if cert_end_date > present_date:
-        print("Certificate does not need renewing until " +
-              cert_end_date.strftime('%d %b %Y'))
+        logging.info("Certificate does not need renewing until %s" %
+                     (cert_end_date.strftime('%d %b %Y')))
         sys.exit()
 else:
-    print("CNAME doesn't exist. No expiry date to check.")
+    logging.info("CNAME doesn't exist. No expiry date to check.")
 
 azure_account.azure_set_subscription(args.subscription_id)
 
@@ -294,5 +300,5 @@ if not get_zone_details(args.resource_group, args.zone):
 if create_certificate(args.hostname, args.zone, fqdn,
                       args.resource_group, args.certbot):
 
-if store_certificate(args.vault, fqdn, args.certbot):
-    print("Certificate successfully created.")
+    if store_certificate(args.vault, fqdn, args.certbot):
+        logging.info("Certificate successfully created.")
