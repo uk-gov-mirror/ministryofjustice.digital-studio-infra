@@ -93,6 +93,7 @@ module "docker_webapp" {
     GITHUB_OAUTH_CLIENTID = "${data.external.vault.result.github_oauth_clientid}" 
     GITHUB_OAUTH_GROUP = "${data.external.vault.result.github_oauth_group}"
     CERTBOT_REG_EMAIL = "noms-studio-webops@digital.justice.gov.uk"
+    PIPELINES_GIT_REPO = "https://github.com/ministryofjustice/digital-studio-platform-pipelines.git"
   }
   tags = "${var.tags}" 
 }
