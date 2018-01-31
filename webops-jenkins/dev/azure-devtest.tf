@@ -1,0 +1,1 @@
+../../azure-devtest-common.tf
