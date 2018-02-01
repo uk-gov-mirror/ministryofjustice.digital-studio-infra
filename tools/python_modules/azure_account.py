@@ -21,3 +21,14 @@ def azure_access_token(subscription_id=None):
         ["az", "account", "get-access-token", *subscription_params],
         check=True, stdout=subprocess.DEVNULL
     )
+
+
+def get_git_root():
+
+    git_root = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        stdout=subprocess.PIPE,
+        check=True
+    ).stdout.decode().rstrip()
+
+    return git_root
