@@ -29,6 +29,8 @@ parser.add_argument("-c", "--certbot",
                     help="Certbot configuration directory set during 'certbot register'. User must have write permissions.")
 parser.add_argument(
     "-v", "--vault", help="Azure Key Vault to store certificate in")
+parser.add_argument(
+    "-t", "--test-environment", help="test mode - uses Letsencrypt staging environment")
 
 args = parser.parse_args()
 
@@ -72,23 +74,27 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
 
     logging.info("Creating certificate")
 
+    cmd = ["certbot", "certonly", "--manual",
+           "--email", "noms-studio-webops@digital.justice.gov.uk",
+           "--preferred-challenges", "dns",
+           "-d", fqdn,
+           "--manual-auth-hook", manual_auth_hook,
+           "--manual-cleanup-hook", manual_cleanup_hook,
+           "--manual-public-ip-logging-ok",
+           "--config-dir", certbot_location,
+           "--work-dir", certbot_location,
+           "--logs-dir", certbot_location,
+           "--force-renewal"
+           ]
+
+    if args.test_environment:
+        cmd.append('--staging')
+        logging.info("Using staging environment")
+
     try:
-        certificate = subprocess.run(
-            ["certbot", "certonly", "--manual",
-             "--email", "noms-studio-webops@digital.justice.gov.uk",
-             "--preferred-challenges", "dns",
-             "-d", fqdn,
-             "--manual-auth-hook", manual_auth_hook,
-             "--manual-cleanup-hook", manual_cleanup_hook,
-             "--manual-public-ip-logging-ok",
-             "--force-renewal",
-             "--config-dir", certbot_location,
-             "--work-dir", certbot_location,
-             "--logs-dir", certbot_location
-             ],
-            stdout=subprocess.PIPE,
-            check=True
-        ).stdout.decode()
+        certificate = subprocess.check_call(
+            cmd
+        )
     except subprocess.CalledProcessError:
         sys.exit("There was an error creating the certificate")
 
