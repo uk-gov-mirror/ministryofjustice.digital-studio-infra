@@ -164,7 +164,7 @@ def store_certificate(vault, fqdn, certbot_location):
              "--content-type", "application/x-pkcs12",
              "--expires", cert_dates["end"],
              "--not-before", cert_dates["start"],
-             "--vault-name", "notm-dev"
+             "--vault-name", vault
              ],
             stdout=subprocess.PIPE,
             check=True
