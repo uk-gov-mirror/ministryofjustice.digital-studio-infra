@@ -1,0 +1,48 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "APPINSIGHTS_INSTRUMENTATIONKEY": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "NODE_ENV": {
+            "type": "string"
+        },
+        "API_ENDPOINT_URL": {
+            "type": "string"
+        },
+        "USE_API_GATEWAY_AUTH": {
+            "type": "string"
+        },
+        "API_GATEWAY_TOKEN": {
+            "type": "secureString"
+        },
+        "API_GATEWAY_PRIVATE_KEY": {
+            "type": "secureString"
+        },
+        "SESSION_SECRET": {
+            "type": "secureString"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('name'), '/appsettings')]",
+            "type": "Microsoft.Web/sites/config",
+            "properties": {
+                "WEBSITE_NODE_DEFAULT_VERSION": "8.4.0",
+                "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
+                "NODE_ENV": "[parameters('NODE_ENV')]",
+                "API_ENDPOINT_URL": "[parameters('API_ENDPOINT_URL')]",
+                "USE_API_GATEWAY_AUTH": "[parameters('USE_API_GATEWAY_AUTH')]",
+                "API_GATEWAY_TOKEN": "[parameters('API_GATEWAY_TOKEN')]",
+                "API_GATEWAY_PRIVATE_KEY": "[parameters('API_GATEWAY_PRIVATE_KEY')]",
+                "SESSION_SECRET": "[parameters('SESSION_SECRET')]"
+            }
+        }
+    ]
+}
