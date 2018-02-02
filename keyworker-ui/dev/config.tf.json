@@ -3,10 +3,10 @@
     "required_version": "~> 0.11.0",
     "backend": {
       "azurerm": {
-        "resource_group_name": "keyworker-ui-dev",
-        "storage_account_name": "keyworkeruistorage",
+        "resource_group_name": "omic-dev",
+        "storage_account_name": "omicuistorage",
         "container_name": "terraform",
-        "key": "keyworker-ui-dev.terraform.tfstate"
+        "key": "omic-dev.terraform.tfstate"
       }
     }
   },
