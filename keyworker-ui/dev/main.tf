@@ -167,11 +167,11 @@ resource "azurerm_template_deployment" "webapp-ssl" {
 module "slackhook" {
   source = "../../shared/modules/slackhook"
   app_name = "${azurerm_template_deployment.webapp.parameters.name}"
-  channels = ["nomisonthemove"]
+  channels = ["omic-dev"]
 }
 
 resource "azurerm_dns_cname_record" "cname" {
-  name = "notm-dev"
+  name = "omic-dev"
   zone_name = "hmpps.dsd.io"
   resource_group_name = "webops"
   ttl = "300"
