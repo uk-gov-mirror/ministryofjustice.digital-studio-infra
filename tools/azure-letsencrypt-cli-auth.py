@@ -305,7 +305,7 @@ def certificate_renewal_due(fqdn):
 
     cert_end_date = datetime.strptime(
         remote_expiry['end'], "%Y-%m-%dT%H:%M:%SZ")
-    print(cert_end_date)
+
     # Adjust the renewal date to when the first letsencrypt email reminder is sent.
     adjusted_renewal_date = cert_end_date - timedelta(days=21)
 
