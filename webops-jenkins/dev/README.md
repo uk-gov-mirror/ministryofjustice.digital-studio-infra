@@ -1,3 +1,15 @@
+### Setup
+
+This terraform directory sets up an azure webapp, on linux, using a docker image.  It runs this docker image, see here for details:
+
+https://github.com/ministryofjustice/digital-studio-platform-jenkins
+
+#### Dependancies
+The jenkins setup integrates with azure AD for authentication, so in order for that to work you need to create a service principle and supply creds to the azureapp, see `main.tf` and `APP_SETTINGS`.  Also see instructions on the offical Azure AD plugin for jenkins here:
+
+https://wiki.jenkins.io/display/JENKINS/Azure+AD+Plugin
+
+
 ### Some helpful things about running a docker container inside an azure app services....
 
 ---
