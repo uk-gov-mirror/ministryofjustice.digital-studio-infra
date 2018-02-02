@@ -33,3 +33,10 @@ Tail the stdout from your running container, this requires *Docker container log
 ```bash
 az webapp log tail --name webops-jenkins-dev -g webops-jenkins-dev
 ```
+Note, this is really useful to see what *docker* command azure use to spin up the container.
+
+---
+See the logs via KUDU, follow the link to the latest logs.
+https://webops-jenkins-dev.scm.azurewebsites.net/api/logs/docker
+
+---
