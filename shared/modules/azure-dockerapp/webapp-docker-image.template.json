@@ -58,7 +58,9 @@
                 "numberOfWorkers": 1,
                 "linuxFxVersion": "[concat('DOCKER|', parameters('docker_image'))]",
                 "alwaysOn": true,
-                "httpsOnly": true
+                "httpsOnly": true,
+                "httpLoggingEnabled": true,
+                "logsDirectorySizeLimit": 35
             }
         },
         {
