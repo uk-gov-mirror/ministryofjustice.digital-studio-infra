@@ -2,6 +2,6 @@
 "comment": "This file's purpose is to allow you to override values in config.tf.json, which is regenerated when init.py or diginit are invoked.",
 "terraform_version": "~> 0.11.0",
 "azurerm_version": "0.3.3",
-"storage_account_name": "keyworkeruistorage",
-"resource_group_name": "keyworker-ui-dev"
+"storage_account_name": "omicuistorage",
+"resource_group_name": "omic-dev"
 }

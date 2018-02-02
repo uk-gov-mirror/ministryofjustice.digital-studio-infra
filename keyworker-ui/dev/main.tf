@@ -6,7 +6,7 @@ variable "env-name" {
 variable "tags" {
     type = "map"
     default {
-        Service = "keyworker-ui"
+        Service = "omic"
         Environment = "Dev"
     }
 }
@@ -15,7 +15,7 @@ resource "random_id" "session-secret" {
   byte_length = 40
 }
 
-resource "azurerm_app_service_plan" "keyworker-ui" {
+resource "azurerm_app_service_plan" "omic-ui" {
   name                = "${var.env-name}"
   location            = "${azurerm_resource_group.group.location}"
   resource_group_name = "${azurerm_resource_group.group.name}"
@@ -33,11 +33,11 @@ resource "azurerm_resource_group" "group" {
   tags     = "${var.tags}"
 }
 
-resource "azurerm_app_service" "keyworker-ui" {
+resource "azurerm_app_service" "omic-ui" {
   name                = "${var.env-name}"
   location            = "${azurerm_resource_group.group.location}"
   resource_group_name = "${azurerm_resource_group.group.name}"
-  app_service_plan_id = "${azurerm_app_service_plan.keyworker-ui.id}"
+  app_service_plan_id = "${azurerm_app_service_plan.omic-ui.id}"
 
   app_settings {
     WEBSITE_NODE_DEFAULT_VERSION = "8.4.0"
