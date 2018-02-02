@@ -1,6 +1,6 @@
 variable "env-name" {
     type = "string"
-    default = "keyworker-ui-dev"
+    default = "omic-dev"
 }
 
 variable "tags" {
@@ -51,8 +51,8 @@ data "external" "vault" {
 
   query {
     vault = "${azurerm_key_vault.vault.name}"
-# left as an example
-#    elite_api_gateway_private_key = "elite-api-gateway-private-key"
+    api_gateway_private_key = "api-gateway-private-key"
+    api_gateway_token = "api-gateway-token"
   }
 }
 
@@ -94,3 +94,88 @@ resource "azurerm_key_vault" "vault" {
 
   tags = "${var.tags}"
 }
+
+
+resource "azurerm_template_deployment" "webapp" {
+  name = "webapp"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  deployment_mode = "Incremental"
+  template_body = "${file("../../shared/appservice.template.json")}"
+  parameters {
+    name = "${var.env-name}"
+    service = "${var.tags["Service"]}"
+    environment = "${var.tags["Environment"]}"
+    workers = "1"
+    sku_name = "S1"
+    sku_tier = "Standard"
+  }
+}
+
+resource "azurerm_template_deployment" "insights" {
+  name = "${var.env-name}"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  deployment_mode = "Incremental"
+  template_body = "${file("../../shared/insights.template.json")}"
+  parameters {
+    name = "${var.env-name}"
+    location = "northeurope" // Not in UK yet
+    service = "${var.tags["Service"]}"
+    environment = "${var.tags["Environment"]}"
+    appServiceId = "${azurerm_template_deployment.webapp.outputs["resourceId"]}"
+  }
+}
+
+resource "azurerm_template_deployment" "webapp-config" {
+  name = "webapp-config"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  deployment_mode = "Incremental"
+  template_body = "${file("../webapp-config.template.json")}"
+
+  parameters {
+    name = "${var.env-name}"
+    APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
+    NODE_ENV = "production"
+    API_ENDPOINT_URL = "https://noms-api-dev.dsd.io/elite2api/"
+    USE_API_GATEWAY_AUTH = "yes"
+    API_GATEWAY_TOKEN = "${data.external.vault.result.api_gateway_token}"
+    API_GATEWAY_PRIVATE_KEY = "${data.external.vault.result.api_gateway_private_key}"
+    SESSION_SECRET = "${random_id.session-secret.b64}"
+  }
+
+  depends_on = ["azurerm_template_deployment.webapp"]
+}
+
+resource "azurerm_template_deployment" "webapp-ssl" {
+  name = "webapp-ssl"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  deployment_mode = "Incremental"
+  template_body = "${file("../../shared/appservice-ssl.template.json")}"
+
+  parameters {
+    name = "${azurerm_template_deployment.webapp.parameters.name}"
+    hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
+    keyVaultId = "${azurerm_key_vault.vault.id}"
+    keyVaultCertName = "${replace("${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}", ".", "DOT")}"
+    service = "${var.tags["Service"]}"
+    environment = "${var.tags["Environment"]}"
+  }
+
+  depends_on = ["azurerm_template_deployment.webapp"]
+}
+
+
+module "slackhook" {
+  source = "../../shared/modules/slackhook"
+  app_name = "${azurerm_template_deployment.webapp.parameters.name}"
+  channels = ["nomisonthemove"]
+}
+
+resource "azurerm_dns_cname_record" "cname" {
+  name = "notm-dev"
+  zone_name = "hmpps.dsd.io"
+  resource_group_name = "webops"
+  ttl = "300"
+  record = "${var.env-name}.azurewebsites.net"
+  tags = "${var.tags}"
+}
+
