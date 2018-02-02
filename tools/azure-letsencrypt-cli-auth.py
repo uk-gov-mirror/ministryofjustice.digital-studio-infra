@@ -86,7 +86,8 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
            "--config-dir", certbot_location,
            "--work-dir", certbot_location,
            "--logs-dir", certbot_location,
-           "--force-renewal"
+           "--force-renewal",
+           "--agree-tos"
            ]
 
     if args.test_environment:
