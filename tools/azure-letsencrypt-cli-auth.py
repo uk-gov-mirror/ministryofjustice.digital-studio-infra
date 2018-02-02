@@ -31,6 +31,8 @@ parser.add_argument(
     "-v", "--vault", help="Azure Key Vault to store certificate in")
 parser.add_argument(
     "-t", "--test-environment", help="test mode - uses Letsencrypt staging environment")
+parser.add_argument(
+    "-e", "--ignore-expiry", help="Ignore the expiry date check")
 
 args = parser.parse_args()
 
@@ -266,13 +268,17 @@ def get_certificate_dates(openssl_response):
 
 def check_dns_name_exits(host, zone, resource_group):
     # az network dns record-set cname show -n notm-deva -g webops -z hmpps.dsd.io
+
+    cmd = ["az", "network", "dns", "record-set",
+     "cname", "show",
+     "-n", host,
+     "-z", zone,
+     "-g", resource_group
+     ]
+
+    logging.info("Trying CNAME record")
     cname = subprocess.run(
-        ["az", "network", "dns", "record-set",
-         "cname", "show",
-         "-n", host,
-         "-z", zone,
-         "-g", resource_group
-         ],
+        cmd,
         stdout=subprocess.PIPE,
         check=True
     ).stdout.decode()
@@ -280,8 +286,18 @@ def check_dns_name_exits(host, zone, resource_group):
     if cname:
         return True
     else:
-        return False
+        cmd[4] = "a"
+        logging.info("Trying A record")
+        a_record = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            check=True
+        ).stdout.decode()
 
+    if a_record:
+        return True
+    else:
+        return False
 
 def certificate_renewal_due(fqdn):
 
@@ -289,7 +305,7 @@ def certificate_renewal_due(fqdn):
 
     cert_end_date = datetime.strptime(
         remote_expiry['end'], "%Y-%m-%dT%H:%M:%SZ")
-
+    print(cert_end_date)
     # Adjust the renewal date to when the first letsencrypt email reminder is sent.
     adjusted_renewal_date = cert_end_date - timedelta(days=21)
 
@@ -301,16 +317,19 @@ def certificate_renewal_due(fqdn):
         sys.exit()
 
 
-if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
-    certificate_renewal_due(fqdn)
 
-else:
-    logging.info("A record or CNAME doesn't exist. No expiry date to check.")
 
 azure_account.azure_set_subscription(args.subscription_id)
 
 if not get_zone_details(args.resource_group, args.zone):
     sys.exit("Failed to find existing zone " + args.zone)
+
+if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
+    if not args.ignore_expiry:
+        logging.info("Check expiry date")
+        certificate_renewal_due(fqdn)
+else:
+    logging.info("A record or CNAME doesn't exist. No expiry date to check.")
 
 if create_certificate(args.hostname, args.zone, fqdn,
                       args.resource_group, args.certbot):
