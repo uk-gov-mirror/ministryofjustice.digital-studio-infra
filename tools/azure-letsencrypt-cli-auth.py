@@ -30,9 +30,9 @@ parser.add_argument("-c", "--certbot",
 parser.add_argument(
     "-v", "--vault", help="Azure Key Vault to store certificate in")
 parser.add_argument(
-    "-t", "--test-environment", help="test mode - uses Letsencrypt staging environment")
+    "-t", "--test-environment", help="test mode - uses Letsencrypt staging environment",action='store_true')
 parser.add_argument(
-    "-e", "--ignore-expiry", help="Ignore the expiry date check")
+    "-e", "--ignore-expiry", help="Ignore the expiry date check",action='store_true')
 
 args = parser.parse_args()
 
