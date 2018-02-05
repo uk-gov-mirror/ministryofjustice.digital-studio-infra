@@ -40,7 +40,7 @@ hostname = args.hostname
 
 if args.test_environment:
     hostname = "letsencrypt-staging-" + hostname
-    args.ignore_expiry = True
+#    args.ignore_expiry = True
 
 fqdn = hostname + '.' + args.zone
 
@@ -234,7 +234,7 @@ def get_remote_certificate_expiry(fqdn):
         return False
 
     try:
-        openssl_dates = subprocess.check_output(
+        openssl_dates = subprocess.run(
             ["openssl", "x509",
              "-startdate",
              "-enddate",
