@@ -32,7 +32,7 @@ parser.add_argument(
 parser.add_argument(
     "-t", "--test-environment", help="test mode - uses Letsencrypt staging environment",action='store_true')
 parser.add_argument(
-    "-e", "--ignore-expiry", help="Ignore the expiry date check",action='store_true')
+    "-e", "--ignore-expiry", help="Ignore the expiry date check to perform an early renewal",action='store_true')
 
 args = parser.parse_args()
 
@@ -150,7 +150,7 @@ def store_certificate(vault, fqdn, certbot_location):
 
     open_pkcs12 = open(cert_file, 'rb').read()
     cert_encoded = base64.encodestring(open_pkcs12)
-   
+
     try:
         set_secret = subprocess.run(
             ["az", "keyvault", "secret", "set",
@@ -218,27 +218,35 @@ def get_remote_certificate_expiry(fqdn):
         check=True
     )
 
-    openssl_sclient = subprocess.run(
-        ["openssl", "s_client",
-         "-servername", fqdn,
-         "-connect", fqdn + ":443"
-         ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-        input=echo.stdout,
-        check=True
-    )
+    try:
+        openssl_sclient = subprocess.run(
+            ["openssl", "s_client",
+             "-servername", fqdn,
+             "-connect", fqdn + ":443"
+             ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            input=echo.stdout,
+            check=True
+        )
+    except:
+        logging.info("Could not connect to host")
+        return False
 
-    openssl_dates = subprocess.run(
-        ["openssl", "x509",
-         "-startdate",
-         "-enddate",
-         "-noout"
-         ],
-        stdout=subprocess.PIPE,
-        input=openssl_sclient.stdout,
-        check=True
-    ).stdout.decode()
+    try:
+        openssl_dates = subprocess.check_output(
+            ["openssl", "x509",
+             "-startdate",
+             "-enddate",
+             "-noout"
+             ],
+            stdout=subprocess.PIPE,
+            input=openssl_sclient.stdout,
+            check=True
+        ).stdout.decode()
+    except:
+       logging.info("Could not read certificate")
+       return False
 
     cert_expiry = openssl_dates.splitlines(True)
 
@@ -310,19 +318,21 @@ def certificate_renewal_due(fqdn):
 
     remote_expiry = get_remote_certificate_expiry(fqdn)
 
-    cert_end_date = datetime.strptime(
-        remote_expiry['end'], "%Y-%m-%dT%H:%M:%SZ")
+    if remote_expiry:
+        cert_end_date = datetime.strptime(
+            remote_expiry['end'], "%Y-%m-%dT%H:%M:%SZ")
 
-    # Adjust the renewal date to when the first letsencrypt email reminder is sent.
-    adjusted_renewal_date = cert_end_date - timedelta(days=21)
+        # Adjust the renewal date to when the first letsencrypt email reminder is sent.
+        adjusted_renewal_date = cert_end_date - timedelta(days=21)
 
-    present_date = datetime.now()
+        present_date = datetime.now()
 
-    if adjusted_renewal_date > present_date:
-        logging.info("Certificate does not need renewing until %s" %
-                     (cert_end_date.strftime('%d %b %Y')))
-        sys.exit()
-
+        if adjusted_renewal_date > present_date:
+            logging.info("Certificate does not need renewing until %s" %
+                         (cert_end_date.strftime('%d %b %Y')))
+            sys.exit()
+    else:
+        logging.info("Couldn't check certificate.")
 
 
 
