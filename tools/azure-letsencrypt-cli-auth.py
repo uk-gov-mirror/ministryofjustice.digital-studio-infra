@@ -36,7 +36,12 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-fqdn = args.hostname + '.' + args.zone
+hostname = args.hostname
+
+if args.test_environment:
+    hostname = "letsencrypt-staging-" + hostname
+
+fqdn = hostname + '.' + args.zone
 
 
 def get_zone_details(resource_group, zone):
@@ -332,7 +337,7 @@ if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
 else:
     logging.info("A record or CNAME doesn't exist. No expiry date to check.")
 
-if create_certificate(args.hostname, args.zone, fqdn,
+if create_certificate(hostname, args.zone, fqdn,
                       args.resource_group, args.certbot):
 
     if store_certificate(args.vault, fqdn, args.certbot):
