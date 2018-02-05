@@ -150,6 +150,10 @@ def store_certificate(vault, fqdn, certbot_location):
 
     open_pkcs12 = open(cert_file, 'rb').read()
     cert_encoded = base64.encodestring(open_pkcs12)
+   
+    # If in testing mode, test saving the cert to a secret with a staging prefix
+    if args.test_environment:
+        name = "letsencrypt-staging-" + name
 
     try:
         set_secret = subprocess.run(
