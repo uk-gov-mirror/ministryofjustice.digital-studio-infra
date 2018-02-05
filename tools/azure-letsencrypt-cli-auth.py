@@ -149,7 +149,7 @@ def store_certificate(vault, fqdn, certbot_location):
    
     # If in testing mode, test saving the cert to a secret with a staging prefix
     if args.test_environment:
-        name = "letsencrypt-staging-" + name
+        vault = "letsencrypt-staging-" + vault
 
     try:
         set_secret = subprocess.run(
