@@ -38,6 +38,10 @@ args = parser.parse_args()
 
 hostname = args.hostname
 
+if args.test_environment:
+    hostname = "letsencrypt-staging-" + hostname
+    args.ignore_expiry = True
+
 fqdn = hostname + '.' + args.zone
 
 
@@ -137,9 +141,6 @@ def create_pkcs12(fqdn, certbot_location):
 
 
 def store_certificate(vault, fqdn, certbot_location):
-
-    if args.test_environment:
-        fqdn = "letsencrypt-staging-" + fqdn
 
     name = fqdn.replace(".", "DOT")
 
