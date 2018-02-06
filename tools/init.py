@@ -21,6 +21,10 @@ appDir = os.path.split(os.path.dirname(os.getcwd()))[1]
 
 keyName = ''.join([appDir, '-', cwd, '.terraform.tfstate'])
 
+storage_account = appDir.replace('-','') + cwd + "storage"
+
+resource_group = appDir + "-" + cwd
+
 # Check if this is a prod or dev environment
 prodEnvs = ['prod', 'preprod']
 
@@ -96,6 +100,45 @@ key = subprocess.run(
 ).stdout.decode()
 
 # Use dso-init to flag first time run, subsequent runs will backup state
+
+resource_group_exists = subprocess.run(
+    ["az", "group", "show",
+    "--name", "resource_group" ],
+    stdout=subprocess.PIPE,
+    check=True
+).stdout.decode()
+
+if not resource_group_exists:
+  subprocess.run(
+      ["az", "group", "create",
+      "--location", "ukwest",
+      "--name", resource_group,
+      ],
+      stdout=subprocess.PIPE,
+      check=True
+  ).stdout.decode()
+
+
+accounts = json.loads(subprocess.run(
+    ["az", "storage", "account", "list"],
+    stdout=subprocess.PIPE,
+    check=True
+).stdout.decode())
+
+account_names = []
+
+for name in accounts:
+  account_names.append(name['name'])
+
+if storage_account not in account_names:
+  subprocess.run(
+      ["az", "storage", "account", "create",
+      "--name", storage_account,
+      "--resource-group", resource_group,
+      ],
+      stdout=subprocess.PIPE,
+      check=True
+  ).stdout.decode()
 
 response = json.loads(subprocess.run(
     ["az", "storage", "container", "exists",
