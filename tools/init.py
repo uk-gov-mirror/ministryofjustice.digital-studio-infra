@@ -7,6 +7,7 @@ import shutil
 
 from python_modules import state_backup
 from python_modules import azure_account
+from python_modules import storage_creation
 
 gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
@@ -24,6 +25,8 @@ keyName = ''.join([appDir, '-', cwd, '.terraform.tfstate'])
 storage_account = appDir.replace('-','') + cwd + "storage"
 
 resource_group = appDir + "-" + cwd
+
+storage_creation.create_storage_account(resource_group, storage_account)
 
 # Check if this is a prod or dev environment
 prodEnvs = ['prod', 'preprod']
@@ -98,66 +101,6 @@ key = subprocess.run(
     stdout=subprocess.PIPE,
     check=True
 ).stdout.decode()
-
-# Use dso-init to flag first time run, subsequent runs will backup state
-
-resource_group_exists = subprocess.run(
-    ["az", "group", "show",
-    "--name", "resource_group" ],
-    stdout=subprocess.PIPE,
-    check=True
-).stdout.decode()
-
-if not resource_group_exists:
-  subprocess.run(
-      ["az", "group", "create",
-      "--location", "ukwest",
-      "--name", resource_group,
-      ],
-      stdout=subprocess.PIPE,
-      check=True
-  ).stdout.decode()
-
-
-accounts = json.loads(subprocess.run(
-    ["az", "storage", "account", "list"],
-    stdout=subprocess.PIPE,
-    check=True
-).stdout.decode())
-
-account_names = []
-
-for name in accounts:
-  account_names.append(name['name'])
-
-if storage_account not in account_names:
-  subprocess.run(
-      ["az", "storage", "account", "create",
-      "--name", storage_account,
-      "--resource-group", resource_group,
-      ],
-      stdout=subprocess.PIPE,
-      check=True
-  ).stdout.decode()
-
-response = json.loads(subprocess.run(
-    ["az", "storage", "container", "exists",
-     "--account-name", providerConfig[environment]["storage_account_name"],
-     "--name", "terraform",
-     ],
-    stdout=subprocess.PIPE,
-    check=True
-).stdout.decode())
-
-if response["exists"] == False:
-    subprocess.run(
-        ["az", "storage", "container", "create",
-         "--account-name", providerConfig[environment]["storage_account_name"],
-         "--name", "terraform"
-         ],
-        stdout=subprocess.PIPE,
-        check=True
-    )
 
 # Init terraform with acquired storage account key
 subprocess.run(
