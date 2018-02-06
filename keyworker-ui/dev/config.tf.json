@@ -6,7 +6,7 @@
         "resource_group_name": "omic-dev",
         "storage_account_name": "omicuistorage",
         "container_name": "terraform",
-        "key": "omic-dev.terraform.tfstate"
+        "key": "keyworker-ui-dev.terraform.tfstate"
       }
     }
   },
