@@ -1,6 +1,6 @@
 variable "env-name" {
     type = "string"
-    default = "omic-dev"
+    default = "omic-ui-dev"
 }
 
 variable "tags" {
@@ -44,9 +44,10 @@ resource "azurerm_app_service" "omic-ui" {
     NODE_ENV       = "production"
     SESSION_SECRET = "${random_id.session-secret.b64}"
     API_ENDPOINT_URL = "https://noms-api-dev.dsd.io/elite2api/"
+    API_GATEWAY_TOKEN = "${data.external.vault.result.api_gateway_token}"
     API_GATEWAY_PRIVATE_KEY = "${data.external.vault.result.api_gateway_private_key}"
     USE_API_GATEWAY_AUTH = "yes"
-    APPINSIGHTS_INSTRUMENTATIONKEY = "${data.external.vault.result.api_gateway_token}"
+    APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
   }
 }
 
