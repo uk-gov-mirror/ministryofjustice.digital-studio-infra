@@ -26,7 +26,7 @@ storage_account = appDir.replace('-','') + cwd + "storage"
 
 resource_group = appDir + "-" + cwd
 
-storage_creation.create_storage_account(resource_group, storage_account)
+
 
 # Check if this is a prod or dev environment
 prodEnvs = ['prod', 'preprod']
@@ -57,8 +57,8 @@ configTfJson = {
         'required_version': appEnvConfig["terraform_version"],
         'backend': {
             'azurerm': {
-                'resource_group_name': providerConfig[environment]["resource_group_name"],
-                'storage_account_name': providerConfig[environment]["storage_account_name"],
+                'resource_group_name': resource_group,# providerConfig[environment]["resource_group_name"],
+                'storage_account_name': storage_account,#providerConfig[environment]["storage_account_name"],
                 'container_name': 'terraform',
                 'key': keyName
             }
@@ -90,17 +90,21 @@ azure_account.azure_access_token(providerConfig[environment]["subscription_id"])
 azure_account.azure_set_subscription(
     providerConfig[environment]["subscription_id"])
 
+storage_creation.create_storage_account(resource_group, storage_account)
+
 # Extract storage account key for remote state
 key = subprocess.run(
     ["az", "storage", "account", "keys", "list",
-        "--resource-group", providerConfig[environment]["resource_group_name"],
-        "--account-name", providerConfig[environment]["storage_account_name"],
+        "--resource-group", resource_group, #providerConfig[environment]["resource_group_name"],
+        "--account-name", storage_account, #providerConfig[environment]["storage_account_name"],
         "--query", "[0].value",
         "--output", "tsv",
      ],
     stdout=subprocess.PIPE,
     check=True
 ).stdout.decode()
+
+
 
 # Init terraform with acquired storage account key
 subprocess.run(
