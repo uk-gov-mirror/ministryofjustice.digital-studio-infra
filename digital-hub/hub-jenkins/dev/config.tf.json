@@ -1,9 +1,4 @@
 {
-  "variable": {
-    "notice": {
-      "default": "This file is JSON so that init.py can read it easily"
-    }
-  },
   "terraform": {
     "required_version": "~> 0.11.0",
     "backend": {

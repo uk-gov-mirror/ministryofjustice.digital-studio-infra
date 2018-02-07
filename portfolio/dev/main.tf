@@ -20,7 +20,7 @@ resource "azurerm_template_deployment" "app" {
     name = "${var.app-name}"
     resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
-    template_body = "${file("../shared/appservice.template.json")}"
+    template_body = "${file("../../shared/appservice.template.json")}"
     parameters {
         name = "${var.app-name}"
         service = "${var.tags["Service"]}"
@@ -35,7 +35,7 @@ resource "azurerm_template_deployment" "app-whitelist" {
     name = "app-whitelist"
     resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
-    template_body = "${file("../shared/appservice-whitelist.template.json")}"
+    template_body = "${file("../../shared/appservice-whitelist.template.json")}"
 
     parameters {
         name = "${var.app-name}"
@@ -61,7 +61,7 @@ resource "azurerm_template_deployment" "app-hostname" {
     name = "app-hostname"
     resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
-    template_body = "${file("../shared/appservice-hostname.template.json")}"
+    template_body = "${file("../../shared/appservice-hostname.template.json")}"
 
     parameters {
         name = "${var.app-name}"
@@ -75,7 +75,7 @@ resource "azurerm_template_deployment" "app-github" {
     name = "app-github"
     resource_group_name = "${azurerm_resource_group.group.name}"
     deployment_mode = "Incremental"
-    template_body = "${file("../shared/appservice-scm.template.json")}"
+    template_body = "${file("../../shared/appservice-scm.template.json")}"
 
     parameters {
         name = "${azurerm_template_deployment.app.parameters.name}"
