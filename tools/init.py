@@ -7,6 +7,7 @@ import shutil
 
 from python_modules import state_backup
 from python_modules import azure_account
+from python_modules import storage_creation
 
 gitRoot = subprocess.run(
     ["git", "rev-parse", "--show-toplevel"],
@@ -20,6 +21,12 @@ cwd = os.path.basename(os.getcwd())
 appDir = os.path.split(os.path.dirname(os.getcwd()))[1]
 
 keyName = ''.join([appDir, '-', cwd, '.terraform.tfstate'])
+
+storage_account = appDir.replace('-','') + cwd + "storage"
+
+resource_group = appDir + "-" + cwd
+
+storage_creation.create_storage_account(resource_group, storage_account)
 
 # Check if this is a prod or dev environment
 prodEnvs = ['prod', 'preprod']
@@ -94,27 +101,6 @@ key = subprocess.run(
     stdout=subprocess.PIPE,
     check=True
 ).stdout.decode()
-
-# Use dso-init to flag first time run, subsequent runs will backup state
-
-response = json.loads(subprocess.run(
-    ["az", "storage", "container", "exists",
-     "--account-name", providerConfig[environment]["storage_account_name"],
-     "--name", "terraform",
-     ],
-    stdout=subprocess.PIPE,
-    check=True
-).stdout.decode())
-
-if response["exists"] == False:
-    subprocess.run(
-        ["az", "storage", "container", "create",
-         "--account-name", providerConfig[environment]["storage_account_name"],
-         "--name", "terraform"
-         ],
-        stdout=subprocess.PIPE,
-        check=True
-    )
 
 # Init terraform with acquired storage account key
 subprocess.run(
