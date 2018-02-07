@@ -1,0 +1,90 @@
+[
+{
+  "azure_app": "licences-stage",
+  "hostname": "licences-stage",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "licences-stage",
+  "keyvault": "licences-stage",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+},
+{
+  "azure_app": "csra-mock",
+  "hostname": "csra-mock",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "csra-mock",
+  "keyvault": "csra-mock",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+},
+{
+  "azure_app": "csra-stage",
+  "hostname": "csra-stage",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "csra-stage",
+  "keyvault": "csra-stage",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+},
+{
+  "azure_app": "rsr-dev",
+  "hostname": "rsr-dev",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "aap-dev",
+  "keyvault": "aap-dev",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+},
+{
+  "azure_app": "viper-dev",
+  "hostname": "viper-dev",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "aap-dev",
+  "keyvault": "aap-dev",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+},
+{
+  "azure_app": "iis-stage",
+  "hostname": "hpa-stage",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "iis-stage",
+  "keyvault": "iis-stage",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+},
+{
+  "azure_app": "licences-mock",
+  "hostname": "licences-mock",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "licences-mock",
+  "keyvault": "licences-mock",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+},
+{
+  "azure_app": "nomis-batchload-mock",
+  "hostname": "nomis-batchload-mock",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "licences-mock",
+  "keyvault": "licences-mock",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+},
+{
+  "azure_app": "notm-dev",
+  "hostname": "notm-dev",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "notm-dev",
+  "keyvault": "notm-dev",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+},
+{
+  "azure_app": "notm-stage",
+  "hostname": "notm-stage",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "notm-stage",
+  "keyvault": "notm-stage",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+},
+{
+  "azure_app": "elite2-dev",
+  "hostname": "elite2-dev",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "notm-dev",
+  "keyvault": "notm-dev",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+}
+]
