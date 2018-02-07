@@ -86,5 +86,13 @@
   "resource_group": "notm-dev",
   "keyvault": "notm-dev",
   "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+},
+{
+  "azure_app": "omic-ui-dev",
+  "hostname": "omic-dev",
+  "zone": "hmpps.dsd.io",
+  "resource_group": "omic-ui-dev",
+  "keyvault": "omic-ui-dev",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
 }
 ]
