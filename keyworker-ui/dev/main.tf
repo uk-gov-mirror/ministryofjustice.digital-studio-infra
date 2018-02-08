@@ -1,6 +1,6 @@
 variable "env-name" {
     type = "string"
-    default = "omic-dev"
+    default = "omic-ui-dev"
 }
 
 variable "tags" {
@@ -41,8 +41,13 @@ resource "azurerm_app_service" "omic-ui" {
 
   app_settings {
     WEBSITE_NODE_DEFAULT_VERSION = "8.4.0"
-    NODE_ENV       = "dev"
+    NODE_ENV       = "production"
     SESSION_SECRET = "${random_id.session-secret.b64}"
+    API_ENDPOINT_URL = "https://noms-api-dev.dsd.io/elite2api/"
+    API_GATEWAY_TOKEN = "${data.external.vault.result.api_gateway_token}"
+    API_GATEWAY_PRIVATE_KEY = "${data.external.vault.result.api_gateway_private_key}"
+    USE_API_GATEWAY_AUTH = "yes"
+    APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
   }
 }
 
@@ -125,25 +130,7 @@ resource "azurerm_template_deployment" "insights" {
   }
 }
 
-resource "azurerm_template_deployment" "webapp-config" {
-  name = "webapp-config"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode = "Incremental"
-  template_body = "${file("../webapp-config.template.json")}"
 
-  parameters {
-    name = "${var.env-name}"
-    APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
-    NODE_ENV = "production"
-    API_ENDPOINT_URL = "https://noms-api-dev.dsd.io/elite2api/"
-    USE_API_GATEWAY_AUTH = "yes"
-    API_GATEWAY_TOKEN = "${data.external.vault.result.api_gateway_token}"
-    API_GATEWAY_PRIVATE_KEY = "${data.external.vault.result.api_gateway_private_key}"
-    SESSION_SECRET = "${random_id.session-secret.b64}"
-  }
-
-  depends_on = ["azurerm_template_deployment.webapp"]
-}
 
 resource "azurerm_template_deployment" "webapp-ssl" {
   name = "webapp-ssl"
@@ -163,12 +150,41 @@ resource "azurerm_template_deployment" "webapp-ssl" {
   depends_on = ["azurerm_template_deployment.webapp"]
 }
 
+resource "azurerm_template_deployment" "webapp-github" {
+  name = "webapp-github"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  deployment_mode = "Incremental"
+  template_body = "${file("../../shared/appservice-scm.template.json")}"
 
-module "slackhook" {
-  source = "../../shared/modules/slackhook"
-  app_name = "${azurerm_template_deployment.webapp.parameters.name}"
-  channels = ["omic-dev"]
+  parameters {
+    name = "${var.env-name}"
+    repoURL = "https://github.com/ministryofjustice/keyworker-ui.git"
+    branch = "deploy-to-dev"
+  }
+
+  depends_on = ["azurerm_template_deployment.webapp"]
 }
+
+resource "github_repository_webhook" "webapp-deploy" {
+  provider = "github.moj"
+  repository = "keyworker-ui"
+
+  name = "web"
+  configuration {
+    url = "${azurerm_template_deployment.webapp-github.outputs["deployTrigger"]}?scmType=GitHub"
+    content_type = "form"
+    insecure_ssl = false
+  }
+  active = true
+
+  events = ["push"]
+}
+
+//module "slackhook" {
+//  source = "../../shared/modules/slackhook"
+//  app_name = "${azurerm_template_deployment.webapp.parameters.name}"
+//  channels = ["omic-dev"]
+//}
 
 resource "azurerm_dns_cname_record" "cname" {
   name = "omic-dev"
