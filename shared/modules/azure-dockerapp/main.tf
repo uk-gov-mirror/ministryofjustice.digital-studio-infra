@@ -37,8 +37,8 @@ resource "azurerm_app_service_plan" "service_plan" {
   location            = "${var.location}"
   resource_group_name = "${var.resource_group}"
   sku {
-    tier     = "Basic"
-    size     = "B1"
+    tier     = "Standard"
+    size     = "S1"
     capacity = 1
   }
   properties {
