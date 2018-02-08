@@ -51,26 +51,6 @@ resource "azurerm_app_service" "omic-ui" {
   }
 }
 
-resource "azurerm_template_deployment" "webapp-config" {
-  name = "webapp-config"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode = "Incremental"
-  template_body = "${file("../webapp-config.template.json")}"
-
-  parameters {
-    name = "${var.env-name}"
-    APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
-    NODE_ENV = "production"
-    API_ENDPOINT_URL = "https://noms-api-dev.dsd.io/elite2api/"
-    USE_API_GATEWAY_AUTH = "yes"
-    API_GATEWAY_TOKEN = "${data.external.vault.result.api_gateway_token}"
-    API_GATEWAY_PRIVATE_KEY = "${data.external.vault.result.api_gateway_private_key}"
-    SESSION_SECRET = "${random_id.session-secret.b64}"
-  }
-
-  depends_on = ["azurerm_template_deployment.webapp"]
-}
-
 data "external" "vault" {
   program = ["python3", "../../tools/keyvault-data-cli-auth.py"]
 
