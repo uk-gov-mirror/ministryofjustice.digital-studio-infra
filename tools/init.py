@@ -20,7 +20,7 @@ def create_config_file():
 
     logging.info("Creating config.tf.json")
 
-    # Derive the backend key name from the path
+    # Derive the names for key, resource group and storage account from the path
     cwd = os.path.basename(os.getcwd())
 
     appDir = os.path.split(os.path.dirname(os.getcwd()))[1]
@@ -51,8 +51,8 @@ def create_config_file():
             'required_version': appEnvConfig["terraform_version"],
             'backend': {
                 'azurerm': {
-                    'resource_group_name': resource_group,# providerConfig[environment]["resource_group_name"],
-                    'storage_account_name': storage_account,#providerConfig[environment]["storage_account_name"],
+                    'resource_group_name': resource_group,
+                    'storage_account_name': storage_account,
                     'container_name': 'terraform',
                     'key': keyName
                 }
@@ -129,8 +129,8 @@ storage_creation.create_storage_account(resource_group, storage_account)
 
 key = subprocess.run(
     ["az", "storage", "account", "keys", "list",
-        "--resource-group", resource_group, #providerConfig[environment]["resource_group_name"],
-        "--account-name", storage_account, #providerConfig[environment]["storage_account_name"],
+        "--resource-group", resource_group,
+        "--account-name", storage_account,
         "--query", "[0].value",
         "--output", "tsv",
      ],
