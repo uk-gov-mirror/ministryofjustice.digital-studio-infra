@@ -4,97 +4,133 @@ import subprocess
 import sys
 import os.path
 import shutil
+import logging
+import fnmatch
+
 
 from python_modules import state_backup
 from python_modules import azure_account
 from python_modules import storage_creation
 
-gitRoot = subprocess.run(
-    ["git", "rev-parse", "--show-toplevel"],
-    stdout=subprocess.PIPE,
-    check=True
-).stdout.decode().rstrip()
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-# Derive the backend key name from the path
-cwd = os.path.basename(os.getcwd())
+def create_config_file():
 
-appDir = os.path.split(os.path.dirname(os.getcwd()))[1]
+    git_root = azure_account.get_git_root()
 
-keyName = ''.join([appDir, '-', cwd, '.terraform.tfstate'])
+    logging.info("Creating config.tf.json")
 
-storage_account = appDir.replace('-','') + cwd + "storage"
+    # Derive the names for key, resource group and storage account from the path
+    cwd = os.path.basename(os.getcwd())
 
-resource_group = appDir + "-" + cwd
+    appDir = os.path.split(os.path.dirname(os.getcwd()))[1]
 
-storage_creation.create_storage_account(resource_group, storage_account)
+    keyName = ''.join([appDir, '-', cwd, '.terraform.tfstate'])
 
-# Check if this is a prod or dev environment
-prodEnvs = ['prod', 'preprod']
+    storage_account = appDir.replace('-','') + cwd + "storage"
 
-environment = 'devtest'
+    resource_group = appDir + "-" + cwd
 
-if cwd in prodEnvs:
-    environment = 'prod'
+    # Check if this is a prod or dev environment
+    prodEnvs = ['prod', 'preprod']
 
-if not os.path.isfile("./dso.json"):
-    src = ''.join([gitRoot, "/tools/config/dso.json"])
-    dst = "."
-    shutil.copy2(src, dst)
+    environment = 'devtest'
 
-appEnvConfig = json.load(open("./dso.json"))
+    if cwd in prodEnvs:
+        environment = 'prod'
 
-providerConfig = json.load(
-    open(gitRoot + "/tools/config/azure-provider-config.json"))
+    if not os.path.isfile("./azure-provider-config.json"):
+        src = ''.join([git_root, "/tools/config/azure-provider-config.json"])
+        dst = "."
+        shutil.copy2(src, dst)
 
-if 'storage_account_name' in appEnvConfig:
-    providerConfig[environment]["storage_account_name"] = appEnvConfig['storage_account_name']
+    appEnvConfig = json.load(open("./azure-provider-config.json"))
 
-if 'resource_group_name' in appEnvConfig:
-    providerConfig[environment]["resource_group_name"] = appEnvConfig['resource_group_name']
-
-configTfJson = {
-    'terraform': {
-        'required_version': appEnvConfig["terraform_version"],
-        'backend': {
+    configTfJson = {
+        'terraform': {
+            'required_version': appEnvConfig["terraform_version"],
+            'backend': {
+                'azurerm': {
+                    'resource_group_name': resource_group,
+                    'storage_account_name': storage_account,
+                    'container_name': 'terraform',
+                    'key': keyName
+                }
+            }
+        },
+        'provider': {
             'azurerm': {
-                'resource_group_name': providerConfig[environment]["resource_group_name"],
-                'storage_account_name': providerConfig[environment]["storage_account_name"],
-                'container_name': 'terraform',
-                'key': keyName
+                'tenant_id': appEnvConfig[environment]["tenant_id"],
+                'subscription_id': appEnvConfig[environment]["subscription_id"],
+                'version': appEnvConfig["azurerm_version"]
             }
         }
-    },
-    'provider': {
-        'azurerm': {
-            'tenant_id': providerConfig[environment]["tenant_id"],
-            'subscription_id': providerConfig[environment]["subscription_id"],
-            'version': appEnvConfig["azurerm_version"]
-        }
     }
-}
 
-if os.path.exists("./.terraform"):
+
+
+    jsonFile = json.dumps(configTfJson, indent=2)
+
+    with open("config.tf.json", "w") as f:
+        f.write(jsonFile)
+
+    logging.info("config.tf.json created")
+
+
+def check_first_time_terraform_init():
+
+    if os.path.exists("./.terraform"):
+
+        try:
+            state_exists = subprocess.run(
+                ["terraform", "show",
+                 ],
+                stdout=subprocess.PIPE,
+                check=True
+            ).stdout.decode()
+        except:
+            logging.warn("There is a problem with .terrform")
+            logging.warn("You may need to delete .terraform before running this script. Exiting.")
+
+        if "No state" in state_exists:
+            logging.info("There is no Terraform state to backup")
+            return False
+        else:
+            logging.info("Terraform state exists")
+            return True
+    else:
+        logging.info("There is no .terraform directory")
+        return False
+
+
+
+if len(fnmatch.filter(os.listdir('.'), '*.tf')) < 1:
+    logging.warn("There are no terraform config files. Exiting.")
+    sys.exit()
+
+if check_first_time_terraform_init():
+    logging.info("Backing up the state")
     state_backup.backup()
 
-jsonFile = json.dumps(configTfJson, indent=2)
-
-with open("config.tf.json", "w") as f:
-    f.write(jsonFile)
+create_config_file()
 
 config = json.load(open("./config.tf.json"))
 
-# Ensure that CLI is logged in and can access the relevant subscription
-azure_account.azure_access_token(providerConfig[environment]["subscription_id"])
+subscription_id = config["provider"]["azurerm"]["subscription_id"]
+resource_group = config["terraform"]["backend"]["azurerm"]["resource_group_name"]
+storage_account = config["terraform"]["backend"]["azurerm"]["storage_account_name"]
 
-# Activate relevant subscription in CLI
-azure_account.azure_set_subscription(
-    providerConfig[environment]["subscription_id"])
+logging.info("Authorizing in Azure")
+azure_account.azure_access_token(subscription_id)
 
-# Extract storage account key for remote state
+azure_account.azure_set_subscription(subscription_id)
+
+storage_creation.create_storage_account(resource_group, storage_account)
+
 key = subprocess.run(
     ["az", "storage", "account", "keys", "list",
-        "--resource-group", providerConfig[environment]["resource_group_name"],
-        "--account-name", providerConfig[environment]["storage_account_name"],
+        "--resource-group", resource_group,
+        "--account-name", storage_account,
         "--query", "[0].value",
         "--output", "tsv",
      ],
@@ -102,7 +138,7 @@ key = subprocess.run(
     check=True
 ).stdout.decode()
 
-# Init terraform with acquired storage account key
+logging.info("Running terraform init")
 subprocess.run(
     ["terraform", "init", "-backend-config", "access_key=%s" % key],
     check=True
