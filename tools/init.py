@@ -141,6 +141,6 @@ key = subprocess.run(
 
 logging.info("Running terraform init")
 subprocess.run(
-    ["terraform", "init", "-lock=false","-backend-config", "access_key=%s" % key],
+    ["terraform", "init", "-backend-config", "access_key=%s" % key],
     check=True
 )
