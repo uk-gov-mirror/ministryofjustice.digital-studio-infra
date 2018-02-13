@@ -1,0 +1,20 @@
+{
+  "Name": "digital-studio-jenkins",
+  "IsCustom": true,
+  "Description": "All permissions needed for jenkins jobs",
+  "Actions": [
+    "Microsoft.Web/certificates/*",
+    "Microsoft.Network/dnsZones/*/read",
+    "Microsoft.Network/dnsZones/TXT/write",
+    "Microsoft.Network/dnsZones/TXT/delete",
+    "Microsoft.Resources/deployments/write",
+    "Microsoft.Resources/deployments/*"
+  ],
+  "NotActions": [
+
+  ],
+  "AssignableScopes": [
+    "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+  ]
+}
+
