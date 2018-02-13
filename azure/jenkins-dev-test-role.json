@@ -7,11 +7,11 @@
     "Microsoft.Network/dnsZones/*/read",
     "Microsoft.Network/dnsZones/TXT/write",
     "Microsoft.Network/dnsZones/TXT/delete",
-    "Microsoft.Resources/deployments/write",
-    "Microsoft.Resources/deployments/*"
+    "Microsoft.Resources/deployments/*",
+    "Microsoft.Keyvault/vaults/*",
+    "Microsoft.Web/serverfarms/*"
   ],
   "NotActions": [
-
   ],
   "AssignableScopes": [
     "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
