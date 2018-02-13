@@ -10,7 +10,7 @@ def create_storage_account(resource_group, storage_account):
 
     resource_group_exists = subprocess.run(
         ["az", "group", "show",
-        "--name", "resource_group" ],
+        "--name", resource_group ],
         stdout=subprocess.PIPE,
         check=True
     ).stdout.decode()

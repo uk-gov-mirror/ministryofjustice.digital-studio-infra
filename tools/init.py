@@ -91,6 +91,7 @@ def check_first_time_terraform_init():
         except:
             logging.warn("There is a problem with .terrform")
             logging.warn("You may need to delete .terraform before running this script. Exiting.")
+            sys.exit()
 
         if "No state" in state_exists:
             logging.info("There is no Terraform state to backup")
@@ -140,6 +141,6 @@ key = subprocess.run(
 
 logging.info("Running terraform init")
 subprocess.run(
-    ["terraform", "init", "-backend-config", "access_key=%s" % key],
+    ["terraform", "init", "-lock=false","-backend-config", "access_key=%s" % key],
     check=True
 )
