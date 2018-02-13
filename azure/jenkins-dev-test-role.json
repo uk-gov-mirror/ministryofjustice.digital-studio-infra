@@ -8,10 +8,12 @@
     "Microsoft.Network/dnsZones/TXT/write",
     "Microsoft.Network/dnsZones/TXT/delete",
     "Microsoft.Resources/deployments/*",
-    "Microsoft.Keyvault/vaults/*",
+    "Microsoft.KeyVault/vaults/*",
     "Microsoft.Web/serverfarms/*"
   ],
   "NotActions": [
+    "Microsoft.KeyVault/vaults/accessPolicies/write",
+    "Microsoft.KeyVault/vaults/secrets/write"
   ],
   "AssignableScopes": [
     "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
