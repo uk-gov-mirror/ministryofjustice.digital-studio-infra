@@ -1,6 +1,0 @@
-{
-"terraform_version": "~> 0.11.0",
-"azurerm_version": "0.3.3",
-"storage_account_name":"aapdevstorage",
-"resource_group_name": "aap-dev"
-}
