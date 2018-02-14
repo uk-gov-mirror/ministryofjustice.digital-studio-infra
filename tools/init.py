@@ -107,7 +107,7 @@ def check_first_time_terraform_init():
 
 if len(fnmatch.filter(os.listdir('.'), '*.tf')) < 1:
     logging.warn("There are no terraform config files. Exiting.")
-    sys.exit()
+    sys.exit(1)
 
 if check_first_time_terraform_init():
     logging.info("Backing up the state")
