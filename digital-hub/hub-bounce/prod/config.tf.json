@@ -3,8 +3,8 @@
     "required_version": "~> 0.11.0",
     "backend": {
       "azurerm": {
-        "resource_group_name": "webops-prod",
-        "storage_account_name": "nomsstudiowebopsprod",
+        "resource_group_name": "hub-bounce-prod",
+        "storage_account_name": "hubbounceprodstorage",
         "container_name": "terraform",
         "key": "hub-bounce-prod.terraform.tfstate"
       }

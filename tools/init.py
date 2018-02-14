@@ -91,6 +91,7 @@ def check_first_time_terraform_init():
         except:
             logging.warn("There is a problem with .terrform")
             logging.warn("You may need to delete .terraform before running this script. Exiting.")
+            sys.exit()
 
         if "No state" in state_exists:
             logging.info("There is no Terraform state to backup")
@@ -106,7 +107,7 @@ def check_first_time_terraform_init():
 
 if len(fnmatch.filter(os.listdir('.'), '*.tf')) < 1:
     logging.warn("There are no terraform config files. Exiting.")
-    sys.exit()
+    sys.exit(1)
 
 if check_first_time_terraform_init():
     logging.info("Backing up the state")
