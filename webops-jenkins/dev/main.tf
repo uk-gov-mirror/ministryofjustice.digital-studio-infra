@@ -74,8 +74,9 @@ data "external" "vault" {
   query {
     vault = "${azurerm_key_vault.vault.name}"
  
-    azure_oauth_secret = "azure-oauth-secret"
-    azure_oauth_clientid = "azure-oauth-clientid"
+    azure_sp_secret = "azure-sp-secret"
+    azure_sp_clientid = "azure-sp-clientid"
+    github_deploy_key = "github-deploy-key"
   }
 }
 
@@ -89,13 +90,14 @@ module "docker_webapp" {
   app_settings {
     WEBSITE_PORTS = "8080"
     ENABLE_FULL_ADMIN = "false"
-    AZURE_OAUTH_ENABLE = "true"
-    AZURE_OAUTH_TENANTID = "${var.azure_tenant_id}" 
-    AZURE_OAUTH_SECRET = "${data.external.vault.result.azure_oauth_secret}" 
-    AZURE_OAUTH_CLIENTID = "${data.external.vault.result.azure_oauth_clientid}" 
-    AZURE_OAUTH_GROUP = "${var.azure_webops_group_oid}"
+    AZURE_AD_OAUTH_ENABLE = "true"
+    AZURE_TENANT_ID = "${var.azure_tenant_id}" 
+    AZURE_SP_SECRET = "${data.external.vault.result.azure_sp_secret}" 
+    AZURE_SP_CLIENT_ID = "${data.external.vault.result.azure_sp_clientid}" 
+    AZURE_AD_AUTH_GROUP = "${var.azure_webops_group_oid}"
     CERTBOT_REG_EMAIL = "noms-studio-webops@digital.justice.gov.uk"
-    PIPELINES_GIT_REPO = "https://github.com/ministryofjustice/digital-studio-platform-pipelines.git"
+    PIPELINES_GIT_REPO = "git@github.com:ministryofjustice/digital-studio-platform-pipelines.git"
+    GITHUB_DEPLOY_KEY = "${data.external.vault.result.github_deploy_key}"
   }
   tags = "${var.tags}" 
 }
