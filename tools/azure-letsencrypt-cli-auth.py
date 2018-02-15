@@ -10,6 +10,8 @@ import argparse
 import base64
 import re
 import logging
+import secrets
+import string
 
 from time import gmtime, strftime, strptime
 from datetime import datetime, timedelta
@@ -33,13 +35,15 @@ parser.add_argument(
     "-t", "--test-environment", help="test mode - uses Letsencrypt staging environment",action='store_true')
 parser.add_argument(
     "-e", "--ignore-expiry", help="Ignore the expiry date check to perform an early renewal",action='store_true')
+parser.add_argument(
+    "-a", "--application-gateway", help="Create a certificate for an Application Gateway.",action='store_true')
 
 args = parser.parse_args()
 
 hostname = args.hostname
 
 if args.test_environment:
-    hostname = "letsencrypt-staging-" + hostname
+    hostname = "test-" + hostname
 #    args.ignore_expiry = True
 
 fqdn = hostname + '.' + args.zone
@@ -117,18 +121,27 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
         return False
 
 
-def create_pkcs12(fqdn, certbot_location):
+def create_pkcs12(fqdn, certbot_location,vault):
 
     path_to_cert = certbot_location + "/live/" + fqdn + "/fullchain.pem"
     path_to_key = certbot_location + "/live/" + fqdn + "/privkey.pem"
     export_path = certbot_location + "/live/" + fqdn + ".p12"
+
+    set_passphrase = "pass:"
+
+    if args.application_gateway:
+        alphabet = string.ascii_letters + string.digits
+        password = ''.join(secrets.choice(alphabet) for i in range(20))
+        set_passphrase = "pass:" + password
+
+        store_password(password,vault)
 
     subprocess.run(
         ["openssl", "pkcs12", "-export",
          "-inkey", path_to_key,
          "-in", path_to_cert,
          "-out", export_path,
-         "-passout", "pass:"
+         "-passout", set_passphrase
          ],
         stdout=subprocess.PIPE,
         check=True
@@ -144,7 +157,10 @@ def store_certificate(vault, fqdn, certbot_location):
 
     name = fqdn.replace(".", "DOT")
 
-    cert_file = create_pkcs12(fqdn, certbot_location)
+    if args.application_gateway:
+        name = "appgw-ssl-certificate"
+
+    cert_file = create_pkcs12(fqdn, certbot_location,vault)
 
     cert_dates = get_local_certificate_expiry(fqdn, certbot_location)
 
@@ -186,6 +202,24 @@ def store_certificate(vault, fqdn, certbot_location):
     else:
         sys.exit("Could not set secret in key vault.")
 
+def store_password(password,vault):
+
+    name = "appgw-ssl-certificate-password"
+
+    try:
+        set_secret = subprocess.run(
+            ["az", "keyvault", "secret", "set",
+             "--value", password,
+             "--encoding", "base64",
+             "--name", name,
+             "--vault-name", vault
+             ],
+            stdout=subprocess.PIPE,
+            check=True
+        )
+
+    except subprocess.CalledProcessError:
+        sys.exit("There was an error saving the passowrd to the vault")
 
 def get_local_certificate_expiry(fqdn, certbot_location):
 
