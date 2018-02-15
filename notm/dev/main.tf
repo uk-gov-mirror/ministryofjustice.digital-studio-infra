@@ -65,12 +65,18 @@ resource "azurerm_key_vault" "vault" {
         key_permissions = []
         secret_permissions = ["get"]
     }
-	access_policy {
-	    tenant_id = "${var.azure_tenant_id}"
-	    object_id = "${var.azure_notm_group_oid}"
-	    key_permissions = []
+    access_policy {
+        tenant_id = "${var.azure_tenant_id}"
+        object_id = "${var.azure_jenkins_sp_oid}"
+        key_permissions = []
+        secret_permissions = ["set"]
+    }
+	  access_policy {
+	      tenant_id = "${var.azure_tenant_id}"
+	      object_id = "${var.azure_notm_group_oid}"
+	      key_permissions = []
         secret_permissions = "${var.azure_secret_permissions_all}"
-	}
+	  }
 
     enabled_for_deployment = false
     enabled_for_disk_encryption = false
