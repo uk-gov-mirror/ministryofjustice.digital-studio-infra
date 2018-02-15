@@ -30,7 +30,7 @@ resource "azurerm_app_service" "ui" {
     DB_PASS           = "${random_id.sql-ui-password.b64}"
     DB_SERVER         = "${module.sql.db_server}"
     DB_NAME           = "${module.sql.db_name}"
-    NOMIS_API_URL     = "https://noms-api-dev.dsd.io/elite2api-stage"
+    NOMIS_API_URL     = "https://noms-api-dev.dsd.io/elite2api"
     ENABLE_TEST_UTILS = true
 
     APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
