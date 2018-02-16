@@ -113,14 +113,14 @@ e.g. ```$ cd /test-app/dev
 2\. Create sub directories for each required environment using the following names:
 
   **devtest environment**
-  dev
-  stage
-  mock
+  - dev
+  - stage
+  - mock
 
   **production environment**
-  testing
-  preprod
-  prod
+  - testing
+  - preprod
+  - prod
 
 3\. Copy the main.tf file from tools/config to your environment sub folder.
 
