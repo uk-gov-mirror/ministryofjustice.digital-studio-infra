@@ -94,13 +94,13 @@ If you are creating the Terraform code for a new app you can use the following i
 
 ### Scripted
 
-1. From the root of the digital-infra-studio repo run the bootstrap.py script. The script accepts two arguments:
+1\. From the root of the digital-infra-studio repo run the bootstrap.py script. The script accepts two arguments:
  - -a, --app-name
  - -e, --environments A comma separated list of environemnts to create
 
  e.g. ```python3 bootstrap.py -a test-app -e dev,stage```
 
-2. Change to the newly created environemnt directory and run ```diginit```.
+2\. Change to the newly created environemnt directory and run ```diginit```.
 
 e.g. ```$ cd /test-app/dev
         $ diginit```
@@ -108,9 +108,9 @@ e.g. ```$ cd /test-app/dev
 
 ### Manual
 
-1. Create a new directory for your app in the root of the digital-infra-studio repo.
+1\. Create a new directory for your app in the root of the digital-infra-studio repo.
 
-2. Create sub directories for each required environment using the following names:
+2\. Create sub directories for each required environment using the following names:
 
   **devtest environment**
   dev
@@ -122,29 +122,31 @@ e.g. ```$ cd /test-app/dev
   preprod
   prod
 
-3. Copy the main.tf file from tools/config to your environment sub folder.
+3\. Copy the main.tf file from tools/config to your environment sub folder.
 
   e.g. ```$ cp tools/config/main.tf test-app/dev/main.tf ```
 
-4. Change to the environment directory and replace the APPDIRECTORY placeholder with the name of the app directory
+4\. Change to the environment directory and replace the APPDIRECTORY placeholder with the name of the app directory
 
   e.g.
 
-  ```variable "app-name" {
+  ```
+     variable "app-name" {
      type = "string"
-     default = "APPDIRECTORY-dev"
+     default = "APPNAME"
      }
   ```
 
   change to
 
-  ```variable "app-name" {
+  ```
+     variable "app-name" {
      type = "string"
      default = "test-app-dev"
      }
 ```
 
-5. Run ```diginit``` to initialise and test the Terraform code. The command does not have any parameters.
+5\. Run ```diginit``` to initialise and test the Terraform code. The command does not have any parameters.
 
   e.g. ```$ diginit```
 
