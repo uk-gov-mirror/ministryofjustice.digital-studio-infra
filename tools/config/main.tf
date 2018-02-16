@@ -1,6 +1,6 @@
 variable "app-name" {
     type = "string"
-    default = "APPDIRECTORY-dev"
+    default = "APPNAME"
 }
 
 variable "tags" {
