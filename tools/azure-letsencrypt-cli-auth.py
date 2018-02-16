@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument("-z", "--zone", help="DNS Zone")
 parser.add_argument("-n", "--hostname", help="Hostname")
-parser.add_argument("-g", "--resource-group", help="Azure Resource Group")
+parser.add_argument("-g", "--resource-group", help="Azure Resource Group for the DNS zone")
 parser.add_argument("-s", "--subscription-id", help="Azure Subscription ID")
 parser.add_argument("-c", "--certbot",
                     help="Certbot configuration directory set during 'certbot register'. User must have write permissions.")
