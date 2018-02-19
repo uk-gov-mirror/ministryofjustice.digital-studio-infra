@@ -1,12 +1,12 @@
 variable "app-name" {
     type = "string"
-    default = "APPNAME"
+    default = "APPNAME-ENVIRONMENT"
 }
 
 variable "tags" {
     type = "map"
     default {
-        Environment = "Dev"
+        Environment = "ENVIRONMENT"
     }
 }
 
@@ -18,7 +18,7 @@ resource "azurerm_resource_group" "group" {
 }
 
 resource "azurerm_storage_account" "storage" {
-    name = "${replace(var.app-name, "-", "")}storage"
+    name = "STORAGE"
     resource_group_name = "${azurerm_resource_group.group.name}"
     location = "${azurerm_resource_group.group.location}"
     account_tier = "Standard"

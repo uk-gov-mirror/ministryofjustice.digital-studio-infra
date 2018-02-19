@@ -120,7 +120,6 @@ e.g. ```$ cd /test-app/dev
   - mock
 
   **production environment**
-  - testing
   - preprod
   - prod
 
