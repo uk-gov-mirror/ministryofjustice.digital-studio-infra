@@ -18,6 +18,12 @@
         "USE_API_GATEWAY_AUTH": {
             "type": "string"
         },
+        "API_CLIENT_ID": {
+            "type": "string"
+        },
+        "API_CLIENT_SECRET": {
+            "type": "string"
+        },
         "NOMS_TOKEN": {
             "type": "secureString"
         },
@@ -41,6 +47,8 @@
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "API_ENDPOINT_URL": "[parameters('API_ENDPOINT_URL')]",
+                "API_CLIENT_ID": "[parameters('API_CLIENT_ID')]",
+                "API_CLIENT_SECRET": "[parameters('API_CLIENT_SECRET')]",
                 "USE_API_GATEWAY_AUTH": "[parameters('USE_API_GATEWAY_AUTH')]",
                 "NOMS_TOKEN": "[parameters('NOMS_TOKEN')]",
                 "NOMS_PRIVATE_KEY": "[parameters('NOMS_PRIVATE_KEY')]",
