@@ -37,13 +37,20 @@ parser.add_argument(
     "-e", "--ignore-expiry", help="Ignore the expiry date check to perform an early renewal",action='store_true')
 parser.add_argument(
     "-a", "--application-gateway", help="Create a certificate for an Application Gateway.",action='store_true')
+parser.add_argument(
+    "-x", "--extra-host", help="Create an additional host on the certificate.")
+parser.add_argument(
+        "-y", "--extra-zone", help="Add the zone or the additional host on the certificate.")
 
 args = parser.parse_args()
 
 hostname = args.hostname
+extra_host = args.extra_host
 
 if args.test_environment:
     hostname = "test-" + hostname
+    extra_host = "test-" + extra_host
+
 #    args.ignore_expiry = True
 
 fqdn = hostname + '.' + args.zone
@@ -72,24 +79,29 @@ def get_zone_details(resource_group, zone):
         return False
 
 
-def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
+def create_certificate(dns_names, fqdn, resource_group, certbot_location):
 
     path_to_hook_scripts = azure_account.get_git_root() + '/tools/letsencrypt'
 
-    host_challenge_name = '_acme-challenge.' + hostname
+    manual_auth_hook = "python3 {path_to_scripts}/authenticator.py '{dns_names}' {resource_group}".format(
+        dns_names= json.dumps(dns_names), resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
 
-    manual_auth_hook = "python3 {path_to_scripts}/authenticator.py {host} {zone} {resource_group}".format(
-        host=host_challenge_name, zone=zone, resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
-
-    manual_cleanup_hook = "python3 {path_to_scripts}/cleanup.py {host} {zone} {resource_group}".format(
-        host=host_challenge_name, zone=zone, resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
+    manual_cleanup_hook = "python3 {path_to_scripts}/cleanup.py '{dns_names}' {resource_group}".format(
+        dns_names= json.dumps(dns_names), resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
 
     logging.info("Creating certificate")
+
+    common_name = '.'.join(dns_names["common_name"])
+
+    domains_to_renew = []
+
+    for key,value in dns_names.items():
+        fqdn = value[0] + "." + value[1]
+        domains_to_renew.extend(["-d", fqdn])
 
     cmd = ["certbot", "certonly", "--manual",
            "--email", "noms-studio-webops@digital.justice.gov.uk",
            "--preferred-challenges", "dns",
-           "-d", fqdn,
            "--manual-auth-hook", manual_auth_hook,
            "--manual-cleanup-hook", manual_cleanup_hook,
            "--manual-public-ip-logging-ok",
@@ -99,6 +111,8 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
            "--force-renewal",
            "--agree-tos"
            ]
+
+    cmd.extend(domains_to_renew)
 
     if args.test_environment:
         cmd.append('--staging')
@@ -111,7 +125,9 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
     except subprocess.CalledProcessError:
         sys.exit("There was an error creating the certificate")
 
-    path_to_cert = certbot_location + "/live/" + fqdn + "/fullchain.pem"
+    path_to_cert = certbot_location + "/live/" + common_name + "/fullchain.pem"
+
+    logging.info(path_to_cert)
 
     if os.path.exists(path_to_cert):
         logging.info("Certificate created")
@@ -382,8 +398,12 @@ if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
 else:
     logging.info("A record or CNAME doesn't exist. No expiry date to check.")
 
-if create_certificate(hostname, args.zone, fqdn,
-                      args.resource_group, args.certbot):
+dns_names = {
+   "common_name": [hostname,args.zone],
+   "additional_name" : [extra_host,args.extra_zone]
+   }
+
+if create_certificate(dns_names, fqdn, args.resource_group, args.certbot):
 
     if store_certificate(args.vault, fqdn, args.certbot):
         logging.info("Certificate successfully created.")
