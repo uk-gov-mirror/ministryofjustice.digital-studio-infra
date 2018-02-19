@@ -141,7 +141,7 @@ def create_pkcs12(fqdn, certbot_location,vault):
 
     path_to_cert = certbot_location + "/live/" + fqdn + "/fullchain.pem"
     path_to_key = certbot_location + "/live/" + fqdn + "/privkey.pem"
-    export_path = certbot_location + "/live/" + fqdn + ".p12"
+    export_path = certbot_location + "/live/" + fqdn + "/pkcs.p12"
 
     set_passphrase = "pass:"
 
