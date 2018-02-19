@@ -17,11 +17,12 @@ parser.add_argument("-e", "--environments", help="Environments: comma separated 
 
 args = parser.parse_args()
 
-def create_app_boilerplate(app_directory,environments):
+def create_app_boilerplate(app_name,environments):
 
     for environment in environments:
-        app_dev_directory = app_directory + "/" + environment
-        app_name =  app_directory + "-" + environment
+        app_dev_directory = app_name + "/" + environment
+
+        storage_account = app_name.replace('-','') + environment + "storage"
 
         pathlib.Path(app_dev_directory).mkdir(parents=True)
 
@@ -31,6 +32,8 @@ def create_app_boilerplate(app_directory,environments):
 
         s = open(src).read()
         s = s.replace('APPNAME', app_name)
+        s = s.replace('ENVIRONMENT', environment)
+        s = s.replace('STORAGE', storage_account)
         f = open(main_terraform, 'w')
         f.write(s)
         f.close()
