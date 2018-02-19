@@ -96,14 +96,16 @@ If you are creating the Terraform code for a new app you can use the following i
 
 1\. From the root of the digital-infra-studio repo run the bootstrap.py script. The script accepts two arguments:
  - -a, --app-name
- - -e, --environments A comma separated list of environemnts to create
+ - -e, --environments A comma separated list of environments to create
 
  e.g. ```python3 bootstrap.py -a test-app -e dev,stage```
 
-2\. Change to the newly created environemnt directory and run ```diginit```.
+2\. Change to the newly created environment directory and run ```diginit``` to test.
 
 e.g. ```$ cd /test-app/dev
         $ diginit```
+
+3\. Add the additional Terraform resources that the app requires.         
 
 
 ### Manual
@@ -126,7 +128,7 @@ e.g. ```$ cd /test-app/dev
 
   e.g. ```$ cp tools/config/main.tf test-app/dev/main.tf ```
 
-4\. Change to the environment directory and replace the APPDIRECTORY placeholder with the name of the app directory
+4\. Change to the environment directory and replace the APPNAME placeholder with the name of the app directory
 
   e.g.
 
@@ -149,6 +151,9 @@ e.g. ```$ cd /test-app/dev
 5\. Run ```diginit``` to initialise and test the Terraform code. The command does not have any parameters.
 
   e.g. ```$ diginit```
+
+6\. Add the additional Terraform resources that the app requires.  
+
 
 ## diginit command
 
