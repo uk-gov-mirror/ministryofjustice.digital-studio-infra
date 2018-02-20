@@ -12,6 +12,10 @@
         "NODE_ENV": {
             "type": "string"
         },
+        "WEBSITE_NODE_DEFAULT_VERSION": {
+            "type": "string",
+            "defaultValue": "6.10.0"
+        },
         "API_ENDPOINT_URL": {
             "type": "string"
         },
@@ -43,7 +47,7 @@
             "name": "[concat(parameters('name'), '/appsettings')]",
             "type": "Microsoft.Web/sites/config",
             "properties": {
-                "WEBSITE_NODE_DEFAULT_VERSION": "6.10.0",
+                "WEBSITE_NODE_DEFAULT_VERSION": "[parameters('WEBSITE_NODE_DEFAULT_VERSION')]",
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "API_ENDPOINT_URL": "[parameters('API_ENDPOINT_URL')]",
