@@ -92,12 +92,14 @@ def create_certificate(dns_names, fqdn, resource_group, certbot_location):
     logging.info("Creating certificate")
 
     common_name = '.'.join(dns_names["common_name"])
+    additional_name = '.'.join(dns_names["additional_name"])
 
     domains_to_renew = []
 
-    for key,value in dns_names.items():
-        fqdn = value[0] + "." + value[1]
-        domains_to_renew.extend(["-d", fqdn])
+    domains_to_renew.extend(["-d", common_name])
+
+    if additional_name:
+        domains_to_renew.extend(["-d", additional_name])
 
     cmd = ["certbot", "certonly", "--manual",
            "--email", "noms-studio-webops@digital.justice.gov.uk",
@@ -119,29 +121,34 @@ def create_certificate(dns_names, fqdn, resource_group, certbot_location):
         logging.info("Using staging environment")
 
     try:
-        certificate = subprocess.check_call(
-            cmd
-        )
+        certificate = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            check=True
+        ).stdout.decode()
+
     except subprocess.CalledProcessError:
         sys.exit("There was an error creating the certificate")
 
-    path_to_cert = certbot_location + "/live/" + common_name + "/fullchain.pem"
+    saved_cert = re.search("saved at:\n(.+?)/fullchain\.pem", certificate)
 
-    logging.info(path_to_cert)
+    path_to_cert = saved_cert.group(1).strip()
+
+    logging.info("The certificate is saved at " + path_to_cert)
 
     if os.path.exists(path_to_cert):
         logging.info("Certificate created")
-        return True
+        return path_to_cert
     else:
         logging.error("There was an error creating the certificate")
         return False
 
 
-def create_pkcs12(fqdn, certbot_location,vault):
+def create_pkcs12(saved_cert):
 
-    path_to_cert = certbot_location + "/live/" + fqdn + "/fullchain.pem"
-    path_to_key = certbot_location + "/live/" + fqdn + "/privkey.pem"
-    export_path = certbot_location + "/live/" + fqdn + "/pkcs.p12"
+    path_to_cert = saved_cert + "/fullchain.pem"
+    path_to_key = saved_cert + "/privkey.pem"
+    export_path = saved_cert + "/pkcs.p12"
 
     set_passphrase = "pass:"
 
@@ -169,16 +176,18 @@ def create_pkcs12(fqdn, certbot_location,vault):
         sys.exit("There was a problem creating the certificate")
 
 
-def store_certificate(vault, fqdn, certbot_location):
+def store_certificate(vault, fqdn, certbot_location,saved_cert):
 
     name = fqdn.replace(".", "DOT")
 
     if args.application_gateway:
         name = "appgw-ssl-certificate"
+        if args.test_environment:
+            name = "test-" + name
 
-    cert_file = create_pkcs12(fqdn, certbot_location,vault)
+    cert_file = create_pkcs12(saved_cert)
 
-    cert_dates = get_local_certificate_expiry(fqdn, certbot_location)
+    cert_dates = get_local_certificate_expiry(saved_cert)
 
     open_pkcs12 = open(cert_file, 'rb').read()
     cert_encoded = base64.encodestring(open_pkcs12)
@@ -222,6 +231,9 @@ def store_password(password,vault):
 
     name = "appgw-ssl-certificate-password"
 
+    if args.test_environment:
+        name = "test-" + name
+
     try:
         set_secret = subprocess.run(
             ["az", "keyvault", "secret", "set",
@@ -237,7 +249,7 @@ def store_password(password,vault):
     except subprocess.CalledProcessError:
         sys.exit("There was an error saving the passowrd to the vault")
 
-def get_local_certificate_expiry(fqdn, certbot_location):
+def get_local_certificate_expiry(saved_cert):
 
     cert_dates = {}
 
@@ -246,7 +258,7 @@ def get_local_certificate_expiry(fqdn, certbot_location):
          "-startdate",
          "-enddate",
          "-noout",
-         "-in", certbot_location + "/live/" + fqdn + "/fullchain.pem",
+         "-in", saved_cert + "/fullchain.pem",
          "-inform", "pem"
          ],
         stdout=subprocess.PIPE,
@@ -403,7 +415,9 @@ dns_names = {
    "additional_name" : [extra_host,args.extra_zone]
    }
 
-if create_certificate(dns_names, fqdn, args.resource_group, args.certbot):
+saved_cert = create_certificate(dns_names, fqdn, args.resource_group, args.certbot)
 
-    if store_certificate(args.vault, fqdn, args.certbot):
+if saved_cert:
+
+    if store_certificate(args.vault, fqdn, args.certbot, saved_cert):
         logging.info("Certificate successfully created.")
