@@ -94,6 +94,7 @@ data "external" "vault" {
         noms_token = "noms-token"
         noms_private_key = "noms-private-key"
         google_analytics_id = "google-analytics-id"
+        api_client_secret = "api-client-secret"
     }
 }
 
@@ -164,12 +165,15 @@ resource "azurerm_template_deployment" "webapp-config" {
         name = "${var.app-name}"
         APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
         NODE_ENV = "production"
-        API_ENDPOINT_URL = "https://noms-api-dev.dsd.io/elite2api-stage/"
+        API_ENDPOINT_URL = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/"
         USE_API_GATEWAY_AUTH = "yes"
         NOMS_TOKEN = "${data.external.vault.result.noms_token}"
         NOMS_PRIVATE_KEY = "${data.external.vault.result.noms_private_key}"
+        API_CLIENT_ID = "elite2apiclient"
+        API_CLIENT_SECRET = "${data.external.vault.result.api_client_secret}"
         GOOGLE_ANALYTICS_ID = "${data.external.vault.result.google_analytics_id}"
         SESSION_SECRET = "${random_id.session-secret.b64}"
+        WEBSITE_NODE_DEFAULT_VERSION = "8.4.0"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
