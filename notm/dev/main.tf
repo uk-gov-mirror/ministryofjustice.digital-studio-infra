@@ -168,6 +168,7 @@ resource "azurerm_template_deployment" "webapp-config" {
         API_CLIENT_SECRET = "${data.external.vault.result.api_client_secret}"
         GOOGLE_ANALYTICS_ID = "${data.external.vault.result.google_analytics_id}"
         SESSION_SECRET = "${random_id.session-secret.b64}"
+        WEBSITE_NODE_DEFAULT_VERSION = "8.4.0"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
