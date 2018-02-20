@@ -49,7 +49,8 @@ extra_host = args.extra_host
 
 if args.test_environment:
     hostname = "test-" + hostname
-    extra_host = "test-" + extra_host
+    if extra_host:
+        extra_host = "test-" + extra_host
 
 #    args.ignore_expiry = True
 
@@ -92,13 +93,13 @@ def create_certificate(dns_names, fqdn, resource_group, certbot_location):
     logging.info("Creating certificate")
 
     common_name = '.'.join(dns_names["common_name"])
-    additional_name = '.'.join(dns_names["additional_name"])
 
     domains_to_renew = []
 
     domains_to_renew.extend(["-d", common_name])
 
-    if additional_name:
+    if "additional_name" in dns_names:
+        additional_name = '.'.join(dns_names["additional_name"])
         domains_to_renew.extend(["-d", additional_name])
 
     cmd = ["certbot", "certonly", "--manual",
@@ -411,9 +412,12 @@ else:
     logging.info("A record or CNAME doesn't exist. No expiry date to check.")
 
 dns_names = {
-   "common_name": [hostname,args.zone],
-   "additional_name" : [extra_host,args.extra_zone]
+   "common_name": [hostname,args.zone]
    }
+if args.extra_zone:
+   dns_names.update({
+   "additional_name" : [extra_host,args.extra_zone]
+   })
 
 saved_cert = create_certificate(dns_names, fqdn, args.resource_group, args.certbot)
 
