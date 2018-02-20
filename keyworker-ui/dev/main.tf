@@ -22,7 +22,7 @@ resource "azurerm_app_service_plan" "omic-ui" {
 
   sku {
     tier     = "Standard"
-    size     = "S1"
+    size     = "S2"
     capacity = 1
   }
 }
@@ -47,6 +47,8 @@ resource "azurerm_app_service" "omic-ui" {
     API_GATEWAY_TOKEN = "${data.external.vault.result.api_gateway_token}"
     API_GATEWAY_PRIVATE_KEY = "${data.external.vault.result.api_gateway_private_key}"
     USE_API_GATEWAY_AUTH = "yes"
+    API_CLIENT_ID = "elite2apiclient"
+    API_CLIENT_SECRET = "${data.external.vault.result.api_client_secret}"
     APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
   }
 }
@@ -58,6 +60,7 @@ data "external" "vault" {
     vault = "${azurerm_key_vault.vault.name}"
     api_gateway_private_key = "api-gateway-private-key"
     api_gateway_token = "api-gateway-token"
+    api_client_secret = "api-client-secret"
   }
 }
 

@@ -12,10 +12,20 @@
         "NODE_ENV": {
             "type": "string"
         },
+        "WEBSITE_NODE_DEFAULT_VERSION": {
+            "type": "string",
+            "defaultValue": "6.10.0"
+        },
         "API_ENDPOINT_URL": {
             "type": "string"
         },
         "USE_API_GATEWAY_AUTH": {
+            "type": "string"
+        },
+        "API_CLIENT_ID": {
+            "type": "string"
+        },
+        "API_CLIENT_SECRET": {
             "type": "string"
         },
         "NOMS_TOKEN": {
@@ -37,10 +47,12 @@
             "name": "[concat(parameters('name'), '/appsettings')]",
             "type": "Microsoft.Web/sites/config",
             "properties": {
-                "WEBSITE_NODE_DEFAULT_VERSION": "6.10.0",
+                "WEBSITE_NODE_DEFAULT_VERSION": "[parameters('WEBSITE_NODE_DEFAULT_VERSION')]",
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "API_ENDPOINT_URL": "[parameters('API_ENDPOINT_URL')]",
+                "API_CLIENT_ID": "[parameters('API_CLIENT_ID')]",
+                "API_CLIENT_SECRET": "[parameters('API_CLIENT_SECRET')]",
                 "USE_API_GATEWAY_AUTH": "[parameters('USE_API_GATEWAY_AUTH')]",
                 "NOMS_TOKEN": "[parameters('NOMS_TOKEN')]",
                 "NOMS_PRIVATE_KEY": "[parameters('NOMS_PRIVATE_KEY')]",
