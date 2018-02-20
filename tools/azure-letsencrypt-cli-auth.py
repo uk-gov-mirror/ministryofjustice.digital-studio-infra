@@ -145,7 +145,7 @@ def create_certificate(dns_names, fqdn, resource_group, certbot_location):
         return False
 
 
-def create_pkcs12(saved_cert):
+def create_pkcs12(saved_cert,vault):
 
     path_to_cert = saved_cert + "/fullchain.pem"
     path_to_key = saved_cert + "/privkey.pem"
@@ -186,7 +186,7 @@ def store_certificate(vault, fqdn, certbot_location,saved_cert):
         if args.test_environment:
             name = "test-" + name
 
-    cert_file = create_pkcs12(saved_cert)
+    cert_file = create_pkcs12(saved_cert,vault)
 
     cert_dates = get_local_certificate_expiry(saved_cert)
 
