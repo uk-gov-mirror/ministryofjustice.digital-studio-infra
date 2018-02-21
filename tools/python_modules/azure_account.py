@@ -3,6 +3,8 @@ import subprocess
 import json
 import logging
 import sys
+import string
+import random
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -63,3 +65,9 @@ def get_secrets(secrets, vault_name):
 
 
     return secret_values
+
+def create_password():
+    alphabet = string.ascii_letters + string.digits
+    password = ''.join(random.choice(alphabet) for i in range(20))
+
+    return password

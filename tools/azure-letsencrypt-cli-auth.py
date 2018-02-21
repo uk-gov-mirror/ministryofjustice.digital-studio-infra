@@ -10,7 +10,6 @@ import argparse
 import base64
 import re
 import logging
-import secrets
 import string
 
 from time import gmtime, strftime, strptime
@@ -154,8 +153,7 @@ def create_pkcs12(saved_cert,vault):
     set_passphrase = "pass:"
 
     if args.application_gateway:
-        alphabet = string.ascii_letters + string.digits
-        password = ''.join(secrets.choice(alphabet) for i in range(20))
+        password = azure_account.create_password()
         set_passphrase = "pass:" + password
 
         store_password(password,vault)
