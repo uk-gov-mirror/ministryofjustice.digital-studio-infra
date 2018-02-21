@@ -22,6 +22,8 @@ args = parser.parse_args()
 
 def create_app_boilerplate(app_name,environments,oid):
 
+    logging.info("Creating local directory structure")
+
     for environment in environments:
         app_dev_directory = app_name + "/" + environment
 
@@ -54,18 +56,25 @@ def create_ad_group(app_name):
 
     display_name = "Digital Studio Dev Team - " + app_name
 
-    check_account_group = subprocess.run(
-        ["az", "ad", "group", "show",
-            "--group", display_name
-         ],
-        stdout=subprocess.PIPE,
-        check=True
-    ).stdout.decode()
+    check_account_group_json = {"displayName":""}
 
-    check_account_group_json = json.loads(check_account_group)
+    try:
+        check_account_group = subprocess.run(
+            ["az", "ad", "group", "show",
+                "--group", display_name
+             ],
+            stdout=subprocess.PIPE,
+            check=True
+        ).stdout.decode()
+
+        check_account_group_json = json.loads(check_account_group)
+
+    except:
+        logging.info("Azure AD Group does not exist")
 
     if check_account_group_json["displayName"] != display_name:
 
+        logging.info("Creating Azure AD Group")
         account_group = subprocess.run(
             ["az", "ad", "group", "create",
                 "--display-name", display_name,
@@ -79,6 +88,7 @@ def create_ad_group(app_name):
 
         return account_group_oid["objectId"]
     else:
+        logging.info("Group exists")
         return check_account_group_json["objectId"]
 
 
