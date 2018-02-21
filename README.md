@@ -177,6 +177,6 @@ It performs the following tasks:
 
 5. Sets the Azure subscription based on the value in config.tf.json.
 
-6. Creates the required Azure resource group, storage account and key vault.
+6. Creates the required Azure resource group, storage account.
 
 7. Performs terraform init to initialise the Terraform backend.

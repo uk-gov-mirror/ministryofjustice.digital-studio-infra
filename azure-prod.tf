@@ -15,14 +15,17 @@ variable "azure_webops_group_oid" {
     default = "98dc3307-f515-4717-b3c1-7174413e20b0"
 }
 
-// These AD ObjectIDs were found via `az ad sp list`
-variable "azure_glenm_tfprod_oid" {
-    type = "string"
-    default = "ad1a039a-c546-4a8f-b5ac-9ce4079b1e92"
-}
+variable "azure_secret_permissions_all" {
+  type = "list"
 
-variable "azure_rlazzurs_tfprod_oid" {
-    type = "string"
-    default = "3dfa627f-a505-4ce0-a6e7-4a8da91e511c"
+  default = [
+    "backup",
+    "delete",
+    "get",
+    "list",
+    "purge",
+    "recover",
+    "restore",
+    "set",
+  ]
 }
-
