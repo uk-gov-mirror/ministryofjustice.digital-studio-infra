@@ -10,6 +10,7 @@ import argparse
 import base64
 import re
 import logging
+import string
 
 from time import gmtime, strftime, strptime
 from datetime import datetime, timedelta
@@ -23,7 +24,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument("-z", "--zone", help="DNS Zone")
 parser.add_argument("-n", "--hostname", help="Hostname")
-parser.add_argument("-g", "--resource-group", help="Azure Resource Group")
+parser.add_argument("-g", "--resource-group", help="Azure Resource Group for the DNS zone")
 parser.add_argument("-s", "--subscription-id", help="Azure Subscription ID")
 parser.add_argument("-c", "--certbot",
                     help="Certbot configuration directory set during 'certbot register'. User must have write permissions.")
@@ -33,13 +34,23 @@ parser.add_argument(
     "-t", "--test-environment", help="test mode - uses Letsencrypt staging environment",action='store_true')
 parser.add_argument(
     "-e", "--ignore-expiry", help="Ignore the expiry date check to perform an early renewal",action='store_true')
+parser.add_argument(
+    "-a", "--application-gateway", help="Create a certificate for an Application Gateway.",action='store_true')
+parser.add_argument(
+    "-x", "--extra-host", help="Create an additional host on the certificate.")
+parser.add_argument(
+        "-y", "--extra-zone", help="Add the zone or the additional host on the certificate.")
 
 args = parser.parse_args()
 
 hostname = args.hostname
+extra_host = args.extra_host
 
 if args.test_environment:
-    hostname = "letsencrypt-staging-" + hostname
+    hostname = "test-" + hostname
+    if extra_host:
+        extra_host = "test-" + extra_host
+
 #    args.ignore_expiry = True
 
 fqdn = hostname + '.' + args.zone
@@ -68,24 +79,31 @@ def get_zone_details(resource_group, zone):
         return False
 
 
-def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
+def create_certificate(dns_names, fqdn, resource_group, certbot_location):
 
     path_to_hook_scripts = azure_account.get_git_root() + '/tools/letsencrypt'
 
-    host_challenge_name = '_acme-challenge.' + hostname
+    manual_auth_hook = "python3 {path_to_scripts}/authenticator.py '{dns_names}' {resource_group}".format(
+        dns_names= json.dumps(dns_names), resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
 
-    manual_auth_hook = "python3 {path_to_scripts}/authenticator.py {host} {zone} {resource_group}".format(
-        host=host_challenge_name, zone=zone, resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
-
-    manual_cleanup_hook = "python3 {path_to_scripts}/cleanup.py {host} {zone} {resource_group}".format(
-        host=host_challenge_name, zone=zone, resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
+    manual_cleanup_hook = "python3 {path_to_scripts}/cleanup.py '{dns_names}' {resource_group}".format(
+        dns_names= json.dumps(dns_names), resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
 
     logging.info("Creating certificate")
+
+    common_name = '.'.join(dns_names["common_name"])
+
+    domains_to_renew = []
+
+    domains_to_renew.extend(["-d", common_name])
+
+    if "additional_name" in dns_names:
+        additional_name = '.'.join(dns_names["additional_name"])
+        domains_to_renew.extend(["-d", additional_name])
 
     cmd = ["certbot", "certonly", "--manual",
            "--email", "noms-studio-webops@digital.justice.gov.uk",
            "--preferred-challenges", "dns",
-           "-d", fqdn,
            "--manual-auth-hook", manual_auth_hook,
            "--manual-cleanup-hook", manual_cleanup_hook,
            "--manual-public-ip-logging-ok",
@@ -96,39 +114,56 @@ def create_certificate(hostname, zone, fqdn, resource_group, certbot_location):
            "--agree-tos"
            ]
 
+    cmd.extend(domains_to_renew)
+
     if args.test_environment:
         cmd.append('--staging')
         logging.info("Using staging environment")
 
     try:
-        certificate = subprocess.check_call(
-            cmd
-        )
+        certificate = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            check=True
+        ).stdout.decode()
+
     except subprocess.CalledProcessError:
         sys.exit("There was an error creating the certificate")
 
-    path_to_cert = certbot_location + "/live/" + fqdn + "/fullchain.pem"
+    saved_cert = re.search("saved at:\n(.+?)/fullchain\.pem", certificate)
+
+    path_to_cert = saved_cert.group(1).strip()
+
+    logging.info("The certificate is saved at " + path_to_cert)
 
     if os.path.exists(path_to_cert):
         logging.info("Certificate created")
-        return True
+        return path_to_cert
     else:
         logging.error("There was an error creating the certificate")
         return False
 
 
-def create_pkcs12(fqdn, certbot_location):
+def create_pkcs12(saved_cert,vault):
 
-    path_to_cert = certbot_location + "/live/" + fqdn + "/fullchain.pem"
-    path_to_key = certbot_location + "/live/" + fqdn + "/privkey.pem"
-    export_path = certbot_location + "/live/" + fqdn + ".p12"
+    path_to_cert = saved_cert + "/fullchain.pem"
+    path_to_key = saved_cert + "/privkey.pem"
+    export_path = saved_cert + "/pkcs.p12"
+
+    set_passphrase = "pass:"
+
+    if args.application_gateway:
+        password = azure_account.create_password()
+        set_passphrase = "pass:" + password
+
+        store_password(password,vault)
 
     subprocess.run(
         ["openssl", "pkcs12", "-export",
          "-inkey", path_to_key,
          "-in", path_to_cert,
          "-out", export_path,
-         "-passout", "pass:"
+         "-passout", set_passphrase
          ],
         stdout=subprocess.PIPE,
         check=True
@@ -140,13 +175,18 @@ def create_pkcs12(fqdn, certbot_location):
         sys.exit("There was a problem creating the certificate")
 
 
-def store_certificate(vault, fqdn, certbot_location):
+def store_certificate(vault, fqdn, certbot_location,saved_cert):
 
     name = fqdn.replace(".", "DOT")
 
-    cert_file = create_pkcs12(fqdn, certbot_location)
+    if args.application_gateway:
+        name = "appgw-ssl-certificate"
+        if args.test_environment:
+            name = "test-" + name
 
-    cert_dates = get_local_certificate_expiry(fqdn, certbot_location)
+    cert_file = create_pkcs12(saved_cert,vault)
+
+    cert_dates = get_local_certificate_expiry(saved_cert)
 
     open_pkcs12 = open(cert_file, 'rb').read()
     cert_encoded = base64.encodestring(open_pkcs12)
@@ -186,8 +226,29 @@ def store_certificate(vault, fqdn, certbot_location):
     else:
         sys.exit("Could not set secret in key vault.")
 
+def store_password(password,vault):
 
-def get_local_certificate_expiry(fqdn, certbot_location):
+    name = "appgw-ssl-certificate-password"
+
+    if args.test_environment:
+        name = "test-" + name
+
+    try:
+        set_secret = subprocess.run(
+            ["az", "keyvault", "secret", "set",
+             "--value", password,
+             "--encoding", "base64",
+             "--name", name,
+             "--vault-name", vault
+             ],
+            stdout=subprocess.PIPE,
+            check=True
+        )
+
+    except subprocess.CalledProcessError:
+        sys.exit("There was an error saving the passowrd to the vault")
+
+def get_local_certificate_expiry(saved_cert):
 
     cert_dates = {}
 
@@ -196,7 +257,7 @@ def get_local_certificate_expiry(fqdn, certbot_location):
          "-startdate",
          "-enddate",
          "-noout",
-         "-in", certbot_location + "/live/" + fqdn + "/fullchain.pem",
+         "-in", saved_cert + "/fullchain.pem",
          "-inform", "pem"
          ],
         stdout=subprocess.PIPE,
@@ -348,8 +409,17 @@ if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
 else:
     logging.info("A record or CNAME doesn't exist. No expiry date to check.")
 
-if create_certificate(hostname, args.zone, fqdn,
-                      args.resource_group, args.certbot):
+dns_names = {
+   "common_name": [hostname,args.zone]
+   }
+if args.extra_zone:
+   dns_names.update({
+   "additional_name" : [extra_host,args.extra_zone]
+   })
 
-    if store_certificate(args.vault, fqdn, args.certbot):
+saved_cert = create_certificate(dns_names, fqdn, args.resource_group, args.certbot)
+
+if saved_cert:
+
+    if store_certificate(args.vault, fqdn, args.certbot, saved_cert):
         logging.info("Certificate successfully created.")
