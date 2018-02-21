@@ -105,7 +105,9 @@ If you are creating the Terraform code for a new app you can use the following i
 e.g. ```$ cd /test-app/dev
         $ diginit```
 
-3\. Add the additional Terraform resources that the app requires.         
+3\. Add the additional Terraform resources that the app requires.
+
+4\. Add users to the Azure AD group created for the vault access policy. (The Group name will be "Digital Studio Dev Team - <app-name>")         
 
 
 ### Manual
@@ -147,11 +149,15 @@ e.g. ```$ cd /test-app/dev
      }
 ```
 
-5\. Run ```diginit``` to initialise and test the Terraform code. The command does not have any parameters.
+5\. Create an Azure AD group with the name "Digital Studio Dev Team - <app-name>". Add users to the group.
+
+6\. Add an access policy to the azurerm_key_vault resource with the object id for the group created in step 5.
+
+7\. Run ```diginit``` to initialise and test the Terraform code. The command does not have any parameters.
 
   e.g. ```$ diginit```
 
-6\. Add the additional Terraform resources that the app requires.  
+8\. Add the additional Terraform resources that the app requires.
 
 
 ## diginit command

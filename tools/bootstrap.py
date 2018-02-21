@@ -6,6 +6,7 @@ import argparse
 import logging
 import pathlib
 import shutil
+import json
 
 from python_modules import azure_account
 
@@ -19,7 +20,7 @@ parser.add_argument("-e", "--environments", help="Environments: comma separated 
 
 args = parser.parse_args()
 
-def create_app_boilerplate(app_name,environments):
+def create_app_boilerplate(app_name,environments,oid):
 
     for environment in environments:
         app_dev_directory = app_name + "/" + environment
@@ -44,15 +45,50 @@ def create_app_boilerplate(app_name,environments):
         s = s.replace('APPNAME', app_name)
         s = s.replace('ENVIRONMENT', environment)
         s = s.replace('STORAGE', storage_account)
+        s = s.replace('AD_GROUP_OID', oid)
         f = open(main_terraform, 'w')
         f.write(s)
         f.close()
 
+def create_ad_group(app_name):
+
+    display_name = "Digital Studio Dev Team - " + app_name
+
+    check_account_group = subprocess.run(
+        ["az", "ad", "group", "show",
+            "--group", display_name
+         ],
+        stdout=subprocess.PIPE,
+        check=True
+    ).stdout.decode()
+
+    check_account_group_json = json.loads(check_account_group)
+
+    if check_account_group_json["displayName"] != display_name:
+
+        account_group = subprocess.run(
+            ["az", "ad", "group", "create",
+                "--display-name", display_name,
+                "--mail-nickname", "null"
+             ],
+            stdout=subprocess.PIPE,
+            check=True
+        ).stdout.decode()
+
+        account_group_oid = json.loads(account_group)
+
+        return account_group_oid["objectId"]
+    else:
+        return check_account_group_json["objectId"]
+
+
 if not os.path.isdir(args.app_name):
+
+    oid = create_ad_group(args.app_name)
 
     environments = args.environments.split(",")
 
-    create_app_boilerplate(args.app_name,environments)
+    create_app_boilerplate(args.app_name,environments,oid)
 
 else:
     logging.warn("App directory already exists")
