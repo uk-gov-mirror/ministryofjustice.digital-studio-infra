@@ -37,6 +37,8 @@ parser.add_argument(
 parser.add_argument(
     "-a", "--application-gateway", help="Create a certificate for an Application Gateway.",action='store_true')
 parser.add_argument(
+    "-o", "--certificate-only", help="Create a certificate but don't store in vault.",action='store_true')
+parser.add_argument(
     "-x", "--extra-host", help="Create an additional host on the certificate.")
 parser.add_argument(
         "-y", "--extra-zone", help="Add the zone or the additional host on the certificate.")
@@ -220,6 +222,7 @@ def store_certificate(vault, fqdn, certbot_location,saved_cert):
         )
 
         if set_secret_attributes.returncode == 0:
+            logging.info("Certificate successfully stored to vault.")
             return True
         else:
             sys.exit("Could not set secret attributes in key vault.")
@@ -419,7 +422,9 @@ if args.extra_zone:
 
 saved_cert = create_certificate(dns_names, fqdn, args.resource_group, args.certbot)
 
-if saved_cert:
+if not args.certificate_only:
 
-    if store_certificate(args.vault, fqdn, args.certbot, saved_cert):
-        logging.info("Certificate successfully created.")
+    store_certificate(args.vault, fqdn, args.certbot, saved_cert)
+
+
+logging.info("Certificate update complete.")
