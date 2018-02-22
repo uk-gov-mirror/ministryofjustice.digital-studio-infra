@@ -94,7 +94,11 @@ def create_ad_group(app_name):
 
 if not os.path.isdir(args.app_name):
 
-    oid = create_ad_group(args.app_name)
+    try:
+        oid = create_ad_group(args.app_name)
+    except:
+        logging.warn("Couldn't create Azure AD group for the vault. Please ask an Azure Admin to do this for you.")
+        oid = ""
 
     environments = args.environments.split(",")
 
