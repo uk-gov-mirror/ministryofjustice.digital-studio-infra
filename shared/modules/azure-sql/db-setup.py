@@ -5,8 +5,8 @@ import json
 import logging
 import subprocess
 import sys
-from base64 import b64decode 
-import pymssql  
+from base64 import b64decode
+import pymssql
 
 parser = argparse.ArgumentParser(description='Helper script to augment terraform mssql setup, manage db users, execute SQL')
 parser.add_argument('--server', help='MSSQL server hostname.', required=True)
@@ -16,7 +16,7 @@ parser.add_argument('--database', help='DB to connect to.', required=True)
 parser.add_argument('--users', help='json map of username/password, base64 encoded')
 parser.add_argument('--queries', help='json array of queries, base64 encoded')
 parser.add_argument('--rollback', action="store_true", help='true/false. Test transactions and rollback any changes')
-parser.add_argument('--debug', action="store_true", help='true/false. Test transactions and rollback any changes')
+parser.add_argument('--debug', action="store_true", help='true/false. enable low-level logging')
 args = parser.parse_args()
 
 # Setup logging
@@ -52,7 +52,6 @@ def sql_setup(queries):
 
 
 def execute_sql(sql):
-    cursor.execute("BEGIN TRANSACTION")
     logging.debug("SQL: %s" % sql)
     cursor.execute(sql)
     if args.rollback:
