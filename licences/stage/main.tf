@@ -20,7 +20,19 @@ resource "random_id" "sql-ui-password" {
   byte_length = 32
 }
 
-resource "random_id" "sql-api-password" {
+resource "random_id" "mwhitfield-password" {
+  byte_length = 32
+}
+
+resource "random_id" "atodd-password" {
+  byte_length = 32
+}
+
+resource "random_id" "mwillis-password" {
+  byte_length = 32
+}
+
+resource "random_id" "sbapaga-password" {
   byte_length = 32
 }
 
@@ -74,10 +86,10 @@ resource "azurerm_key_vault" "vault" {
   }
 
   access_policy {
-      tenant_id = "${var.azure_tenant_id}"
-      object_id = "${var.azure_jenkins_sp_oid}"
-      key_permissions = []
-      secret_permissions = ["set"]
+    tenant_id          = "${var.azure_tenant_id}"
+    object_id          = "${var.azure_jenkins_sp_oid}"
+    key_permissions    = []
+    secret_permissions = ["set"]
   }
 
   access_policy {
@@ -115,12 +127,20 @@ module "sql" {
   tags                  = "${var.tags}"
 
   db_users = {
-    ui = "${random_id.sql-ui-password.b64}"
+    ui         = "${random_id.sql-ui-password.b64}"
+    mwhitfield = "${random_id.mwhitfield-password.b64}"
+    atodd      = "${random_id.atodd-password.b64}"
+    mwillis    = "${random_id.mwillis-password.b64}"
+    sbapaga    = "${random_id.sbapaga-password.b64}"
   }
 
   setup_queries = [
     "ALTER ROLE db_datareader ADD MEMBER ui",
     "ALTER ROLE db_datawriter ADD MEMBER ui",
+    "ALTER ROLE db_owner ADD MEMBER mwhitfield",
+    "ALTER ROLE db_owner ADD MEMBER atodd",
+    "ALTER ROLE db_owner ADD MEMBER mwillis",
+    "ALTER ROLE db_owner ADD MEMBER sbapaga",
   ]
 }
 
