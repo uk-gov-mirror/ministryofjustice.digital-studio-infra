@@ -33,7 +33,7 @@ resource "azurerm_app_service" "ui" {
     NOMIS_API_URL     = "https://noms-api-dev.dsd.io/elite2api"
     ENABLE_TEST_UTILS = true
 
-    APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
+    APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_application_insights.insights.instrumentation_key}"
 
     NOMIS_GW_TOKEN = "${data.external.vault.result.elite_api_gateway_token}"
     NOMIS_GW_KEY   = "${data.external.vault.result.elite_api_gateway_private_key}"

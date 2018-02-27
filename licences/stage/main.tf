@@ -139,16 +139,9 @@ data "external" "sas-url" {
   }
 }
 
-resource "azurerm_template_deployment" "insights" {
+resource "azurerm_application_insights" "insights" {
   name                = "${var.env-name}"
+  location            = "North Europe"
   resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/insights.template.json")}"
-
-  parameters {
-    name        = "${var.env-name}"
-    location    = "northeurope"                // Not in UK yet
-    service     = "${var.tags["Service"]}"
-    environment = "${var.tags["Environment"]}"
-  }
+  application_type    = "Web"
 }
