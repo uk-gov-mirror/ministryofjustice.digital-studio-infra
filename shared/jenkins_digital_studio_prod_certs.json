@@ -3,6 +3,7 @@
   "azure_app": "csra-prod",
   "hostname": "csra",
   "zone": "service.hmpps.dsd.io",
+  "dns_resource_group": "webops",
   "resource_group": "csra-prod",
   "keyvault": "csra-prod",
   "subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
@@ -11,6 +12,7 @@
   "azure_app": "notm-prod",
   "hostname": "notm",
   "zone": "service.hmpps.dsd.io",
+  "dns_resource_group": "webops-prod",
   "resource_group": "notm-prod",
   "keyvault": "notm-prod",
   "subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383"

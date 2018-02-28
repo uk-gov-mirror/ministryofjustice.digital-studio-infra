@@ -25,6 +25,9 @@
         },
         "keyVaultCertName": {
             "type": "string"
+        },
+        "subscription_id": {
+            "type": "string"
         }
     },
     "variables": {
@@ -48,7 +51,7 @@
             }
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.Web/sites/mw-test-app/config/web'.",
+            "comments": "Generalized from resource: '/subscriptions/[parameters('subscription_id')]/resourceGroups/webops-jenkins-dev/providers/Microsoft.Web/sites/mw-test-app/config/web'.",
             "type": "Microsoft.Web/sites/config",
             "name": "[concat(parameters('app_name'), '/web')]",
             "apiVersion": "2016-08-01",
