@@ -51,7 +51,6 @@
             }
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/[parameters('subscription_id')]/resourceGroups/webops-jenkins-dev/providers/Microsoft.Web/sites/mw-test-app/config/web'.",
             "type": "Microsoft.Web/sites/config",
             "name": "[concat(parameters('app_name'), '/web')]",
             "apiVersion": "2016-08-01",

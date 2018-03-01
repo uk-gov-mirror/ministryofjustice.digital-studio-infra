@@ -109,12 +109,12 @@
 }
 ,
 {
-  "azure_app": "webops-jenkins-devprod",
-  "hostname": "webops-jenkins-prod",
+  "azure_app": "webops-jenkins-dev",
+  "hostname": "webops-jenkins-dev",
   "zone": "service.hmpps.dsd.io",
-  "dns_resource_group": "webops-prod",
-  "resource_group": "webops-jenkins-prod",
-  "keyvault": "webops-jenkins-prod",
+  "dns_resource_group": "webops",
+  "resource_group": "webops-jenkins-dev",
+  "keyvault": "webops-jenkins-dev",
   "subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
 }
 ]
