@@ -1,0 +1,13 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: mojdigitalstudio/git-secrets-ahoy 
+    working_directory: /git
+    steps:
+      - checkout
+      - run:
+          name: Run truffleHog
+          command: |
+            /trufflehog/truffleHogger.sh --use_current_branch  --since_commit "$(git rev-parse ${CIRCLE_SHA1}~1)" 
