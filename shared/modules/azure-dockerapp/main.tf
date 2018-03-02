@@ -11,10 +11,6 @@ variable "app_name" {
   type    = "string"
 }
 
-variable "subscription_id" {
-  type    = "string"
-}
-
 variable "binding_hostname" {
   type    = "string"
 }
@@ -67,7 +63,6 @@ resource "azurerm_template_deployment" "docker_app" {
 
   parameters {
     app_name = "${azurerm_app_service.docker_app.name}"
-    subscription_id = "${var.subscription_id}"
     docker_image = "${var.docker_image}"
     app_serviceplan = "${azurerm_app_service_plan.service_plan.name}"
     hostname         = "${var.binding_hostname}"
