@@ -50,7 +50,7 @@ Terraform will create a key vault for this app however in order to complete the 
 - azure-sp-secret: The jenkins secret created above
 - azure-oauth-clientid: Same as  azure-sp-clientid
 - azure-oauth-secret: Same as azure-sp-secret
-- github-deploy-key: From ministryofjustice/digital-studio-platform-pipelines
+- github-deploy-key: From ministryofjustice/digital-studio-platform-pipelines (base64 encoded)
 
 The application will also need an SSL certificate which can be created using tools/azure-letsencrypt-cli-auth.py.
 
