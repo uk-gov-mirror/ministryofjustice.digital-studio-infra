@@ -1,7 +1,7 @@
 [
 {
   "azure_app": "iis-preprod",
-  "hostname": "iis-preprod",
+  "hostname": "hpa-preprod",
   "zone": "service.hmpps.dsd.io",
   "dns_resource_group": "webops-prod",
   "resource_group": "iis-preprod",
@@ -10,7 +10,7 @@
 },
 {
   "azure_app": "iis-prod",
-  "hostname": "iis-prod",
+  "hostname": "hpa",
   "zone": "service.hmpps.dsd.io",
   "dns_resource_group": "webops-prod",
   "resource_group": "iis-prod",
@@ -28,7 +28,7 @@
 },
 {
   "azure_app": "notm-prod",
-  "hostname": "notm-prod",
+  "hostname": "notm",
   "zone": "service.hmpps.dsd.io",
   "dns_resource_group": "webops-prod",
   "resource_group": "notm-prod",

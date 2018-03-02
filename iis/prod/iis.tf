@@ -140,7 +140,7 @@ resource "azurerm_template_deployment" "webapp" {
 }
 
 data "external" "sas-url" {
-    program = ["node", "../../tools/container-sas-url-cli-auth.js"]
+    program = ["python3", "../../tools/container-sas-url-cli-auth.py"]
     query {
         subscription_id = "${var.azure_subscription_id}"
         tenant_id = "${var.azure_tenant_id}"
@@ -212,7 +212,7 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
 }
 
 data "external" "vault" {
-    program = ["node", "../../tools/keyvault-data-cli-auth.js"]
+    program = ["python3", "../../tools/keyvault-data-cli-auth.py"]
     query {
         vault = "${azurerm_key_vault.vault.name}"
 
