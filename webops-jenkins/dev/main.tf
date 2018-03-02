@@ -73,7 +73,7 @@ data "external" "vault" {
   program = ["python3", "../../tools/keyvault-data-cli-auth.py"]
   query {
     vault = "${azurerm_key_vault.vault.name}"
- 
+
     azure_sp_secret = "azure-sp-secret"
     azure_sp_clientid = "azure-sp-clientid"
     github_deploy_key = "github-deploy-key"
@@ -85,19 +85,20 @@ module "docker_webapp" {
   app_name = "${var.app_name}"
   binding_hostname = "${azurerm_dns_cname_record.jenkins.name}.${azurerm_dns_cname_record.jenkins.zone_name}"
   ssl_cert_keyvault = "${azurerm_key_vault.vault.id}"
-  resource_group = "${azurerm_resource_group.group.name}" 
+  resource_group = "${azurerm_resource_group.group.name}"
   docker_image = "mojdigitalstudio/digital-studio-platform-jenkins:latest"
   app_settings {
     WEBSITE_PORTS = "8080"
     ENABLE_FULL_ADMIN = "false"
     AZURE_AD_OAUTH_ENABLE = "true"
-    AZURE_TENANT_ID = "${var.azure_tenant_id}" 
-    AZURE_SP_SECRET = "${data.external.vault.result.azure_sp_secret}" 
-    AZURE_SP_CLIENT_ID = "${data.external.vault.result.azure_sp_clientid}" 
+    AZURE_TENANT_ID = "${var.azure_tenant_id}"
+    AZURE_SP_SECRET = "${data.external.vault.result.azure_sp_secret}"
+    AZURE_SP_CLIENT_ID = "${data.external.vault.result.azure_sp_clientid}"
     AZURE_AD_AUTH_GROUP = "${var.azure_webops_group_oid}"
     CERTBOT_REG_EMAIL = "noms-studio-webops@digital.justice.gov.uk"
     PIPELINES_GIT_REPO = "git@github.com:ministryofjustice/digital-studio-platform-pipelines.git"
     GITHUB_DEPLOY_KEY = "${data.external.vault.result.github_deploy_key}"
+    CERT_JSON = "./shared/jenkins_digital_studio_devtest_certs.json"
   }
-  tags = "${var.tags}" 
+  tags = "${var.tags}"
 }

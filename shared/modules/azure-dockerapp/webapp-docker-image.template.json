@@ -26,9 +26,6 @@
         "keyVaultCertName": {
             "type": "string"
         },
-        "subscription_id": {
-            "type": "string"
-        }
     },
     "variables": {
         "tags": {
