@@ -1,14 +1,5 @@
 [
 {
-  "azure_app": "csra-prod",
-  "hostname": "csra-prod",
-  "zone": "service.hmpps.dsd.io",
-  "dns_resource_group": "webops-prod",
-  "resource_group": "csra-prod",
-  "keyvault": "csra-prod",
-  "subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
-},
-{
   "azure_app": "iis-preprod",
   "hostname": "iis-preprod",
   "zone": "service.hmpps.dsd.io",
