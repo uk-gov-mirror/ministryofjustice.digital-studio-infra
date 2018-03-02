@@ -29,7 +29,7 @@ az role definition update --role-definition ./appservice-deployment-reader.json
 
 ## Jenkins Service Principle Role
 
-This role sets up the minimum permissions needed by the jenkins SP.
+This role sets up the minimum permissions needed by the Jenkins SP.
 
 ```
 az role definition create --role-definition jenkins-dev-test-role.json
@@ -38,6 +38,8 @@ az role assignment create --role digital-studio-jenkins \
   --assignee 3ddcc102-7f43-4885-ae16-c872c65584c6 \
   --scope '/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7'
 ```
+
+In order to create the az role definition you will need to have owner permissions on the subscription that the role belongs to.
 
 ## Useful commands
 
@@ -50,4 +52,3 @@ Researching avaiable permissions for a given resource, e.g keyvaults
 ```
 az provider operation show --namespace 'Microsoft.KeyVault'
 ```
-

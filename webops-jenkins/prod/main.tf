@@ -83,7 +83,6 @@ data "external" "vault" {
 module "docker_webapp" {
   source   = "../../shared/modules/azure-dockerapp"
   app_name = "${var.app_name}"
-  subscription_id = "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
   binding_hostname = "${azurerm_dns_cname_record.jenkins.name}.${azurerm_dns_cname_record.jenkins.zone_name}"
   ssl_cert_keyvault = "${azurerm_key_vault.vault.id}"
   resource_group = "${azurerm_resource_group.group.name}"
