@@ -98,7 +98,7 @@ module "docker_webapp" {
     CERTBOT_REG_EMAIL = "noms-studio-webops@digital.justice.gov.uk"
     PIPELINES_GIT_REPO = "git@github.com:ministryofjustice/digital-studio-platform-pipelines.git"
     GITHUB_DEPLOY_KEY = "${data.external.vault.result.github_deploy_key}"
-    CERT_JSON = "./shared/jenkins_digital_studio_devtest_certs.json"
+    SERVER_ENVIRONMENT = "devtest"
   }
   tags = "${var.tags}"
 }
