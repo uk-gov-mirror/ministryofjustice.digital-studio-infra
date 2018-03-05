@@ -39,16 +39,18 @@ def create_config_file():
     if cwd in prodEnvs:
         environment = 'prod'
 
-    if not os.path.isfile("./azure-provider-config.json"):
-        src = ''.join([git_root, "/tools/config/azure-provider-config.json"])
+    if not os.path.isfile("./azure-verion-override.json"):
+        src = ''.join([git_root, "/tools/config/azure-version-override.json"])
         dst = "."
         shutil.copy2(src, dst)
 
-    appEnvConfig = json.load(open("./azure-provider-config.json"))
+    env_versions = json.load(open("./azure-version-override.json"))
+
+    azure_account_ids = json.load(open(git_root + "/tools/config/azure-account-config.json"))
 
     configTfJson = {
         'terraform': {
-            'required_version': appEnvConfig["terraform_version"],
+            'required_version': env_versions["terraform_version"],
             'backend': {
                 'azurerm': {
                     'resource_group_name': resource_group,
@@ -60,9 +62,9 @@ def create_config_file():
         },
         'provider': {
             'azurerm': {
-                'tenant_id': appEnvConfig[environment]["tenant_id"],
-                'subscription_id': appEnvConfig[environment]["subscription_id"],
-                'version': appEnvConfig["azurerm_version"]
+                'tenant_id': azure_account_ids[environment]["tenant_id"],
+                'subscription_id': azure_account_ids[environment]["subscription_id"],
+                'version': env_versions["azurerm_version"]
             }
         }
     }
@@ -89,7 +91,7 @@ def check_first_time_terraform_init():
                 check=True
             ).stdout.decode()
         except:
-            logging.warn("There is a problem with .terrform")
+            logging.warn("There is a problem with .terraform")
             logging.warn("You may need to delete .terraform before running this script. Exiting.")
             sys.exit()
 
