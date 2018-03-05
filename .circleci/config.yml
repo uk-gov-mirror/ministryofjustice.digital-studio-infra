@@ -10,4 +10,4 @@ jobs:
       - run:
           name: Run truffleHog
           command: |
-            /trufflehog/truffleHogger.sh --use_current_branch  --since_commit "$(git rev-parse ${CIRCLE_SHA1}~1)" 
+            /trufflehog/truffleHogger.sh --use_current_branch  --since_commit "$(git rev-parse '@{1 week ago}')" 
