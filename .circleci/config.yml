@@ -10,5 +10,7 @@ jobs:
       - run:
           name: Run truffleHog
           command: |
-            git checkout -b "${CIRCLE_BRANCH}" # give the current checkout a name
+            # give the current checkout a name
+            git branch -d "${CIRCLE_BRANCH}"
+            git checkout -b "${CIRCLE_BRANCH}"
             /trufflehog/truffleHogger.sh --use_current_branch  --since_commit "$(git rev-parse HEAD~20)" 
