@@ -1,0 +1,320 @@
+{
+    "version": 3,
+    "terraform_version": "0.11.1",
+    "serial": 7,
+    "lineage": "7e2abdf5-9feb-4b1c-a8fc-ca2e3220c318",
+    "modules": [
+        {
+            "path": [
+                "root"
+            ],
+            "outputs": {},
+            "resources": {
+                "azurerm_dns_cname_record.jenkins": {
+                    "type": "azurerm_dns_cname_record",
+                    "depends_on": [],
+                    "primary": {
+                        "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops/providers/Microsoft.Network/dnszones/hmpps.dsd.io/CNAME/webops-jenkins-dev",
+                        "attributes": {
+                            "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops/providers/Microsoft.Network/dnszones/hmpps.dsd.io/CNAME/webops-jenkins-dev",
+                            "name": "webops-jenkins-dev",
+                            "record": "webops-jenkins-dev.azurewebsites.net",
+                            "resource_group_name": "webops",
+                            "tags.%": "2",
+                            "tags.Environment": "Management",
+                            "tags.Service": "WebOps",
+                            "ttl": "300",
+                            "zone_name": "hmpps.dsd.io"
+                        },
+                        "meta": {},
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.azurerm"
+                },
+                "azurerm_key_vault.vault": {
+                    "type": "azurerm_key_vault",
+                    "depends_on": [
+                        "azurerm_resource_group.group"
+                    ],
+                    "primary": {
+                        "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.KeyVault/vaults/webops-jenkins-dev",
+                        "attributes": {
+                            "access_policy.#": "3",
+                            "access_policy.0.application_id": "",
+                            "access_policy.0.certificate_permissions.#": "0",
+                            "access_policy.0.key_permissions.#": "0",
+                            "access_policy.0.object_id": "98dc3307-f515-4717-b3c1-7174413e20b0",
+                            "access_policy.0.secret_permissions.#": "8",
+                            "access_policy.0.secret_permissions.0": "backup",
+                            "access_policy.0.secret_permissions.1": "delete",
+                            "access_policy.0.secret_permissions.2": "get",
+                            "access_policy.0.secret_permissions.3": "list",
+                            "access_policy.0.secret_permissions.4": "purge",
+                            "access_policy.0.secret_permissions.5": "recover",
+                            "access_policy.0.secret_permissions.6": "restore",
+                            "access_policy.0.secret_permissions.7": "set",
+                            "access_policy.0.tenant_id": "747381f4-e81f-4a43-bf68-ced6a1e14edf",
+                            "access_policy.1.application_id": "",
+                            "access_policy.1.certificate_permissions.#": "0",
+                            "access_policy.1.key_permissions.#": "0",
+                            "access_policy.1.object_id": "5b2509b1-64bd-4117-b839-9b0c2b02e02c",
+                            "access_policy.1.secret_permissions.#": "1",
+                            "access_policy.1.secret_permissions.0": "get",
+                            "access_policy.1.tenant_id": "747381f4-e81f-4a43-bf68-ced6a1e14edf",
+                            "access_policy.2.application_id": "",
+                            "access_policy.2.certificate_permissions.#": "0",
+                            "access_policy.2.key_permissions.#": "0",
+                            "access_policy.2.object_id": "880790d6-77d8-4f9b-9df7-f60097801381",
+                            "access_policy.2.secret_permissions.#": "1",
+                            "access_policy.2.secret_permissions.0": "set",
+                            "access_policy.2.tenant_id": "747381f4-e81f-4a43-bf68-ced6a1e14edf",
+                            "enabled_for_deployment": "false",
+                            "enabled_for_disk_encryption": "false",
+                            "enabled_for_template_deployment": "true",
+                            "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.KeyVault/vaults/webops-jenkins-dev",
+                            "location": "ukwest",
+                            "name": "webops-jenkins-dev",
+                            "resource_group_name": "webops-jenkins-dev",
+                            "sku.#": "1",
+                            "sku.0.name": "standard",
+                            "tags.%": "2",
+                            "tags.Environment": "Management",
+                            "tags.Service": "WebOps",
+                            "tenant_id": "747381f4-e81f-4a43-bf68-ced6a1e14edf",
+                            "vault_uri": "https://webops-jenkins-dev.vault.azure.net/"
+                        },
+                        "meta": {
+                            "schema_version": "1"
+                        },
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.azurerm"
+                },
+                "azurerm_resource_group.group": {
+                    "type": "azurerm_resource_group",
+                    "depends_on": [],
+                    "primary": {
+                        "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev",
+                        "attributes": {
+                            "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev",
+                            "location": "ukwest",
+                            "name": "webops-jenkins-dev",
+                            "tags.%": "2",
+                            "tags.Environment": "Management",
+                            "tags.Service": "WebOps"
+                        },
+                        "meta": {},
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.azurerm"
+                },
+                "azurerm_storage_account.storage": {
+                    "type": "azurerm_storage_account",
+                    "depends_on": [
+                        "azurerm_resource_group.group"
+                    ],
+                    "primary": {
+                        "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.Storage/storageAccounts/webopsjenkinsdevstorage",
+                        "attributes": {
+                            "access_tier": "",
+                            "account_encryption_source": "Microsoft.Storage",
+                            "account_kind": "Storage",
+                            "account_replication_type": "RAGRS",
+                            "account_tier": "Standard",
+                            "account_type": "Standard_RAGRS",
+                            "enable_blob_encryption": "true",
+                            "enable_file_encryption": "true",
+                            "enable_https_traffic_only": "false",
+                            "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.Storage/storageAccounts/webopsjenkinsdevstorage",
+                            "location": "ukwest",
+                            "name": "webopsjenkinsdevstorage",
+                            "primary_access_key": "RmNC2BO4mW3XjbuT7/gJO1Yl4CNxHA0Sj3hYM0VHLy17as94Cbubt9xJ0Dv2hmHij29EKBRKicCl6/8TpHhl4g==",
+                            "primary_blob_connection_string": "DefaultEndpointsProtocol=https;BlobEndpoint=https://webopsjenkinsdevstorage.blob.core.windows.net/;AccountName=webopsjenkinsdevstorage;AccountKey=hoJZepnmU6oJLSTLZhBV0omw4DoNfB7B4axDH22ScWScJTFCfJu/P7U38lNfKjSE/Yd/muzz79aPIo8KQR0PxQ==",
+                            "primary_blob_endpoint": "https://webopsjenkinsdevstorage.blob.core.windows.net/",
+                            "primary_file_endpoint": "https://webopsjenkinsdevstorage.file.core.windows.net/",
+                            "primary_location": "ukwest",
+                            "primary_queue_endpoint": "https://webopsjenkinsdevstorage.queue.core.windows.net/",
+                            "primary_table_endpoint": "https://webopsjenkinsdevstorage.table.core.windows.net/",
+                            "resource_group_name": "webops-jenkins-dev",
+                            "secondary_access_key": "tKuYNtKewpUK/VV2ZY43ivAqRy5jjs3C6hdwx54wEFn9EO8tWlMrbdP8cpVh5awfMVOjbkxF5UEyi9lrXLm2LA==",
+                            "secondary_blob_connection_string": "DefaultEndpointsProtocol=https;BlobEndpoint=https://webopsjenkinsdevstorage-secondary.blob.core.windows.net/;AccountName=webopsjenkinsdevstorage;AccountKey=Q2ozk9c0Xt49jdniuoLW1Jcnqz5AjgRddygVl2V8xT0yTZnZp1gca7Sw+8qzyv081OAe0HTMeq2R7A6GxqpYLA==",
+                            "secondary_blob_endpoint": "https://webopsjenkinsdevstorage-secondary.blob.core.windows.net/",
+                            "secondary_location": "uksouth",
+                            "secondary_queue_endpoint": "https://webopsjenkinsdevstorage-secondary.queue.core.windows.net/",
+                            "secondary_table_endpoint": "https://webopsjenkinsdevstorage-secondary.table.core.windows.net/",
+                            "tags.%": "2",
+                            "tags.Environment": "Management",
+                            "tags.Service": "WebOps"
+                        },
+                        "meta": {
+                            "schema_version": "2"
+                        },
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.azurerm"
+                },
+                "data.external.vault": {
+                    "type": "external",
+                    "depends_on": [
+                        "azurerm_key_vault.vault"
+                    ],
+                    "primary": {
+                        "id": "-",
+                        "attributes": {
+                            "id": "-",
+                            "program.#": "2",
+                            "program.0": "python3",
+                            "program.1": "../../tools/keyvault-data-cli-auth.py",
+                            "query.%": "4",
+                            "query.azure_sp_clientid": "azure-sp-clientid",
+                            "query.azure_sp_secret": "azure-sp-secret",
+                            "query.github_deploy_key": "github-deploy-key",
+                            "query.vault": "webops-jenkins-dev",
+                            "result.%": "3",
+                            "result.azure_sp_clientid": "06a1bec9-8ae2-420c-92bb-a5f119b7634c",
+                            "result.azure_sp_secret": "Y5YSDKV3ABn+dZQzvAXzFOKDI1jj5s0yN+e7fqegA/o=",
+                            "result.github_deploy_key":"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBb09wbzdTT3pHcVBVcFBKQUMyaDVoT0E0ZkN4VXlFQ1R2cEp4RktXb2hkblNqR2UwCk5kQys5c1dvak9ibDBSckJKWFRiYnZWQ2pvdmIyZG93VDRpUUk1L21MS1hQU3JkN0l4YzFia0YyYTROWG5MZ2oKMzliU2pIQzlETHFNWndzZGFmWHJGZ2VhZlRRRjJHeHFEN1lQMHA4RkZJU1RNMmNJMVBLOWVSdmd3U3RXS2Vvawp4cjk3TVFoc3Z3SDR2ZjQxUDFHU2ZwbEtqWmtEMmtaL0J2eFZsejRwa1RHMHhzSDNuT1pZMFdwKzMxbVRhWGNyClJweDRvbzBiWU5ycFo1L1hNZ3Q1NkNwWWJBWjdLem9GbkNvMkpmLzFHdmNmRk84bHFBK1VCSEtVNjV2S3RtTlQKRE5EdDQrcnhqM2lKb3U1VVlmTnFuT0VwUi9ybUoycDlpWTROandJREFRQUJBb0lCQUJ5dmpRTHhRVVYzZlRubQpZWnBuQm5xMGlmMUEzZUJRK3NXWFQ0ZFJ2TWdYdTV3Q0JMTXZRa3Uxa3NXRGgrYU44VzZlOVZ0RFo1a0h2NnFIClplTlh3ZkpIMS8yUGxYT0pYKzh5ZlBqcHZKV1A5WGRmc0MyQUcwcWo4bCtwaGN2OHhFS1diMUVmQytCVC9OTEgKQ09WQ0hISDhuU2c2TmcrTXg1dEdwcFpIYlBxaVdiMmJFTktKTlFQOUpIOHFFT1VDcTJ5S3ZSWDYwSUZyUWRCcwpzNjNlYVJ6N2dOVVYxV215R3gyS1A3cEk0cEJORVcwUUF2WGRJUkRVZzJoM1B2M3Jid2lLTDJqU3lxTndsLzgzCnUzb1UwSG5xekF3NGpNSEhVVzFxRDY4cDVNbWtvZ3VVTWRaRHFWeXM5RWlwU1RLbm5qTFlIQWh1bUdsYXJ4eVEKdzNsM0g2RUNnWUVBeTJyWG01SlpzNUM5blpQNXlPYWZDS3BBeDNvLy9ob2VMT2krNWE2YjdOc3FPUHhFZFFNQgpHSlQ5dEs5blY5RXIzRmUyVG1NYnJIcjZ3QWNyYkZkTGIybDY3Q3dha3RHWk5jbGZCTURTc0tlTXpuVGRyYnErCmNHQ0pJQlBkOC9KL1UwdlpvenVjem5CVUVRWFdWN2Vpdkx1a1IybkxUZElUUFVtRTVrbVYrcDhDZ1lFQXlvTUQKN3QwdnUzWHBIVFpwK3NwTXZJcHBwN05pc0RaT1pZaHpFS1VBWSsxamdjZm0zSm0yNThKN3BPTmFHbmxGZnUxdgpiOHBwWlpXbFU5dFk4b0pxeDExdVpNZlM5Sm1MbG9GWlprVThzRkQwUWlCVmw1cVJEU3pOdFlvM1Urc0l5OUUyCml2a0hiaUY2UFNBQkh5UkZYMTU1YUtZNFdiZzdJb1NLclNLWDl4RUNnWUVBcEFPUHVPWjE0U3p4Vmw3NzVocmQKVy9VNnFoeE9BS282Ym1kemxHb0hXeUVUbUVML1I0R1ducVZ6TXY3Q3lySGpOWlNiYi9URldYc0hOMUlRbHhpRAp3RjlDTjY4UDloVjkvVHBTbk5pRWlOOXZ6diszeGQ1dXN0bURkeFBOd0daa2Qxc1BMbWhnZEt0cGZSaEJ6UlJKCjZQYzY3RUhISlFZZmNTa1lPVDVYNlcwQ2dZQVI0cGhLVkVhTzY4NzJ3WU9DbnJOQVE0a3BRbktJMVlMKy9Kb00KOGtXaWphaW9JWnVHQ0IxYlFwWGc3aU5iQ3pMVUR1dzBsMC9QcFBQQkFESk8ySzNOaGJibU42K3Q0cEd0YlNjVQpIVEZLOFJ0aGE3R2pmZ2NwZnJkOFBRUzk2SmdTU0J2bEVqRlJ6S3NiRXVTR2Q1R1k1cU1hVnZQTEdMWkFTaXhsCk5oVHR3UUtCZ0dzOGh4UFhOUzJwbWt1enlKVnA5YmE2dE1lM0FmbThnRTloNkRNa1FMVTZDTmhGaHVJVU02QjEKbXdHeS9YR21paWU0T2dVc2EzcnpoN0xFZUtjSGF0ZWVGek1jUStGSTVZZEwzUFhiOWxGZE9xUzd2L0hSV3VwTQp1K2lzcTN5b1FkWmtNd0s4T3dyZ0w4YTZYenJWaVJiWE5aL0tWSXp1azRBWUEwR0pvRkVsCi0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg=="
+                        },
+                        "meta": {},
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.external"
+                }
+            },
+            "depends_on": []
+        },
+        {
+            "path": [
+                "root",
+                "docker_webapp"
+            ],
+            "outputs": {},
+            "resources": {
+                "azurerm_app_service.docker_app": {
+                    "type": "azurerm_app_service",
+                    "depends_on": [
+                        "azurerm_app_service_plan.service_plan"
+                    ],
+                    "primary": {
+                        "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.Web/sites/webops-jenkins-dev",
+                        "attributes": {
+                            "app_service_plan_id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.Web/serverfarms/webops-jenkins-dev",
+                            "app_settings.%": "11",
+                            "app_settings.AZURE_AD_AUTH_GROUP": "98dc3307-f515-4717-b3c1-7174413e20b0",
+                            "app_settings.AZURE_AD_OAUTH_ENABLE": "true",
+                            "app_settings.AZURE_SP_CLIENT_ID": "06a1bec9-8ae2-420c-92bb-a5f119b7634c",
+                            "app_settings.AZURE_SP_SECRET": "Y5YSDKV3ABn+dZQzvAXzFOKDI1jj5s0yN+e7fqegA/o=",
+                            "app_settings.AZURE_TENANT_ID": "747381f4-e81f-4a43-bf68-ced6a1e14edf",
+                            "app_settings.CERTBOT_REG_EMAIL": "noms-studio-webops@digital.justice.gov.uk",
+                            "app_settings.ENABLE_FULL_ADMIN": "false",
+                            "app_settings.GITHUB_DEPLOY_KEY": "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBb09wbzdTT3pHcVBVcFBKQUMyaDVoT0E0ZkN4VXlFQ1R2cEp4RktXb2hkblNqR2UwCk5kQys5c1dvak9ibDBSckJKWFRiYnZWQ2pvdmIyZG93VDRpUUk1L21MS1hQU3JkN0l4YzFia0YyYTROWG5MZ2oKMzliU2pIQzlETHFNWndzZGFmWHJGZ2VhZlRRRjJHeHFEN1lQMHA4RkZJU1RNMmNJMVBLOWVSdmd3U3RXS2Vvawp4cjk3TVFoc3Z3SDR2ZjQxUDFHU2ZwbEtqWmtEMmtaL0J2eFZsejRwa1RHMHhzSDNuT1pZMFdwKzMxbVRhWGNyClJweDRvbzBiWU5ycFo1L1hNZ3Q1NkNwWWJBWjdLem9GbkNvMkpmLzFHdmNmRk84bHFBK1VCSEtVNjV2S3RtTlQKRE5EdDQrcnhqM2lKb3U1VVlmTnFuT0VwUi9ybUoycDlpWTROandJREFRQUJBb0lCQUJ5dmpRTHhRVVYzZlRubQpZWnBuQm5xMGlmMUEzZUJRK3NXWFQ0ZFJ2TWdYdTV3Q0JMTXZRa3Uxa3NXRGgrYU44VzZlOVZ0RFo1a0h2NnFIClplTlh3ZkpIMS8yUGxYT0pYKzh5ZlBqcHZKV1A5WGRmc0MyQUcwcWo4bCtwaGN2OHhFS1diMUVmQytCVC9OTEgKQ09WQ0hISDhuU2c2TmcrTXg1dEdwcFpIYlBxaVdiMmJFTktKTlFQOUpIOHFFT1VDcTJ5S3ZSWDYwSUZyUWRCcwpzNjNlYVJ6N2dOVVYxV215R3gyS1A3cEk0cEJORVcwUUF2WGRJUkRVZzJoM1B2M3Jid2lLTDJqU3lxTndsLzgzCnUzb1UwSG5xekF3NGpNSEhVVzFxRDY4cDVNbWtvZ3VVTWRaRHFWeXM5RWlwU1RLbm5qTFlIQWh1bUdsYXJ4eVEKdzNsM0g2RUNnWUVBeTJyWG01SlpzNUM5blpQNXlPYWZDS3BBeDNvLy9ob2VMT2krNWE2YjdOc3FPUHhFZFFNQgpHSlQ5dEs5blY5RXIzRmUyVG1NYnJIcjZ3QWNyYkZkTGIybDY3Q3dha3RHWk5jbGZCTURTc0tlTXpuVGRyYnErCmNHQ0pJQlBkOC9KL1UwdlpvenVjem5CVUVRWFdWN2Vpdkx1a1IybkxUZElUUFVtRTVrbVYrcDhDZ1lFQXlvTUQKN3QwdnUzWHBIVFpwK3NwTXZJcHBwN05pc0RaT1pZaHpFS1VBWSsxamdjZm0zSm0yNThKN3BPTmFHbmxGZnUxdgpiOHBwWlpXbFU5dFk4b0pxeDExdVpNZlM5Sm1MbG9GWlprVThzRkQwUWlCVmw1cVJEU3pOdFlvM1Urc0l5OUUyCml2a0hiaUY2UFNBQkh5UkZYMTU1YUtZNFdiZzdJb1NLclNLWDl4RUNnWUVBcEFPUHVPWjE0U3p4Vmw3NzVocmQKVy9VNnFoeE9BS282Ym1kemxHb0hXeUVUbUVML1I0R1ducVZ6TXY3Q3lySGpOWlNiYi9URldYc0hOMUlRbHhpRAp3RjlDTjY4UDloVjkvVHBTbk5pRWlOOXZ6diszeGQ1dXN0bURkeFBOd0daa2Qxc1BMbWhnZEt0cGZSaEJ6UlJKCjZQYzY3RUhISlFZZmNTa1lPVDVYNlcwQ2dZQVI0cGhLVkVhTzY4NzJ3WU9DbnJOQVE0a3BRbktJMVlMKy9Kb00KOGtXaWphaW9JWnVHQ0IxYlFwWGc3aU5iQ3pMVUR1dzBsMC9QcFBQQkFESk8ySzNOaGJibU42K3Q0cEd0YlNjVQpIVEZLOFJ0aGE3R2pmZ2NwZnJkOFBRUzk2SmdTU0J2bEVqRlJ6S3NiRXVTR2Q1R1k1cU1hVnZQTEdMWkFTaXhsCk5oVHR3UUtCZ0dzOGh4UFhOUzJwbWt1enlKVnA5YmE2dE1lM0FmbThnRTloNkRNa1FMVTZDTmhGaHVJVU02QjEKbXdHeS9YR21paWU0T2dVc2EzcnpoN0xFZUtjSGF0ZWVGek1jUStGSTVZZEwzUFhiOWxGZE9xUzd2L0hSV3VwTQp1K2lzcTN5b1FkWmtNd0s4T3dyZ0w4YTZYenJWaVJiWE5aL0tWSXp1azRBWUEwR0pvRkVsCi0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==",
+                            "app_settings.PIPELINES_GIT_REPO": "git@github.com:ministryofjustice/digital-studio-platform-pipelines.git",
+                            "app_settings.SERVER_ENVIRONMENT": "devtest",
+                            "app_settings.WEBSITE_PORTS": "8080",
+                            "client_affinity_enabled": "true",
+                            "connection_string.#": "0",
+                            "enabled": "true",
+                            "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.Web/sites/webops-jenkins-dev",
+                            "location": "ukwest",
+                            "name": "webops-jenkins-dev",
+                            "resource_group_name": "webops-jenkins-dev",
+                            "site_config.#": "1",
+                            "site_config.0.always_on": "true",
+                            "site_config.0.default_documents.#": "9",
+                            "site_config.0.default_documents.0": "Default.htm",
+                            "site_config.0.default_documents.1": "Default.html",
+                            "site_config.0.default_documents.2": "Default.asp",
+                            "site_config.0.default_documents.3": "index.htm",
+                            "site_config.0.default_documents.4": "index.html",
+                            "site_config.0.default_documents.5": "iisstart.htm",
+                            "site_config.0.default_documents.6": "default.aspx",
+                            "site_config.0.default_documents.7": "index.php",
+                            "site_config.0.default_documents.8": "hostingstart.html",
+                            "site_config.0.dotnet_framework_version": "v4.0",
+                            "site_config.0.java_container": "",
+                            "site_config.0.java_container_version": "",
+                            "site_config.0.java_version": "",
+                            "site_config.0.local_mysql_enabled": "false",
+                            "site_config.0.managed_pipeline_mode": "Integrated",
+                            "site_config.0.php_version": "",
+                            "site_config.0.python_version": "",
+                            "site_config.0.remote_debugging_enabled": "false",
+                            "site_config.0.remote_debugging_version": "",
+                            "site_config.0.use_32_bit_worker_process": "true",
+                            "site_config.0.websockets_enabled": "false",
+                            "tags.%": "0"
+                        },
+                        "meta": {},
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.azurerm"
+                },
+                "azurerm_app_service_plan.service_plan": {
+                    "type": "azurerm_app_service_plan",
+                    "depends_on": [],
+                    "primary": {
+                        "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.Web/serverfarms/webops-jenkins-dev",
+                        "attributes": {
+                            "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.Web/serverfarms/webops-jenkins-dev",
+                            "kind": "linux",
+                            "location": "ukwest",
+                            "maximum_number_of_workers": "10",
+                            "name": "webops-jenkins-dev",
+                            "properties.#": "1",
+                            "properties.0.per_site_scaling": "false",
+                            "properties.0.reserved": "true",
+                            "resource_group_name": "webops-jenkins-dev",
+                            "sku.#": "1",
+                            "sku.0.capacity": "1",
+                            "sku.0.size": "S1",
+                            "sku.0.tier": "Standard",
+                            "tags.%": "0"
+                        },
+                        "meta": {},
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.azurerm"
+                },
+                "azurerm_template_deployment.docker_app": {
+                    "type": "azurerm_template_deployment",
+                    "depends_on": [
+                        "azurerm_app_service.docker_app",
+                        "azurerm_app_service_plan.service_plan"
+                    ],
+                    "primary": {
+                        "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.Resources/deployments/webops-jenkins-dev",
+                        "attributes": {
+                            "deployment_mode": "Incremental",
+                            "id": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.Resources/deployments/webops-jenkins-dev",
+                            "name": "webops-jenkins-dev",
+                            "outputs.%": "0",
+                            "parameters.%": "8",
+                            "parameters.app_name": "webops-jenkins-dev",
+                            "parameters.app_serviceplan": "webops-jenkins-dev",
+                            "parameters.docker_image": "mojdigitalstudio/digital-studio-platform-jenkins:latest",
+                            "parameters.environment": "Management",
+                            "parameters.hostname": "webops-jenkins-dev.hmpps.dsd.io",
+                            "parameters.keyVaultCertName": "webops-jenkins-devDOThmppsDOTdsdDOTio",
+                            "parameters.keyVaultId": "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7/resourceGroups/webops-jenkins-dev/providers/Microsoft.KeyVault/vaults/webops-jenkins-dev",
+                            "parameters.service": "WebOps",
+                            "resource_group_name": "webops-jenkins-dev",
+                            "template_body": "{\"$schema\":\"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\"contentVersion\":\"1.0.0.0\",\"parameters\":{\"app_name\":{\"type\":\"String\"},\"app_serviceplan\":{\"type\":\"String\"},\"docker_image\":{\"type\":\"String\"},\"environment\":{\"type\":\"string\"},\"hostname\":{\"type\":\"string\"},\"keyVaultCertName\":{\"type\":\"string\"},\"keyVaultId\":{\"type\":\"string\"},\"service\":{\"type\":\"string\"}},\"resources\":[{\"apiVersion\":\"2016-08-01\",\"comments\":\"Template sets up an azure appservice with a docker image\",\"kind\":\"app,linux,container\",\"location\":\"UK West\",\"name\":\"[parameters('app_name')]\",\"properties\":{\"enabled\":true,\"serverFarmId\":\"[resourceId('Microsoft.Web/serverfarms', parameters('app_serviceplan'))]\"},\"scale\":null,\"type\":\"Microsoft.Web/sites\"},{\"apiVersion\":\"2016-08-01\",\"location\":\"UK West\",\"name\":\"[concat(parameters('app_name'), '/web')]\",\"properties\":{\"alwaysOn\":true,\"httpLoggingEnabled\":true,\"httpsOnly\":true,\"linuxFxVersion\":\"[concat('DOCKER|', parameters('docker_image'))]\",\"logsDirectorySizeLimit\":35,\"numberOfWorkers\":1},\"scale\":null,\"type\":\"Microsoft.Web/sites/config\"},{\"apiVersion\":\"2016-03-01\",\"location\":\"[resourceGroup().location]\",\"name\":\"[parameters('keyVaultCertName')]\",\"properties\":{\"keyVaultId\":\"[parameters('keyVaultId')]\",\"keyVaultSecretName\":\"[parameters('keyVaultCertName')]\",\"serverFarmId\":\"[resourceId('Microsoft.Web/serverfarms/', parameters('app_name'))]\"},\"tags\":\"[variables('tags')]\",\"type\":\"Microsoft.Web/certificates\"},{\"apiVersion\":\"2016-03-01\",\"dependsOn\":[\"[concat('Microsoft.Web/certificates/', parameters('keyVaultCertName'))]\"],\"location\":\"[resourceGroup().location]\",\"name\":\"[concat(parameters('app_name'), '/', parameters('hostname'))]\",\"properties\":{\"sslState\":\"SniEnabled\",\"thumbprint\":\"[reference(resourceId('Microsoft.Web/certificates', parameters('keyVaultCertName'))).Thumbprint]\"},\"type\":\"Microsoft.Web/sites/hostnameBindings\"}],\"variables\":{\"tags\":{\"Environment\":\"[parameters('environment')]\",\"Service\":\"[parameters('service')]\"}}}"
+                        },
+                        "meta": {},
+                        "tainted": false
+                    },
+                    "deposed": [],
+                    "provider": "provider.azurerm"
+                }
+            },
+            "depends_on": []
+        }
+    ]
+}
