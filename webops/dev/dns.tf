@@ -138,11 +138,20 @@ resource "azurerm_dns_cname_record" "search" {
   record              = "search-noms-api.dsd.io"
 }
 
-# Allow AWS's ACM to manage keyworker-srv.hmpps.dsd.io
-resource "azurerm_dns_cname_record" "keyworker-srv" {
+# Allow AWS's ACM to manage keyworker-api-dev.hmpps.dsd.io
+resource "azurerm_dns_cname_record" "keyworker-api-dev" {
   name                = "_bea8514516acc235b1c7a61407bd4e47.keyworker-api-dev"
   zone_name           = "${azurerm_dns_zone.hmpps.name}"
   resource_group_name = "${azurerm_resource_group.group.name}"
   ttl                 = "300"
   record              = "_fa356c8ae40aa381ad67c8199f6b4cfe.acm-validations.aws."
+}
+
+# Allow AWS's ACM to manage omic-dev.hmpps.dsd.io
+resource "azurerm_dns_cname_record" "omic-dev" {
+  name                = "_79224e76e3cf7223cd35155455755acc.omic-dev"
+  zone_name           = "${azurerm_dns_zone.hmpps.name}"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  ttl                 = "300"
+  record              = "_3f84403eebcf649218bc22a4654a5fa4.acm-validations.aws."
 }
