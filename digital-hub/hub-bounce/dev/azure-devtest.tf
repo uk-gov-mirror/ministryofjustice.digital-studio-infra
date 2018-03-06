@@ -1,1 +1,1 @@
-../../../azure-devtest-common.tf
+../../../azure-devtest.tf
