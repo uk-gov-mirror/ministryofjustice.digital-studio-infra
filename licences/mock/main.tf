@@ -155,7 +155,7 @@ module "sql-nomis-batchload" {
 }
 
 data "external" "sas-url" {
-  program = ["node", "../../tools/container-sas-url-cli-auth.js"]
+  program = ["python3", "../../tools/container-sas-url-cli-auth.py"]
 
   query {
     subscription_id = "${var.azure_subscription_id}"
