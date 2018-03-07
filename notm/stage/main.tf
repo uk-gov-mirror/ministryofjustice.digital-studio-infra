@@ -76,7 +76,7 @@ resource "azurerm_key_vault" "vault" {
       	object_id = "${var.azure_app_service_oid}"
       	key_permissions = []
       	secret_permissions = ["get"]
-  	}  
+  	}
 
     enabled_for_deployment = false
     enabled_for_disk_encryption = false
@@ -88,7 +88,7 @@ resource "azurerm_key_vault" "vault" {
 }
 
 data "external" "vault" {
-    program = ["node", "../../tools/keyvault-data-cli-auth.js"]
+    program = ["python3", "../../tools/keyvault-data-cli-auth.py"]
     query {
         vault = "${azurerm_key_vault.vault.name}"
         noms_token = "noms-token"
@@ -114,7 +114,7 @@ resource "azurerm_template_deployment" "webapp" {
 }
 
 data "external" "sas-url" {
-    program = ["node", "../../tools/container-sas-url-cli-auth.js"]
+    program = ["python3", "../../tools/container-sas-url-cli-auth.py"]
     query {
         subscription_id = "${var.azure_subscription_id}"
         tenant_id = "${var.azure_tenant_id}"

@@ -41,7 +41,7 @@ resource "azurerm_app_service" "nomis-batchload" {
 }
 
 data "external" "vault-nomis-batchload" {
-  program = ["node", "../../tools/keyvault-data-cli-auth.js"]
+  program = ["python3", "../../tools/keyvault-data-cli-auth.py"]
 
   query {
     vault = "${azurerm_key_vault.vault.name}"
