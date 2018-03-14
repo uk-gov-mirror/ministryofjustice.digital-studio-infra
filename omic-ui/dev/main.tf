@@ -30,7 +30,7 @@ resource "random_id" "session-secret" {
 }
 
 data "aws_acm_certificate" "cert" {
-    domain = "omic-dev.hmpps.dsd.io"
+    domain = "${var.app-name}.hmpps.dsd.io"
 }
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
@@ -49,11 +49,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
         name = "IamInstanceProfile"
         value = "aws-elasticbeanstalk-ec2-role"
     }
-//    setting {
-//        namespace = "aws:elasticbeanstalk:application"
-//        name = "Application Healthcheck URL"
-//        value = "/health"
-//    }
+    setting {
+        namespace = "aws:elasticbeanstalk:application"
+        name = "Application Healthcheck URL"
+        value = "/health"
+    }
     setting {
         namespace = "aws:elasticbeanstalk:environment"
         name = "ServiceRole"
