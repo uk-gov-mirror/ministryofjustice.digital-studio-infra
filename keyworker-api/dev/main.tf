@@ -20,7 +20,7 @@ data "aws_acm_certificate" "cert" {
 }
 
 resource "aws_security_group" "elb" {
-  name = "${var.app-name}-elb-group"
+  name = "keyworker-api-elb-group"
   vpc_id = "${aws_vpc.vpc.id}"
   description = "Keyworker API ELB security group"
 
