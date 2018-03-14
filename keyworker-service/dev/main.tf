@@ -26,11 +26,11 @@ resource "aws_elastic_beanstalk_application" "app" {
 }
 
 data "aws_acm_certificate" "cert" {
-    domain = "keyworker-api-dev.hmpps.dsd.io"
+    domain = "${var.app-name}.hmpps.dsd.io"
 }
 
 resource "aws_security_group" "elb" {
-  name = "keyworker-api-elb-group"
+  name = "${var.app-name}-elb-group"
   vpc_id = "${aws_vpc.vpc.id}"
   description = "Keyworker API ELB security group"
 
