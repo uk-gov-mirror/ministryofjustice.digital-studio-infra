@@ -1,13 +1,3 @@
-terraform {
-    required_version = ">= 0.9.8"
-    backend "s3" {
-        bucket = "moj-studio-webops-terraform"
-        key = "keyworker-srv-dev.terraform.tfstate"
-        region = "eu-west-2"
-        encrypt = true
-    }
-}
-
 variable "app-name" {
     type = "string"
     default = "keyworker-api-dev"
