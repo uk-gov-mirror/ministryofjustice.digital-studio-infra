@@ -39,7 +39,8 @@ def create_config_file():
     if cwd in prodEnvs:
         environment = 'prod'
 
-    if not os.path.isfile("./azure-verion-override.json"):
+    if not os.path.isfile("./azure-version-override.json"):
+        logging.info("Creating fresh azure-version-override.json")
         src = ''.join([git_root, "/tools/config/azure-version-override.json"])
         dst = "."
         shutil.copy2(src, dst)
