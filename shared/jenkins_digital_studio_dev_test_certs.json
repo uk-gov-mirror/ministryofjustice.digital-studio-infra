@@ -13,8 +13,8 @@
   "hostname": "rsr-dev",
   "zone": "hmpps.dsd.io",
   "dns_resource_group": "webops",
-  "resource_group": "aap-dev",
-  "keyvault": "aap-dev",
+  "resource_group": "rsr-dev",
+  "keyvault": "rsr-dev",
   "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
 },
 {
