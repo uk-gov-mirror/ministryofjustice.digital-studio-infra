@@ -5,12 +5,12 @@ variable "rsr-name" {
 
 variable "env-name" {
     type = "string"
-    default = "aap-prod"
+    default = "rsr-prod"
 }
 variable "tags" {
     type = "map"
     default {
-        Service = "AAP"
+        Service = "RSR"
         Environment = "Prod"
     }
 }
