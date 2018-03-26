@@ -1,6 +1,6 @@
 variable "env-name" {
   type    = "string"
-  default = "aap-dev"
+  default = "rsr-dev"
 }
 
 variable "rsr-name" {
@@ -156,7 +156,7 @@ resource "github_repository_webhook" "rsr-deploy" {
   name = "web"
 
   configuration {
-    url          = "${azurerm_template_deployment.rsr-github.outputs.deployTrigger}?scmType=GitHub"
+    url          = "https://${env-name}.scm.azurewebsites.net/deploy  "
     content_type = "form"
     insecure_ssl = false
   }
