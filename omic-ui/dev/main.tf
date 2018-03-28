@@ -153,6 +153,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NN_ENDPOINT_URL"
+    value     = "https://notm-dev.hmpps.dsd.io/"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_TOKEN"
     value     = "${data.aws_ssm_parameter.api-gateway-token.value}"
   }
