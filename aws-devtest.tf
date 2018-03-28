@@ -21,5 +21,5 @@ provider "aws" {
 
 variable "elastic-beanstalk-single-docker" {
     type = "string"
-    default = "64bit Amazon Linux 2017.09 v2.8.4 running Docker 17.09.1-ce"
+    default = "64bit Amazon Linux 2017.09 v2.9.1 running Docker 17.12.0-ce"
 }
