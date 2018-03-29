@@ -216,8 +216,8 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "JWT_SIGNING_KEY"
-    value     = "${data.aws_ssm_parameter.jwt-signing-key.value}"
+    name      = "JWT_PUBLIC_KEY"
+    value     = "${data.aws_ssm_parameter.jwt-public-key.value}"
   }
 
   setting {
