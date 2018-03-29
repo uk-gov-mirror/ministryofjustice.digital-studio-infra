@@ -262,6 +262,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "${aws_db_instance.db.password}"
   }
 
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SVC_KW_SUPPORTED_AGENCIES"
+    value     = "ALI,BMI,BXI,ISI,LEI,LT1,LT2"
+  }
+
   tags = "${var.tags}"
 }
 
