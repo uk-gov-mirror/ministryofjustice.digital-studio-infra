@@ -74,6 +74,13 @@ resource "azurerm_key_vault" "vault" {
         secret_permissions = ["set"]
     }
 
+    access_policy {
+        tenant_id          = "${var.azure_tenant_id}"
+        object_id          = "${var.azure_notm_group_oid}"
+        key_permissions    = []
+        secret_permissions = "${var.azure_secret_permissions_all}"
+    }
+
     enabled_for_deployment = false
     enabled_for_disk_encryption = false
     enabled_for_template_deployment = true
@@ -88,24 +95,50 @@ data "external" "vault" {
         vault = "${azurerm_key_vault.vault.name}"
         noms_token = "noms-token"
         noms_private_key = "noms-private-key"
+        api_gateway_private_key = "api-gateway-private-key"
         google_analytics_id = "google-analytics-id"
         api_client_secret = "api-client-secret"
     }
 }
 
-resource "azurerm_template_deployment" "webapp" {
-    name = "webapp"
+resource "azurerm_app_service_plan" "app" {
+    name                = "${var.app-name}"
+    location            = "${azurerm_resource_group.group.location}"
     resource_group_name = "${azurerm_resource_group.group.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../../shared/appservice.template.json")}"
-    parameters {
-        name = "${var.app-name}"
-        service = "${var.tags["Service"]}"
-        environment = "${var.tags["Environment"]}"
-        workers = "2"
-        sku_name = "S2"
-        sku_tier = "Standard"
+
+    sku {
+        tier     = "Standard"
+        size     = "S2"
+        capacity = 2
     }
+
+    tags = "${var.tags}"
+}
+
+resource "azurerm_app_service" "app" {
+    name                = "${var.app-name}"
+    location            = "${azurerm_resource_group.group.location}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    app_service_plan_id = "${azurerm_app_service_plan.app.id}"
+
+    app_settings {
+        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
+        NODE_ENV                       = "production"
+        API_ENDPOINT_URL               = "https://gateway.nomis-api.service.justice.gov.uk/elite2api/"
+        USE_API_GATEWAY_AUTH           = "yes"
+        NOMS_TOKEN                     = "${data.external.vault.result.noms_token}"
+        NOMS_PRIVATE_KEY               = "${data.external.vault.result.noms_private_key}"
+        API_GATEWAY_PRIVATE_KEY        = "${data.external.vault.result.api_gateway_private_key}"
+        API_CLIENT_ID                  = "elite2apiclient"
+        API_CLIENT_SECRET              = "${data.external.vault.result.api_client_secret}"
+        GOOGLE_ANALYTICS_ID            = "${data.external.vault.result.google_analytics_id}"
+        HMPPS_COOKIE_NAME              = "hmpps-session-preprod"
+        HMPPS_COOKIE_DOMAIN            = "hmpps.dsd.io"
+        SESSION_COOKIE_SECRET          = "${random_id.session-secret.b64}"
+        WEBSITE_NODE_DEFAULT_VERSION   = "8.10.0"
+    }
+
+    tags = "${var.tags}"
 }
 
 data "external" "sas-url" {
@@ -129,11 +162,9 @@ resource "azurerm_template_deployment" "webapp-weblogs" {
     template_body = "${file("../../shared/appservice-weblogs.template.json")}"
 
     parameters {
-        name = "${var.app-name}"
+    name       = "${azurerm_app_service.app.name}"
         storageSAS = "${data.external.sas-url.result["url"]}"
     }
-
-    depends_on = ["azurerm_template_deployment.webapp"]
 }
 
 resource "azurerm_template_deployment" "insights" {
@@ -146,32 +177,7 @@ resource "azurerm_template_deployment" "insights" {
         location = "northeurope" // Not in UK yet
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
-        appServiceId = "${azurerm_template_deployment.webapp.outputs["resourceId"]}"
     }
-}
-
-resource "azurerm_template_deployment" "webapp-config" {
-    name = "webapp-config"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../webapp-config.template.json")}"
-
-    parameters {
-        name = "${var.app-name}"
-        APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
-        NODE_ENV = "production"
-        API_ENDPOINT_URL = "https://gateway.nomis-api.service.justice.gov.uk/elite2api/"
-        USE_API_GATEWAY_AUTH = "yes"
-        NOMS_TOKEN = "${data.external.vault.result.noms_token}"
-        NOMS_PRIVATE_KEY = "${data.external.vault.result.noms_private_key}"
-        API_CLIENT_ID = "elite2apiclient"
-        API_CLIENT_SECRET = "${data.external.vault.result.api_client_secret}"
-        GOOGLE_ANALYTICS_ID = "${data.external.vault.result.google_analytics_id}"
-        SESSION_SECRET = "${random_id.session-secret.b64}"
-        WEBSITE_NODE_DEFAULT_VERSION = "8.4.0"
-    }
-
-    depends_on = ["azurerm_template_deployment.webapp"]
 }
 
 resource "azurerm_template_deployment" "webapp-whitelist" {
@@ -181,7 +187,7 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
     template_body = "${file("../../shared/appservice-whitelist.template.json")}"
 
     parameters {
-        name = "${azurerm_template_deployment.webapp.parameters.name}"
+        name = "${azurerm_app_service.app.name}"
         ip1 = "${var.ips["office"]}"
         ip2 = "${var.ips["quantum"]}"
         ip3 = "${var.ips["health-kick"]}"
@@ -189,8 +195,6 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
         ip5 = "${var.ips["digitalprisons2"]}"
         ip6 = "${var.ips["mojvpn"]}"
     }
-
-    depends_on = ["azurerm_template_deployment.webapp"]
 }
 
 resource "azurerm_template_deployment" "webapp-ssl" {
@@ -200,20 +204,18 @@ resource "azurerm_template_deployment" "webapp-ssl" {
     template_body = "${file("../../shared/appservice-ssl.template.json")}"
 
     parameters {
-        name = "${azurerm_template_deployment.webapp.parameters.name}"
+        name             = "${azurerm_app_service.app.name}"
         hostname = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
         keyVaultId = "${azurerm_key_vault.vault.id}"
-        keyVaultCertName = "notmDOTserviceDOThmppsDOTdsdDOTio"
+        keyVaultCertName = "${replace("${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}", ".", "DOT")}"
         service = "${var.tags["Service"]}"
         environment = "${var.tags["Environment"]}"
     }
-
-    depends_on = ["azurerm_template_deployment.webapp"]
 }
 
 module "slackhook" {
     source = "../../shared/modules/slackhook"
-    app_name = "${azurerm_template_deployment.webapp.parameters.name}"
+    app_name = "${azurerm_app_service.app.name}"
     azure_subscription = "production"
     channels = ["nomisonthemove"]
 }
