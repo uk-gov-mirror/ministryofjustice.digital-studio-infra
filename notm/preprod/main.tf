@@ -133,7 +133,7 @@ resource "azurerm_app_service" "app" {
         API_CLIENT_SECRET              = "${data.external.vault.result.api_client_secret}"
         GOOGLE_ANALYTICS_ID            = "${data.external.vault.result.google_analytics_id}"
         HMPPS_COOKIE_NAME              = "hmpps-session-preprod"
-        HMPPS_COOKIE_DOMAIN            = "hmpps.dsd.io"
+        HMPPS_COOKIE_DOMAIN            = "service.hmpps.dsd.io"
         SESSION_COOKIE_SECRET          = "${random_id.session-secret.b64}"
         WEBSITE_NODE_DEFAULT_VERSION   = "8.10.0"
     }
