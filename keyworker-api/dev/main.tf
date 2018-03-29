@@ -1,28 +1,79 @@
 variable "app-name" {
   type    = "string"
-  default = "omic-dev"
+  default = "keyworker-api-dev"
 }
 
 variable "tags" {
   type = "map"
 
   default {
-    Service     = "omic"
+    Service     = "keyworker-api"
     Environment = "Dev"
   }
 }
 
 resource "aws_elastic_beanstalk_application" "app" {
-  name        = "${var.app-name}"
-  description = "${var.app-name}"
-}
-
-resource "random_id" "session-secret" {
-  byte_length = 40
+  name        = "keyworker-api"
+  description = "keyworker-api"
 }
 
 data "aws_acm_certificate" "cert" {
   domain = "${var.app-name}.hmpps.dsd.io"
+}
+
+resource "aws_security_group" "elb" {
+  name        = "keyworker-api-elb-group"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "Keyworker API ELB security group"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags {
+    Name = "keyworker-api-lb-sg"
+  }
+}
+
+resource "aws_security_group" "ec2" {
+  name        = "keyworker-api-ec2-group"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "Keyworker API EC2 security group"
+
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = ["${aws_security_group.elb.id}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags {
+    Name = "keyworker-api-ec2-sg"
+  }
 }
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
@@ -30,6 +81,24 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   application         = "${aws_elastic_beanstalk_application.app.name}"
   solution_stack_name = "${var.elastic-beanstalk-single-docker}"
   tier                = "WebServer"
+
+  setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "ManagedSecurityGroup"
+    value     = "${aws_security_group.elb.id}"
+  }
+
+  setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.elb.id}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.ec2.id}"
+  }
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -136,25 +205,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
-    value     = "yes"
-  }
-
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_ENDPOINT_URL"
-    value     = "https://noms-api-dev.dsd.io/elite2api/"
-  }
-
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "KEYWORKER_API_URL"
-    value     = "https://keyworker-api-dev.hmpps.dsd.io/"
-  }
-
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "NN_ENDPOINT_URL"
-    value     = "https://notm-dev.hmpps.dsd.io/"
+    value     = "true"
   }
 
   setting {
@@ -165,14 +216,14 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_CLIENT_ID"
-    value     = "elite2apiclient"
+    name      = "JWT_PUBLIC_KEY"
+    value     = "${data.aws_ssm_parameter.jwt-public-key.value}"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_CLIENT_SECRET"
-    value     = "${data.aws_ssm_parameter.api-client-secret.value}"
+    name      = "ELITE2_API_URI_ROOT"
+    value     = "https://noms-api-dev.dsd.io/elite2api/api"
   }
 
   setting {
@@ -183,26 +234,38 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${data.aws_ssm_parameter.appinsights-instrumentationkey.value}"
+    name      = "SPRING_PROFILES_ACTIVE"
+    value     = "postgres"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "HMPPS_COOKIE_NAME"
-    value     = "hmpps-session-dev"
+    name      = "APP_DB_SERVER"
+    value     = "${aws_db_instance.db.address}"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "HMPPS_COOKIE_DOMAIN"
-    value     = "hmpps.dsd.io"
+    name      = "APP_DB_NAME"
+    value     = "${aws_db_instance.db.name}"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SESSION_COOKIE_SECRET"
-    value     = "${random_id.session-secret.b64}"
+    name      = "SPRING_DATASOURCE_USERNAME"
+    value     = "${aws_db_instance.db.username}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SPRING_DATASOURCE_PASSWORD"
+    value     = "${aws_db_instance.db.password}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SVC_KW_SUPPORTED_AGENCIES"
+    value     = "ALI,BMI,BXI,ISI,LEI,LT1,LT2"
   }
 
   tags = "${var.tags}"

@@ -37,6 +37,16 @@
 }
 ,
 {
+  "azure_app": "rsr-prod",
+  "hostname": "rsr",
+  "zone": "service.hmpps.dsd.io",
+  "dns_resource_group": "webops-prod",
+  "resource_group": "rsr-prod",
+  "keyvault": "rsr-prod",
+  "subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
+}
+,
+{
   "azure_app": "webops-jenkins-prod",
   "hostname": "webops-jenkins-prod",
   "zone": "service.hmpps.dsd.io",
