@@ -1,28 +1,24 @@
-variable "rsr-name" {
+variable "app-name" {
     type = "string"
     default = "rsr-prod"
 }
 
-variable "env-name" {
-    type = "string"
-    default = "aap-prod"
-}
 variable "tags" {
     type = "map"
     default {
-        Service = "AAP"
+        Service = "RSR"
         Environment = "Prod"
     }
 }
 
 resource "azurerm_resource_group" "group" {
-    name = "${var.env-name}"
+    name = "${var.app-name}"
     location = "ukwest"
     tags = "${var.tags}"
 }
 
 resource "azurerm_storage_account" "storage" {
-    name = "${replace(var.env-name, "-", "")}storage"
+    name = "${replace(var.app-name, "-", "")}storage"
     resource_group_name = "${azurerm_resource_group.group.name}"
     location = "${azurerm_resource_group.group.location}"
     account_tier = "Standard"
@@ -33,7 +29,7 @@ resource "azurerm_storage_account" "storage" {
 }
 
 resource "azurerm_key_vault" "vault" {
-    name = "${var.env-name}"
+    name = "${var.app-name}"
     resource_group_name = "${azurerm_resource_group.group.name}"
     location = "${azurerm_resource_group.group.location}"
     sku {
@@ -69,33 +65,27 @@ resource "azurerm_key_vault" "vault" {
     tags = "${var.tags}"
 }
 
-resource "azurerm_template_deployment" "rsr" {
-    name = "rsr"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../../shared/appservice.template.json")}"
-    parameters {
-        name = "${var.rsr-name}"
-        service = "${var.tags["Service"]}"
-        environment = "${var.tags["Environment"]}"
-        workers = "1"
-        sku_name = "S1"
-        sku_tier = "Standard"
-    }
+resource "azurerm_app_service_plan" "app" {
+  name                = "${var.app-name}"
+  location            = "${azurerm_resource_group.group.location}"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+
+  sku {
+    tier     = "Standard"
+    size     = "S1"
+    capacity = 1
+  }
+
+  tags = "${var.tags}"
 }
 
-resource "azurerm_template_deployment" "rsr-hostname" {
-    name = "rsr-hostname"
-    resource_group_name = "${azurerm_resource_group.group.name}"
-    deployment_mode = "Incremental"
-    template_body = "${file("../../shared/appservice-hostname.template.json")}"
+resource "azurerm_app_service" "app" {
+  name                = "${var.app-name}"
+  location            = "${azurerm_resource_group.group.location}"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  app_service_plan_id = "${azurerm_app_service_plan.app.id}"
 
-    parameters {
-        name = "${var.rsr-name}"
-        hostname = "${azurerm_dns_cname_record.rsr.name}.${azurerm_dns_cname_record.rsr.zone_name}"
-    }
-
-    depends_on = ["azurerm_template_deployment.rsr"]
+  tags = "${var.tags}"
 }
 
 resource "azurerm_dns_cname_record" "rsr" {
@@ -103,7 +93,7 @@ resource "azurerm_dns_cname_record" "rsr" {
     zone_name = "service.hmpps.dsd.io"
     resource_group_name = "webops-prod"
     ttl = "300"
-    record = "${var.rsr-name}.azurewebsites.net"
+    record = "${var.app-name}.azurewebsites.net"
     tags = "${var.tags}"
 }
 
@@ -114,7 +104,7 @@ resource "azurerm_template_deployment" "rsr-ssl" {
     template_body = "${file("../../shared/appservice-ssl.template.json")}"
 
     parameters {
-        name = "${azurerm_template_deployment.rsr.parameters.name}"
+        name = "${azurerm_app_service.app.name}"
         hostname = "${azurerm_dns_cname_record.rsr.name}.${azurerm_dns_cname_record.rsr.zone_name}"
         keyVaultId = "${azurerm_key_vault.vault.id}"
         keyVaultCertName = "${replace("${azurerm_dns_cname_record.rsr.name}.${azurerm_dns_cname_record.rsr.zone_name}", ".", "DOT")}"
@@ -122,12 +112,12 @@ resource "azurerm_template_deployment" "rsr-ssl" {
         environment = "${var.tags["Environment"]}"
     }
 
-    depends_on = ["azurerm_template_deployment.rsr"]
+    depends_on = ["azurerm_app_service.app"]
 }
 
 module "slackhook-rsr" {
     source = "../../shared/modules/slackhook"
-    app_name = "${azurerm_template_deployment.rsr.parameters.name}"
+    app_name = "${azurerm_app_service.app.name}"
     channels = ["api-accelerator", "shef_changes"]
     azure_subscription = "production"
 }
