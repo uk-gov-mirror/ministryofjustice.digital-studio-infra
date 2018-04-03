@@ -1,6 +1,6 @@
 variable "app-name" {
   type    = "string"
-  default = "keyworker-api-dev"
+  default = "keyworker-api-stage"
 }
 
 variable "tags" {
@@ -8,11 +8,11 @@ variable "tags" {
 
   default {
     Service     = "keyworker-api"
-    Environment = "Dev"
+    Environment = "Stage"
   }
 }
 
-# This resource is managed in multiple places (keyworker api stage)
+# This resource is managed in multiple places (keyworker api dev)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "keyworker-api"
   description = "keyworker-api"
@@ -79,7 +79,7 @@ resource "aws_security_group" "ec2" {
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
   name                = "${var.app-name}"
-  application         = "${aws_elastic_beanstalk_application.app.name}"
+  application         = "keyworker-api"
   solution_stack_name = "${var.elastic-beanstalk-single-docker}"
   tier                = "WebServer"
 
@@ -224,7 +224,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "ELITE2_API_URI_ROOT"
-    value     = "https://noms-api-dev.dsd.io/elite2api/api"
+    value     = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/api"
   }
 
   setting {
@@ -263,12 +263,6 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "${aws_db_instance.db.password}"
   }
 
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SVC_KW_SUPPORTED_AGENCIES"
-    value     = "ALI,BMI,BXI,ISI,LEI,LT1,LT2"
-  }
-
   tags = "${var.tags}"
 }
 
@@ -278,4 +272,12 @@ resource "azurerm_dns_cname_record" "cname" {
   resource_group_name = "webops"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
+}
+
+resource "azurerm_dns_cname_record" "acm-verify" {
+  name                = "_991d7e3705d551d020fc0c48d6ab9460.keyworker-api-stage"
+  zone_name           = "hmpps.dsd.io"
+  resource_group_name = "webops"
+  ttl                 = "300"
+  record              = "_451c0978c4ee03b05eb304be4af8cfe7.acm-validations.aws."
 }

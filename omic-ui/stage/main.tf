@@ -1,80 +1,42 @@
 variable "app-name" {
   type    = "string"
-  default = "keyworker-api-dev"
+  default = "omic-stage"
 }
 
 variable "tags" {
   type = "map"
 
   default {
-    Service     = "keyworker-api"
-    Environment = "Dev"
+    Service     = "omic-ui"
+    Environment = "Stage"
   }
 }
 
-# This resource is managed in multiple places (keyworker api stage)
+# This resource is managed in multiple places (omic ui dev)
 resource "aws_elastic_beanstalk_application" "app" {
-  name        = "keyworker-api"
-  description = "keyworker-api"
+  name        = "omic-ui"
+  description = "omic-ui"
+}
+
+resource "random_id" "session-secret" {
+  byte_length = 40
+}
+
+resource "azurerm_resource_group" "group" {
+  name     = "omic-ui-stage"
+  location = "ukwest"
+  tags     = "${var.tags}"
+}
+
+resource "azurerm_application_insights" "insights" {
+  name                = "${var.app-name}"
+  location            = "North Europe"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  application_type    = "Web"
 }
 
 data "aws_acm_certificate" "cert" {
   domain = "${var.app-name}.hmpps.dsd.io"
-}
-
-resource "aws_security_group" "elb" {
-  name        = "keyworker-api-elb-group"
-  vpc_id      = "${aws_vpc.vpc.id}"
-  description = "Keyworker API ELB security group"
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags {
-    Name = "keyworker-api-lb-sg"
-  }
-}
-
-resource "aws_security_group" "ec2" {
-  name        = "keyworker-api-ec2-group"
-  vpc_id      = "${aws_vpc.vpc.id}"
-  description = "Keyworker API EC2 security group"
-
-  ingress {
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    security_groups = ["${aws_security_group.elb.id}"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags {
-    Name = "keyworker-api-ec2-sg"
-  }
 }
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
@@ -82,24 +44,6 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   application         = "${aws_elastic_beanstalk_application.app.name}"
   solution_stack_name = "${var.elastic-beanstalk-single-docker}"
   tier                = "WebServer"
-
-  setting {
-    namespace = "aws:elbv2:loadbalancer"
-    name      = "ManagedSecurityGroup"
-    value     = "${aws_security_group.elb.id}"
-  }
-
-  setting {
-    namespace = "aws:elbv2:loadbalancer"
-    name      = "SecurityGroups"
-    value     = "${aws_security_group.elb.id}"
-  }
-
-  setting {
-    namespace = "aws:autoscaling:launchconfiguration"
-    name      = "SecurityGroups"
-    value     = "${aws_security_group.ec2.id}"
-  }
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -206,7 +150,25 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
-    value     = "true"
+    value     = "yes"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_ENDPOINT_URL"
+    value     = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "KEYWORKER_API_URL"
+    value     = "https://keyworker-api-stage.hmpps.dsd.io/"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NN_ENDPOINT_URL"
+    value     = "https://notm-stage.hmpps.dsd.io/"
   }
 
   setting {
@@ -217,14 +179,14 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "JWT_PUBLIC_KEY"
-    value     = "${data.aws_ssm_parameter.jwt-public-key.value}"
+    name      = "API_CLIENT_ID"
+    value     = "omic"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "ELITE2_API_URI_ROOT"
-    value     = "https://noms-api-dev.dsd.io/elite2api/api"
+    name      = "API_CLIENT_SECRET"
+    value     = "${data.aws_ssm_parameter.api-client-secret.value}"
   }
 
   setting {
@@ -235,38 +197,26 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SPRING_PROFILES_ACTIVE"
-    value     = "postgres"
+    name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
+    value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "APP_DB_SERVER"
-    value     = "${aws_db_instance.db.address}"
+    name      = "HMPPS_COOKIE_NAME"
+    value     = "hmpps-session-stage"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "APP_DB_NAME"
-    value     = "${aws_db_instance.db.name}"
+    name      = "HMPPS_COOKIE_DOMAIN"
+    value     = "hmpps.dsd.io"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SPRING_DATASOURCE_USERNAME"
-    value     = "${aws_db_instance.db.username}"
-  }
-
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SPRING_DATASOURCE_PASSWORD"
-    value     = "${aws_db_instance.db.password}"
-  }
-
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SVC_KW_SUPPORTED_AGENCIES"
-    value     = "ALI,BMI,BXI,ISI,LEI,LT1,LT2"
+    name      = "SESSION_COOKIE_SECRET"
+    value     = "${random_id.session-secret.b64}"
   }
 
   tags = "${var.tags}"
@@ -278,4 +228,13 @@ resource "azurerm_dns_cname_record" "cname" {
   resource_group_name = "webops"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
+}
+
+# Allow AWS's ACM to manage omic-stage.hmpps.dsd.io
+resource "azurerm_dns_cname_record" "acm-verify" {
+  name                = "_f506263e0801e0bbae5c53047b69cc0a.omic-stage"
+  zone_name           = "hmpps.dsd.io"
+  resource_group_name = "webops"
+  ttl                 = "300"
+  record              = "_5ef9109510441c9c28efcb7369982219.acm-validations.aws."
 }
