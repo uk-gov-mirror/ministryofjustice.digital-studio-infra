@@ -34,9 +34,9 @@ resource "random_id" "session-secret" {
   byte_length = 40
 }
 
-//data "aws_acm_certificate" "cert" {
-//  domain = "${var.app-name}.hmpps.dsd.io"
-//}
+data "aws_acm_certificate" "cert" {
+  domain = "${var.app-name}.hmpps.dsd.io"
+}
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
   name                = "${var.app-name}"
@@ -68,29 +68,29 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "aws-elasticbeanstalk-service-role"
   }
 
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "ListenerProtocol"
-//    value     = "HTTPS"
-//  }
-//
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "SSLCertificateId"
-//    value     = "${data.aws_acm_certificate.cert.arn}"
-//  }
-//
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "InstancePort"
-//    value     = "80"
-//  }
-//
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "ListenerProtocol"
-//    value     = "HTTPS"
-//  }
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "ListenerProtocol"
+    value     = "HTTPS"
+  }
+
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "SSLCertificateId"
+    value     = "${data.aws_acm_certificate.cert.arn}"
+  }
+
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "InstancePort"
+    value     = "80"
+  }
+
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "ListenerProtocol"
+    value     = "HTTPS"
+  }
 
   setting {
     namespace = "aws:ec2:vpc"
@@ -227,4 +227,12 @@ resource "azurerm_dns_cname_record" "cname" {
   resource_group_name = "webops"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
+}
+
+resource "azurerm_dns_cname_record" "acm-verify" {
+  name                = "_f506263e0801e0bbae5c53047b69cc0a.omic-stage"
+  zone_name           = "hmpps.dsd.io"
+  resource_group_name = "webops"
+  ttl                 = "300"
+  record              = "_5ef9109510441c9c28efcb7369982219.acm-validations.aws."
 }

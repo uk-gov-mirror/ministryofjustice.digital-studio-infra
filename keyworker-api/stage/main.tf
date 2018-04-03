@@ -17,9 +17,9 @@ variable "tags" {
 //  description = "keyworker-api"
 //}
 
-//data "aws_acm_certificate" "cert" {
-//  domain = "${var.app-name}.hmpps.dsd.io"
-//}
+data "aws_acm_certificate" "cert" {
+  domain = "${var.app-name}.hmpps.dsd.io"
+}
 
 resource "aws_security_group" "elb" {
   name        = "keyworker-api-elb-group"
@@ -124,29 +124,29 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "aws-elasticbeanstalk-service-role"
   }
 
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "ListenerProtocol"
-//    value     = "HTTPS"
-//  }
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "ListenerProtocol"
+    value     = "HTTPS"
+  }
 
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "SSLCertificateId"
-//    value     = "${data.aws_acm_certificate.cert.arn}"
-//  }
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "SSLCertificateId"
+    value     = "${data.aws_acm_certificate.cert.arn}"
+  }
 
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "InstancePort"
-//    value     = "80"
-//  }
-//
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "ListenerProtocol"
-//    value     = "HTTPS"
-//  }
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "InstancePort"
+    value     = "80"
+  }
+
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "ListenerProtocol"
+    value     = "HTTPS"
+  }
 
   setting {
     namespace = "aws:ec2:vpc"
@@ -271,4 +271,12 @@ resource "azurerm_dns_cname_record" "cname" {
   resource_group_name = "webops"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
+}
+
+resource "azurerm_dns_cname_record" "acm-verify" {
+  name                = "_991d7e3705d551d020fc0c48d6ab9460.keyworker-api-stage"
+  zone_name           = "hmpps.dsd.io"
+  resource_group_name = "webops"
+  ttl                 = "300"
+  record              = "_451c0978c4ee03b05eb304be4af8cfe7.acm-validations.aws."
 }
