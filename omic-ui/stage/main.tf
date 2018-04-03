@@ -1,6 +1,6 @@
 variable "app-name" {
   type    = "string"
-  default = "omic-dev"
+  default = "omic-stage"
 }
 
 variable "tags" {
@@ -8,17 +8,13 @@ variable "tags" {
 
   default {
     Service     = "omic"
-    Environment = "Dev"
+    Environment = "Stage"
   }
 }
 
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "${var.app-name}"
   description = "${var.app-name}"
-}
-
-resource "random_id" "session-secret" {
-  byte_length = 40
 }
 
 resource "azurerm_resource_group" "group" {
@@ -34,10 +30,13 @@ resource "azurerm_application_insights" "insights" {
   application_type    = "Web"
 }
 
-
-data "aws_acm_certificate" "cert" {
-  domain = "${var.app-name}.hmpps.dsd.io"
+resource "random_id" "session-secret" {
+  byte_length = 40
 }
+
+//data "aws_acm_certificate" "cert" {
+//  domain = "${var.app-name}.hmpps.dsd.io"
+//}
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
   name                = "${var.app-name}"
@@ -69,29 +68,29 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "aws-elasticbeanstalk-service-role"
   }
 
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
-    value     = "HTTPS"
-  }
-
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.cert.arn}"
-  }
-
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "InstancePort"
-    value     = "80"
-  }
-
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
-    value     = "HTTPS"
-  }
+//  setting {
+//    namespace = "aws:elb:listener:443"
+//    name      = "ListenerProtocol"
+//    value     = "HTTPS"
+//  }
+//
+//  setting {
+//    namespace = "aws:elb:listener:443"
+//    name      = "SSLCertificateId"
+//    value     = "${data.aws_acm_certificate.cert.arn}"
+//  }
+//
+//  setting {
+//    namespace = "aws:elb:listener:443"
+//    name      = "InstancePort"
+//    value     = "80"
+//  }
+//
+//  setting {
+//    namespace = "aws:elb:listener:443"
+//    name      = "ListenerProtocol"
+//    value     = "HTTPS"
+//  }
 
   setting {
     namespace = "aws:ec2:vpc"
@@ -156,19 +155,19 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_ENDPOINT_URL"
-    value     = "https://noms-api-dev.dsd.io/elite2api/"
+    value     = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "KEYWORKER_API_URL"
-    value     = "https://keyworker-api-dev.hmpps.dsd.io/"
+    value     = "https://keyworker-api-stage.hmpps.dsd.io/"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NN_ENDPOINT_URL"
-    value     = "https://notm-dev.hmpps.dsd.io/"
+    value     = "https://notm-stage.hmpps.dsd.io/"
   }
 
   setting {
@@ -180,7 +179,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_ID"
-    value     = "elite2apiclient"
+    value     = "omic"
   }
 
   setting {
@@ -204,7 +203,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_NAME"
-    value     = "hmpps-session-dev"
+    value     = "hmpps-session-stage"
   }
 
   setting {
