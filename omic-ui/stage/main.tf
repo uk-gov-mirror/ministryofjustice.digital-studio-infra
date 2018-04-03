@@ -7,14 +7,15 @@ variable "tags" {
   type = "map"
 
   default {
-    Service     = "omic"
+    Service     = "omic-ui"
     Environment = "Stage"
   }
 }
 
+# This resource is managed in multiple places (omic ui dev)
 resource "aws_elastic_beanstalk_application" "app" {
-  name        = "${var.app-name}"
-  description = "${var.app-name}"
+  name        = "omic-ui"
+  description = "omic-ui"
 }
 
 resource "random_id" "session-secret" {
