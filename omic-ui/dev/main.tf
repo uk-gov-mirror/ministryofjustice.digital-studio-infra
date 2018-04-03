@@ -7,18 +7,32 @@ variable "tags" {
   type = "map"
 
   default {
-    Service     = "omic"
+    Service     = "omic-ui"
     Environment = "Dev"
   }
 }
 
+# This resource is managed in multiple places (omic ui stage)
 resource "aws_elastic_beanstalk_application" "app" {
-  name        = "${var.app-name}"
-  description = "${var.app-name}"
+  name        = "omic-ui"
+  description = "omic-ui"
 }
 
 resource "random_id" "session-secret" {
   byte_length = 40
+}
+
+resource "azurerm_resource_group" "group" {
+  name     = "omic-ui-dev"
+  location = "ukwest"
+  tags     = "${var.tags}"
+}
+
+resource "azurerm_application_insights" "insights" {
+  name                = "${var.app-name}"
+  location            = "North Europe"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  application_type    = "Web"
 }
 
 data "aws_acm_certificate" "cert" {
@@ -184,7 +198,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${data.aws_ssm_parameter.appinsights-instrumentationkey.value}"
+    value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
 
   setting {
@@ -214,4 +228,13 @@ resource "azurerm_dns_cname_record" "cname" {
   resource_group_name = "webops"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
+}
+
+# Allow AWS's ACM to manage omic-dev.hmpps.dsd.io
+resource "azurerm_dns_cname_record" "acm-verify" {
+  name                = "_79224e76e3cf7223cd35155455755acc.omic-dev"
+  zone_name           = "hmpps.dsd.io"
+  resource_group_name = "webops"
+  ttl                 = "300"
+  record              = "_3f84403eebcf649218bc22a4654a5fa4.acm-validations.aws."
 }
