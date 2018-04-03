@@ -23,10 +23,10 @@ resource "aws_iam_user_policy" "deployer" {
             "Effect": "Allow",
             "Resource": [
                 "arn:aws:elasticbeanstalk:*::solutionstack/*",
-                "arn:aws:elasticbeanstalk:${var.aws_region}:${var.aws_account_id}:application/keyworker-api",
-                "arn:aws:elasticbeanstalk:${var.aws_region}:${var.aws_account_id}:applicationversion/keyworker-api/*",
-                "arn:aws:elasticbeanstalk:${var.aws_region}:${var.aws_account_id}:environment/keyworker-api/*",
-                "arn:aws:elasticbeanstalk:${var.aws_region}:${var.aws_account_id}:template/keyworker-api/*"
+                "arn:aws:elasticbeanstalk:${var.aws_region}:${var.aws_account_id}:application/${aws_elastic_beanstalk_application.app.name}",
+                "arn:aws:elasticbeanstalk:${var.aws_region}:${var.aws_account_id}:applicationversion/${aws_elastic_beanstalk_application.app.name}/*",
+                "arn:aws:elasticbeanstalk:${var.aws_region}:${var.aws_account_id}:environment/${aws_elastic_beanstalk_application.app.name}/*",
+                "arn:aws:elasticbeanstalk:${var.aws_region}:${var.aws_account_id}:template/${aws_elastic_beanstalk_application.app.name}/*"
             ]
         }
     ]
