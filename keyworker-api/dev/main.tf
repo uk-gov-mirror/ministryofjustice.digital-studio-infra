@@ -12,6 +12,7 @@ variable "tags" {
   }
 }
 
+# This resource is managed in multiple places
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "keyworker-api"
   description = "keyworker-api"

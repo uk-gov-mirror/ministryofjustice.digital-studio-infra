@@ -17,8 +17,12 @@ resource "aws_elastic_beanstalk_application" "app" {
   description = "${var.app-name}"
 }
 
+resource "random_id" "session-secret" {
+  byte_length = 40
+}
+
 resource "azurerm_resource_group" "group" {
-  name     = "${var.app-name}"
+  name     = "omic-ui-stage"
   location = "ukwest"
   tags     = "${var.tags}"
 }
@@ -28,10 +32,6 @@ resource "azurerm_application_insights" "insights" {
   location            = "North Europe"
   resource_group_name = "${azurerm_resource_group.group.name}"
   application_type    = "Web"
-}
-
-resource "random_id" "session-secret" {
-  byte_length = 40
 }
 
 data "aws_acm_certificate" "cert" {
@@ -229,6 +229,7 @@ resource "azurerm_dns_cname_record" "cname" {
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
+# Allow AWS's ACM to manage omic-stage.hmpps.dsd.io
 resource "azurerm_dns_cname_record" "acm-verify" {
   name                = "_f506263e0801e0bbae5c53047b69cc0a.omic-stage"
   zone_name           = "hmpps.dsd.io"

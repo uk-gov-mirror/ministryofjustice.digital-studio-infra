@@ -12,10 +12,11 @@ variable "tags" {
   }
 }
 
-//resource "aws_elastic_beanstalk_application" "app" {
-//  name        = "keyworker-api"
-//  description = "keyworker-api"
-//}
+# This resource is managed in multiple places
+resource "aws_elastic_beanstalk_application" "app" {
+  name        = "keyworker-api"
+  description = "keyworker-api"
+}
 
 data "aws_acm_certificate" "cert" {
   domain = "${var.app-name}.hmpps.dsd.io"
