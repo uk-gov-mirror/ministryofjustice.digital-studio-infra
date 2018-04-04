@@ -19,6 +19,9 @@
         "API_ENDPOINT_URL": {
             "type": "string"
         },
+        "KEYWORKER_API_URL": {
+            "type": "string"
+        },
         "USE_API_GATEWAY_AUTH": {
             "type": "string"
         },
@@ -51,6 +54,7 @@
                 "APPINSIGHTS_INSTRUMENTATIONKEY": "[parameters('APPINSIGHTS_INSTRUMENTATIONKEY')]",
                 "NODE_ENV": "[parameters('NODE_ENV')]",
                 "API_ENDPOINT_URL": "[parameters('API_ENDPOINT_URL')]",
+                "KEYWORKER_API_URL": "[parameters('KEYWORKER_API_URL')]",
                 "API_CLIENT_ID": "[parameters('API_CLIENT_ID')]",
                 "API_CLIENT_SECRET": "[parameters('API_CLIENT_SECRET')]",
                 "USE_API_GATEWAY_AUTH": "[parameters('USE_API_GATEWAY_AUTH')]",
