@@ -1,3 +1,8 @@
+variable "gpg_key" {
+    type = "string"
+    default = ""
+}
+
 resource "aws_iam_group" "webops" {
   name = "WebOps"
 }
@@ -54,7 +59,7 @@ all_users = "${concat(local.aws_users_webops,local.aws_users_developers)}"
 resource "aws_iam_user_login_profile" "user" {
   count = "${length(local.all_users)}"
   user    = "${element(local.all_users, count.index)}"
-  pgp_key = "${file("~/my-public-key.asc")}"
+  pgp_key = "${file(var.gpg_key)}"
   password_length = 14
 }
 
