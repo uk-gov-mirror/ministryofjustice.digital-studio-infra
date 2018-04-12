@@ -9,12 +9,21 @@ read -p "Enter MFA code: " mfa_code
 
 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 
-echo "serial number: arn:aws:iam::$accountid:mfa/$username"
-
 json_result=$(aws sts get-session-token --serial-number arn:aws:iam::$accountid:mfa/$username --token-code $mfa_code)
 
-echo $json_result
+if [ $? -eq 0 ]; then
+    echo "Session token ok"
+else
+    echo "Couldn't get session token"
+fi
 
 export AWS_ACCESS_KEY_ID=$(echo $json_result | jq -r '.Credentials.AccessKeyId')
 export AWS_SECRET_ACCESS_KEY=$(echo $json_result | jq -r '.Credentials.SecretAccessKey')
-export AWS_SECURITY_TOKEN=$(echo $json_result | jq -r '.Credentials.SessionToken')
+export AWS_SESSION_TOKEN=$(echo $json_result | jq -r '.Credentials.SessionToken')
+
+if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$AWS_SESSION_TOKEN" ]
+then
+  echo "FAIL: Environment variables have not been set."
+else
+  echo "Authentication successfully set."
+fi
