@@ -1,0 +1,36 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+      {
+          "Sid": "DoNotAllowAnythingOtherThanAboveUnlessMFAd",
+          "Effect": "Deny",
+          "NotAction": [
+              "iam:CreateVirtualMFADevice",
+              "iam:DeactivateMFADevice",
+              "iam:DeleteVirtualMFADevice",
+              "iam:EnableMFADevice",
+              "iam:ResyncMFADevice",
+              "iam:ListVirtualMFADevices",
+              "iam:ListMFADevices",
+              "iam:ChangePassword",
+              "iam:CreateLoginProfile",
+              "iam:DeleteLoginProfile",
+              "iam:GetAccountPasswordPolicy",
+              "iam:GetAccountSummary",
+              "iam:GetLoginProfile",
+              "iam:UpdateLoginProfile",
+              "iam:ListAccountAliases",
+              "iam:ListUsers"
+          ],
+          "NotResource": [
+              "arn:aws:iam::589133037702:mfa/${aws:username}",
+              "arn:aws:iam::589133037702:user/${aws:username}"
+          ],
+          "Condition": {
+              "Null": {
+                  "aws:MultiFactorAuthAge": "true"
+              }
+          }
+      }
+  ]
+}
