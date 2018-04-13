@@ -25,16 +25,9 @@ def manage_users(environment, user_action,group):
 
     user_types = ['webops','developers']
 
-    usersTfJson = {
-      "variable": {
-      "aws_users_webops":{"default" : []},
-      "aws_users_developers":{"default" : []},
-      }
-    }
-
     vault_name = "aws-users-" + environment
 
-    logging.info("Creating users.tf.json")
+    logging.info("Creating user list")
 
     for user_type in user_types:
         logging.info("Checking " + user_type )
@@ -45,7 +38,7 @@ def manage_users(environment, user_action,group):
             user_list = subprocess.run(
                 ["az", "keyvault", "secret", "show",
                  "--vault-name", vault_name,
-                 "--name", "users-" + user_type
+                 "--name", user_type
                  ],
                 stdout=subprocess.PIPE,
                 check=True
@@ -54,9 +47,8 @@ def manage_users(environment, user_action,group):
             user_list = json.loads(user_list)
 
             user_list = user_list["value"].split(",")
-            print(user_list)
+
             user_list = list(filter(None, user_list))
-            print(user_list)
 
         except subprocess.CalledProcessError:
             logging.info("Key vault secret for " + user_type + " doesn't exist. It will be created if required.")
@@ -77,19 +69,14 @@ def manage_users(environment, user_action,group):
                 else:
                     logging.warn("User " + user + " does not exist" )
 
-        user_type_key = "aws_users_" + user_type
-
-        usersTfJson["variable"][user_type_key]["default"] = user_list
-
         if not user_list:
-
             store_user_list = ","
         else:
             store_user_list = ",".join(user_list)
 
         user_list_update_cmd = ["az", "keyvault", "secret", "set",
         "--vault-name", vault_name,
-         "--name", "users-" + user_type,
+         "--name", user_type,
          "--value", store_user_list]
 
         try:

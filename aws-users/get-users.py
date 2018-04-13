@@ -22,7 +22,11 @@ import subprocess
 import sys
 import logging
 
-from functions import get_users
+# from functions import get_users
+
+sys.path.insert(0, '../../')
+
+from tools.python_modules import azure_account
 
 if sys.stdin:
     args = json.load(sys.stdin)
@@ -33,13 +37,6 @@ if sys.stdin:
 
     del input_items['vault']
 
-users = get_users(input_items, vault_name)
-
-jsonFile = json.dumps(users, indent=2)
-
-users_file = "users.json"
-
-with open(users_file, "w") as f:
-    f.write(jsonFile)
+users = azure_account.get_secrets(input_items, vault_name)
 
 print(json.dumps(users))
