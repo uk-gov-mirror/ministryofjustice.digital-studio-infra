@@ -12,6 +12,12 @@ variable "tags" {
   }
 }
 
+resource "azurerm_resource_group" "group" {
+  name     = "${var.app-name}"
+  location = "ukwest"
+  tags     = "${var.tags}"
+}
+
 resource "azurerm_app_service_plan" "app" {
   name                = "${var.app-name}"
   location            = "${azurerm_resource_group.group.location}"
@@ -33,12 +39,18 @@ resource "azurerm_app_service" "app" {
   app_service_plan_id = "${azurerm_app_service_plan.app.id}"
 
   tags = "${var.tags}"
+
+  app_settings {
+    WEBSITE_NODE_DEFAULT_VERSION   = "6.9.1"
+    APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_application_insights.insights.instrumentation_key}"
+  }
 }
 
-resource "azurerm_resource_group" "group" {
-  name     = "${var.app-name}"
-  location = "ukwest"
-  tags     = "${var.tags}"
+resource "azurerm_application_insights" "insights" {
+  name                = "${var.app-name}"
+  location            = "North Europe"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  application_type    = "Web"
 }
 
 resource "azurerm_storage_account" "storage" {
@@ -76,12 +88,14 @@ resource "azurerm_key_vault" "vault" {
     key_permissions    = []
     secret_permissions = "${var.azure_secret_permissions_all}"
   }
+
   access_policy {
-    tenant_id = "${var.azure_tenant_id}"
-    object_id = "${var.azure_jenkins_sp_oid}"
-    key_permissions = []
+    tenant_id          = "${var.azure_tenant_id}"
+    object_id          = "${var.azure_jenkins_sp_oid}"
+    key_permissions    = []
     secret_permissions = ["set"]
   }
+
   access_policy {
     tenant_id          = "${var.azure_tenant_id}"
     object_id          = "${var.azure_app_service_oid}"
