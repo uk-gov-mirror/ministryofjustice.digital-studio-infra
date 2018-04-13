@@ -23,8 +23,8 @@
               "iam:ListUsers"
           ],
           "NotResource": [
-              "arn:aws:iam::589133037702:mfa/${aws:username}",
-              "arn:aws:iam::589133037702:user/${aws:username}"
+              "arn:aws:iam::${aws_account_id}:mfa/$${aws:username}",
+              "arn:aws:iam::${aws_account_id}:user/$${aws:username}"
           ],
           "Condition": {
               "Null": {

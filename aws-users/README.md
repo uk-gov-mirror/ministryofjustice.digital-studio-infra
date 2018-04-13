@@ -27,13 +27,15 @@ Parameters:
 -e, --environment The environment the user is created for. Determines the Azure key vault used.
 -u, --users A comma separated list of users to add or delete.
 -a, --user-action Action to take i.e. add or delete.
--g, --group The group the user will belong to e.g. developers     
+-g, --group The group the user will belong to e.g. developers  
+
+TBC: Add groups of developers in the format <dev team>_developers   
 
 ## Generating an access token to use AWS CLI with MFA enabled.
 
-A script has been created to generate the AWS security token required for the CLI when MFA is enabled. The script parameters are the AWS account number and username. The script should be sourced when run to correctly export the necessary environment variables. The security token will last for 12 hours.
+A script has been created to generate the AWS security token required for the CLI when MFA is enabled. The script parameters are the AWS account number and username. The script should be sourced when run to correctly export the necessary environment variables. The security token, along with an access key id and secret are stored as environment variables and will be valid for 12 hours.
 
-1. Ensure your AWS CLI has been set up with ```aws configure```
+1. Ensure your AWS CLI has been set up with ```aws configure```. Credentials are required to get the security token, they will not allow any further access.
 
 2. Source the ```get-access-token.sh``` script to obtain an access token.
 
