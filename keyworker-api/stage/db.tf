@@ -1,4 +1,3 @@
-
 resource "aws_db_subnet_group" "db" {
   name       = "${var.app-name}-db"
   subnet_ids = ["${aws_subnet.db-a.id}", "${aws_subnet.db-b.id}"]
@@ -9,16 +8,16 @@ resource "aws_db_subnet_group" "db" {
 }
 
 resource "aws_security_group" "db" {
-  name = "${var.app-name}-db-sg"
-  vpc_id = "${aws_vpc.vpc.id}"
+  name        = "${var.app-name}-db-sg"
+  vpc_id      = "${aws_vpc.vpc.id}"
   description = "${var.app-name} DB security group"
 
   ingress {
-    from_port = 5432
-    to_port   = 5432
-    protocol  = "tcp"
-    cidr_blocks = ["${var.ips["office"]}/32", "${var.ips["mojvpn"]}/32"]
-    security_groups = [ "${aws_security_group.ec2.id}" ]
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    cidr_blocks     = ["${var.ips["office"]}/32", "${var.ips["mojvpn"]}/32"]
+    security_groups = ["${aws_security_group.ec2.id}"]
   }
 
   tags {
@@ -48,4 +47,3 @@ resource "aws_db_instance" "db" {
   final_snapshot_identifier = "${var.app-name}-final"
   storage_encrypted         = "false"
 }
-
