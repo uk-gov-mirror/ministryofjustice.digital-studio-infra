@@ -137,12 +137,3 @@ resource "azurerm_dns_cname_record" "search" {
   ttl                 = "300"
   record              = "search-noms-api.dsd.io"
 }
-
-# Allow AWS's ACM to manage keyworker-api-dev.hmpps.dsd.io
-resource "azurerm_dns_cname_record" "keyworker-api-dev" {
-  name                = "_bea8514516acc235b1c7a61407bd4e47.keyworker-api-dev"
-  zone_name           = "${azurerm_dns_zone.hmpps.name}"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  ttl                 = "300"
-  record              = "_fa356c8ae40aa381ad67c8199f6b4cfe.acm-validations.aws."
-}
