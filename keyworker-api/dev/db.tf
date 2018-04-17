@@ -2,9 +2,7 @@ resource "aws_db_subnet_group" "db" {
   name       = "${var.app-name}-db"
   subnet_ids = ["${aws_subnet.db-a.id}", "${aws_subnet.db-b.id}"]
 
-  tags {
-    Name = "${var.app-name}-db"
-  }
+  tags = "${merge(map("Name", "${var.app-name}-db"), var.tags)}"
 }
 
 resource "aws_security_group" "db" {
@@ -20,9 +18,7 @@ resource "aws_security_group" "db" {
     security_groups = ["${aws_security_group.ec2.id}"]
   }
 
-  tags {
-    Name = "${var.app-name}-db-sg"
-  }
+  tags = "${merge(map("Name", "${var.app-name}-db"), var.tags)}"
 }
 
 resource "random_id" "db-password" {
@@ -59,4 +55,6 @@ resource "aws_db_instance" "db" {
 
   # TODO: enable this! requires a rebuild.
   # storage_encrypted         = "true"
+
+  tags = "${var.tags}"
 }
