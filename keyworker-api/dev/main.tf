@@ -48,9 +48,7 @@ resource "aws_security_group" "elb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
-    Name = "keyworker-api-lb-sg"
-  }
+  tags = "${merge(map("Name", "${var.app-name}-elb"), var.tags)}"
 
   lifecycle {
     create_before_destroy = true
@@ -76,9 +74,7 @@ resource "aws_security_group" "ec2" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
-    Name = "keyworker-api-ec2-sg"
-  }
+  tags = "${merge(map("Name", "${var.app-name}-ec2"), var.tags)}"
 
   lifecycle {
     create_before_destroy = true
@@ -269,11 +265,6 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SPRING_PROFILES_ACTIVE"
-    value     = "postgres"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APP_DB_URL"
     value     = "jdbc:postgresql://${aws_db_instance.db.endpoint}/${aws_db_instance.db.name}?sslmode=verify-full"
   }
@@ -287,11 +278,6 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "SPRING_DATASOURCE_PASSWORD"
     value     = "${aws_db_instance.db.password}"
   }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SVC_KW_SUPPORTED_AGENCIES"
-    value     = "ALI,BMI,BXI,ISI,LEI,LT1,LT2"
-  }
   tags = "${var.tags}"
 }
 
@@ -301,4 +287,12 @@ resource "azurerm_dns_cname_record" "cname" {
   resource_group_name = "webops"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
+}
+
+resource "azurerm_dns_cname_record" "acm-verify" {
+  name                = "_bea8514516acc235b1c7a61407bd4e47.keyworker-api-dev"
+  zone_name           = "hmpps.dsd.io"
+  resource_group_name = "webops"
+  ttl                 = "300"
+  record              = "_fa356c8ae40aa381ad67c8199f6b4cfe.acm-validations.aws."
 }
