@@ -42,7 +42,7 @@ resource "aws_db_instance" "db" {
   engine                    = "postgres"
   engine_version            = "10.1"
   parameter_group_name      = "${aws_db_parameter_group.db.name}"
-  instance_class            = "db.t2.micro"
+  instance_class            = "db.t2.small"
   name                      = "${replace(var.app-name, "-", "_")}"
   username                  = "keyworker"
   password                  = "${random_id.db-password.b64}"
@@ -52,9 +52,7 @@ resource "aws_db_instance" "db" {
   license_model             = "postgresql-license"
   skip_final_snapshot       = "false"
   final_snapshot_identifier = "${var.app-name}-final"
-
-  # TODO: enable this! requires a rebuild.
-  # storage_encrypted         = "true"
+  storage_encrypted         = "true"
 
   tags = "${var.tags}"
 }
