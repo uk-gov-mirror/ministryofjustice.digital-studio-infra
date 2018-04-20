@@ -73,6 +73,7 @@ resource "aws_iam_role_policy_attachment" "elb-service" {
   role       = "${aws_iam_role.aws-elasticbeanstalk-service-role.name}"
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkService"
 }
+
 # resource "aws_iam_user" "deployer" {
 #     name = "${var.app-name}-deployer"
 # }
@@ -214,3 +215,4 @@ resource "aws_iam_role_policy_attachment" "elb-service" {
 # resource "aws_iam_access_key" "deployer" {
 #     user = "${aws_iam_user.deployer.name}"
 # }
+

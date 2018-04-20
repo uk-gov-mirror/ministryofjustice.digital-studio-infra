@@ -236,7 +236,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_DOMAIN"
-    value     = "hmpps.dsd.io"
+    value     = "service.hmpps.dsd.io"
   }
 
   setting {
