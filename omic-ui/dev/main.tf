@@ -94,6 +94,18 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   setting {
+    namespace = "aws:elb:policies:tlshigh"
+    name      = "LoadBalancerPorts"
+    value     = "443"
+  }
+
+  setting {
+    namespace = "aws:elb:policies:tlshigh"
+    name      = "SSLReferencePolicy"
+    value     = "ELBSecurityPolicy-TLS-1-2-2017-01"
+  }
+
+  setting {
     namespace = "aws:ec2:vpc"
     name      = "VPCId"
     value     = "${aws_vpc.vpc.id}"
@@ -148,77 +160,73 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   setting {
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs"
+    name      = "StreamLogs"
+    value     = "true"
+  }
+
+  # Begin app-specific config settings
+
+  setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
     value     = "yes"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_ENDPOINT_URL"
     value     = "https://noms-api-dev.dsd.io/elite2api/"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "KEYWORKER_API_URL"
     value     = "https://keyworker-api-dev.hmpps.dsd.io/"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NN_ENDPOINT_URL"
     value     = "https://notm-dev.hmpps.dsd.io/"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_TOKEN"
     value     = "${data.aws_ssm_parameter.api-gateway-token.value}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_ID"
     value     = "elite2apiclient"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_SECRET"
     value     = "${data.aws_ssm_parameter.api-client-secret.value}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_PRIVATE_KEY"
     value     = "${data.aws_ssm_parameter.api-gateway-private-key.value}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
     value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_NAME"
     value     = "hmpps-session-dev"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_DOMAIN"
     value     = "hmpps.dsd.io"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SESSION_COOKIE_SECRET"
     value     = "${random_id.session-secret.b64}"
   }
-
   tags = "${var.tags}"
 }
 
