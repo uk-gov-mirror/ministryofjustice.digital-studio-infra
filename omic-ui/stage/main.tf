@@ -39,6 +39,49 @@ data "aws_acm_certificate" "cert" {
   domain = "${var.app-name}.hmpps.dsd.io"
 }
 
+locals {
+  allowed-list = [
+    "${var.ips["office"]}/32",
+    "${var.ips["quantum"]}/32",
+    "${var.ips["health-kick"]}/32",
+    "${var.ips["mojvpn"]}/32",
+    "82.37.105.223/32",             # Source for security testing
+  ]
+}
+
+resource "aws_security_group" "elb" {
+  name        = "${var.app-name}-elb"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "ELB"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = "${local.allowed-list}"
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = "${local.allowed-list}"
+  }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-elb"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "aws_elastic_beanstalk_environment" "app-env" {
   name                = "${var.app-name}"
   application         = "${aws_elastic_beanstalk_application.app.name}"
@@ -70,6 +113,18 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   setting {
+    namespace = "aws:elb:loadbalancer"
+    name      = "ManagedSecurityGroup"
+    value     = "${aws_security_group.elb.id}"
+  }
+
+  setting {
+    namespace = "aws:elb:loadbalancer"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.elb.id}"
+  }
+
+  setting {
     namespace = "aws:elb:listener:443"
     name      = "ListenerProtocol"
     value     = "HTTPS"
@@ -91,6 +146,18 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elb:listener:443"
     name      = "ListenerProtocol"
     value     = "HTTPS"
+  }
+
+  setting {
+    namespace = "aws:elb:policies:tlshigh"
+    name      = "LoadBalancerPorts"
+    value     = "443"
+  }
+
+  setting {
+    namespace = "aws:elb:policies:tlshigh"
+    name      = "SSLReferencePolicy"
+    value     = "ELBSecurityPolicy-TLS-1-2-2017-01"
   }
 
   setting {
@@ -148,77 +215,73 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   setting {
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs"
+    name      = "StreamLogs"
+    value     = "true"
+  }
+
+  # Begin app-specific config settings
+
+  setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
     value     = "yes"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_ENDPOINT_URL"
     value     = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "KEYWORKER_API_URL"
     value     = "https://keyworker-api-stage.hmpps.dsd.io/"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NN_ENDPOINT_URL"
     value     = "https://notm-stage.hmpps.dsd.io/"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_TOKEN"
     value     = "${data.aws_ssm_parameter.api-gateway-token.value}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_ID"
     value     = "omic"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_SECRET"
     value     = "${data.aws_ssm_parameter.api-client-secret.value}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_PRIVATE_KEY"
     value     = "${data.aws_ssm_parameter.api-gateway-private-key.value}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
     value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_NAME"
     value     = "hmpps-session-stage"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_DOMAIN"
     value     = "hmpps.dsd.io"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SESSION_COOKIE_SECRET"
     value     = "${random_id.session-secret.b64}"
   }
-
   tags = "${var.tags}"
 }
 
