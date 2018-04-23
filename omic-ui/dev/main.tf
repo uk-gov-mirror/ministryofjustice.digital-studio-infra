@@ -39,10 +39,15 @@ data "aws_acm_certificate" "cert" {
   domain = "${var.app-name}.hmpps.dsd.io"
 }
 
+data "aws_elastic_beanstalk_solution_stack" "docker" {
+  most_recent = true
+  name_regex  = "^64bit Amazon Linux .* v2.* running Docker 17.*$"
+}
+
 resource "aws_elastic_beanstalk_environment" "app-env" {
   name                = "${var.app-name}"
   application         = "${aws_elastic_beanstalk_application.app.name}"
-  solution_stack_name = "${var.elastic-beanstalk-single-docker}"
+  solution_stack_name = "${data.aws_elastic_beanstalk_solution_stack.docker.name}"
   tier                = "WebServer"
 
   setting {

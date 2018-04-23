@@ -12,7 +12,7 @@ variable "tags" {
   }
 }
 
-# This resource is managed in multiple places (keyworker api stage)
+# This resource is managed in multiple places (keyworker api preprod)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "keyworker-api"
   description = "keyworker-api"
@@ -21,14 +21,7 @@ resource "aws_elastic_beanstalk_application" "app" {
 resource "aws_acm_certificate" "cert" {
   domain_name       = "${var.app-name}.service.hmpps.dsd.io"
   validation_method = "DNS"
-
-  tags {
-    Environment = "${var.tags["Environment"]}"
-  }
-}
-
-data "aws_acm_certificate" "cert" {
-  domain = "${var.app-name}.service.hmpps.dsd.io"
+  tags = "${var.tags}"
 }
 
 resource "aws_security_group" "elb" {
@@ -158,7 +151,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:listener:443"
     name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.cert.arn}"
+    value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
@@ -310,10 +303,14 @@ resource "azurerm_dns_cname_record" "cname" {
 }
 
 # Allow AWS's ACM to manage keyworker-api.service.hmpps.dsd.io
+locals {
+  aws_record_name     = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,var.dns_zone_name,"")}"
+}
+
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_229381d145cddae46b7ba27679b3cfc0.keyworker-api"
-  zone_name           = "service.hmpps.dsd.io"
+  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+  zone_name           = "${var.dns_zone_name}"
   resource_group_name = "webops-prod"
   ttl                 = "300"
-  record              = "_fa0d6825a6caff9b1e19726665096e7e.acm-validations.aws."
+  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }

@@ -12,23 +12,16 @@ variable "tags" {
   }
 }
 
-# This resource is managed in multiple places (keyworker api stage)
+# This resource is managed in multiple places (keyworker api prod)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "keyworker-api"
   description = "keyworker-api"
 }
 
 resource "aws_acm_certificate" "cert" {
-  domain_name       = "${var.app-name}.service.hmpps.dsd.io"
+  domain_name       = "${var.app-name}.${var.dns_zone_name}"
   validation_method = "DNS"
-
-  tags {
-    Environment = "${var.tags["Environment"]}"
-  }
-}
-
-data "aws_acm_certificate" "cert" {
-  domain = "${var.app-name}.service.hmpps.dsd.io"
+  tags = "${var.tags}"
 }
 
 resource "aws_security_group" "elb" {
@@ -158,7 +151,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:listener:443"
     name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.cert.arn}"
+    value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
@@ -298,17 +291,21 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 
 resource "azurerm_dns_cname_record" "cname" {
   name                = "${var.app-name}"
-  zone_name           = "service.hmpps.dsd.io"
+  zone_name           = "${var.dns_zone_name}"
   resource_group_name = "webops-prod"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
 # Allow AWS's ACM to manage keyworker-api-preprod.hmpps.dsd.io
+locals {
+  aws_record_name     = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,var.dns_zone_name,"")}"
+}
+
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_75dd2c3ebe362965bad130645fb24e1e.keyworker-api-preprod"
-  zone_name           = "service.hmpps.dsd.io"
+  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+  zone_name           = "${var.dns_zone_name}"
   resource_group_name = "webops-prod"
   ttl                 = "300"
-  record              = "_5f513a2d3df89dcc26b66b13de98e893.acm-validations.aws."
+  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }

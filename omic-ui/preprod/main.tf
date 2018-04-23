@@ -12,7 +12,7 @@ variable "tags" {
   }
 }
 
-# This resource is managed in multiple places (omic ui stage)
+# This resource is managed in multiple places (omic ui prod)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "omic-ui"
   description = "omic-ui"
@@ -38,19 +38,60 @@ resource "azurerm_application_insights" "insights" {
 resource "aws_acm_certificate" "cert" {
   domain_name = "${var.app-name}.service.hmpps.dsd.io"
   validation_method = "DNS"
-  tags {
-    Environment = "${var.tags["Environment"]}"
+  tags = "${var.tags}"
+}
+
+locals {
+  allowed-list = [
+    "${var.ips["office"]}/32",
+    "${var.ips["quantum"]}/32",
+    "${var.ips["health-kick"]}/32",
+    "${var.ips["mojvpn"]}/32",
+  ]
+}
+
+resource "aws_security_group" "elb" {
+  name        = "${var.app-name}-elb"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "ELB"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = "${local.allowed-list}"
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = "${local.allowed-list}"
+  }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-elb"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
-data "aws_acm_certificate" "cert" {
-  domain = "${var.app-name}.service.hmpps.dsd.io"
+data "aws_elastic_beanstalk_solution_stack" "docker" {
+  most_recent = true
+  name_regex  = "^64bit Amazon Linux .* v2.* running Docker 17.*$"
 }
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
   name                = "${var.app-name}"
   application         = "${aws_elastic_beanstalk_application.app.name}"
-  solution_stack_name = "${var.elastic-beanstalk-single-docker}"
+  solution_stack_name = "${data.aws_elastic_beanstalk_solution_stack.docker.name}"
   tier                = "WebServer"
 
   setting {
@@ -86,7 +127,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:listener:443"
     name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.cert.arn}"
+    value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
@@ -257,10 +298,14 @@ resource "azurerm_dns_cname_record" "cname" {
 }
 
 # Allow AWS's ACM to manage omic-preprod.service.hmpps.dsd.io
+locals {
+  aws_record_name     = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,var.dns_zone_name,"")}"
+}
+
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_afba74c36ea20f990fd81365eee21b7a.omic-prepod"
-  zone_name           = "service.hmpps.dsd.io"
+  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+  zone_name           = "${var.dns_zone_name}"
   resource_group_name = "webops-prod"
   ttl                 = "300"
-  record              = "_2552505f3b8070428856ec63d66a004e.acm-validations.aws."
+  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }
