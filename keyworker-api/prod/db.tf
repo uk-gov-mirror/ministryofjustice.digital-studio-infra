@@ -22,7 +22,7 @@ resource "aws_security_group" "db" {
 }
 
 resource "random_id" "db-password" {
-  byte_length = 16
+  byte_length = 32
 }
 
 resource "aws_db_parameter_group" "db" {
