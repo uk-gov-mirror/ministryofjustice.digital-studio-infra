@@ -37,13 +37,13 @@ resource "aws_db_parameter_group" "db" {
 
 resource "aws_db_instance" "db" {
   identifier                = "${var.app-name}"
-  allocated_storage         = 10
+  allocated_storage         = 20
   storage_type              = "gp2"
   engine                    = "sqlserver-ex"
   engine_version            = "14.00.3015.40.v1"
   parameter_group_name      = "${aws_db_parameter_group.db.name}"
   instance_class            = "db.t2.small"
-  name                      = "${replace(var.app-name, "-", "_")}"
+ // name                      = "${replace(var.app-name, "-", "_")}"
   username                  = "licences"
   password                  = "${random_id.db-password.b64}"
   db_subnet_group_name      = "${aws_db_subnet_group.db.name}"
@@ -52,7 +52,7 @@ resource "aws_db_instance" "db" {
   license_model             = "license-included"
   skip_final_snapshot       = "false"
   final_snapshot_identifier = "${var.app-name}-final"
-  storage_encrypted         = "true"
+  storage_encrypted         = "false"
 
   tags = "${var.tags}"
 }
