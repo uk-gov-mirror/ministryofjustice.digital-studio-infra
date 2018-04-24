@@ -1,6 +1,6 @@
 variable "app-name" {
   type    = "string"
-  default = "omic-prepod"
+  default = "omic-preprod"
 }
 
 variable "tags" {

@@ -1,6 +1,6 @@
 variable "app-name" {
   type    = "string"
-  default = "omic"
+  default = "omic-prod"
 }
 
 variable "tags" {
@@ -36,7 +36,7 @@ resource "azurerm_application_insights" "insights" {
 }
 
 resource "aws_acm_certificate" "cert" {
-  domain_name = "${var.app-name}.service.hmpps.dsd.io"
+  domain_name = "omic.service.hmpps.dsd.io"
   validation_method = "DNS"
   tags = "${var.tags}"
 }
@@ -290,7 +290,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 }
 
 resource "azurerm_dns_cname_record" "cname" {
-  name                = "${var.app-name}"
+  name                = "omic"
   zone_name           = "service.hmpps.dsd.io"
   resource_group_name = "webops-prod"
   ttl                 = "60"

@@ -1,6 +1,6 @@
 variable "app-name" {
   type    = "string"
-  default = "keyworker-api"
+  default = "keyworker-api-prod"
 }
 
 variable "tags" {
@@ -19,7 +19,7 @@ resource "aws_elastic_beanstalk_application" "app" {
 }
 
 resource "aws_acm_certificate" "cert" {
-  domain_name       = "${var.app-name}.service.hmpps.dsd.io"
+  domain_name       = "keyworker-api.service.hmpps.dsd.io"
   validation_method = "DNS"
   tags = "${var.tags}"
 }
@@ -295,7 +295,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 }
 
 resource "azurerm_dns_cname_record" "cname" {
-  name                = "${var.app-name}"
+  name                = "keyworker-api"
   zone_name           = "service.hmpps.dsd.io"
   resource_group_name = "webops-prod"
   ttl                 = "60"
