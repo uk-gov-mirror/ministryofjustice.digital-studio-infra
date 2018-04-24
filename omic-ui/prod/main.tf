@@ -271,7 +271,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_NAME"
-    value     = "hmpps-session-dev"
+    value     = "hmpps-session-prod"
   }
 
   setting {
