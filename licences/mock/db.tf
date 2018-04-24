@@ -11,8 +11,8 @@ resource "aws_security_group" "db" {
   description = "${var.app-name} DB security group"
 
   ingress {
-    from_port       = 5432
-    to_port         = 5432
+    from_port       = 1433
+    to_port         = 1433
     protocol        = "tcp"
     cidr_blocks     = ["${var.ips["office"]}/32", "${var.ips["mojvpn"]}/32"]
     security_groups = ["${aws_security_group.ec2.id}"]
@@ -28,6 +28,11 @@ resource "random_id" "db-password" {
 resource "aws_db_parameter_group" "db" {
   name   = "${var.app-name}"
   family = "sqlserver-ex-14.0"
+
+  parameter {
+    name = "contained database authentication"
+    value = "1"
+  }
 
 //  parameter {
 //    name  = "rds.force_ssl"

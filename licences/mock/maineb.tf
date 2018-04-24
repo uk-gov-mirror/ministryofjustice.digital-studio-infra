@@ -9,9 +9,9 @@ resource "aws_elastic_beanstalk_application" "app" {
   description = "licences"
 }
 
-//data "aws_acm_certificate" "cert" {
-//  domain = "${var.app-name}.hmpps.dsd.io"
-//}
+data "aws_acm_certificate" "cert" {
+  domain = "${var.app-name}.hmpps.dsd.io"
+}
 
 resource "aws_security_group" "elb" {
   name        = "${var.app-name}-elb"
@@ -131,35 +131,35 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "${aws_security_group.elb.id}"
   }
 
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "ListenerProtocol"
-//    value     = "HTTPS"
-//  }
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "ListenerProtocol"
+    value     = "HTTPS"
+  }
 
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "SSLCertificateId"
-//    value     = "${data.aws_acm_certificate.cert.arn}"
-//  }
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "SSLCertificateId"
+    value     = "${data.aws_acm_certificate.cert.arn}"
+  }
 
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "InstancePort"
-//    value     = "80"
-//  }
-//
-//  setting {
-//    namespace = "aws:elb:listener:443"
-//    name      = "ListenerProtocol"
-//    value     = "HTTPS"
-//  }
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "InstancePort"
+    value     = "80"
+  }
 
-//  setting {
-//    namespace = "aws:elb:policies:tlshigh"
-//    name      = "LoadBalancerPorts"
-//    value     = "443"
-//  }
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "ListenerProtocol"
+    value     = "HTTPS"
+  }
+
+  setting {
+    namespace = "aws:elb:policies:tlshigh"
+    name      = "LoadBalancerPorts"
+    value     = "443"
+  }
 
   setting {
     namespace = "aws:elb:policies:tlshigh"
@@ -251,12 +251,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "DB_NAME"
-    value     = "${aws_db_instance.db.name}"
+    value     = "licences"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "DB_SERVER"
-    value     = "${aws_db_instance.db.endpoint}"
+    value     = "${replace(aws_db_instance.db.endpoint, ":1433", "")}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
