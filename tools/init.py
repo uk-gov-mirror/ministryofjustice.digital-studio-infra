@@ -28,6 +28,8 @@ def create_config_file():
     keyName = ''.join([appDir, '-', cwd, '.terraform.tfstate'])
 
     storage_account = appDir.replace('-','') + cwd + "storage"
+    # make sure it's not over the 24 character limit for storage account names
+    storage_account = storage_account[:24]
 
     resource_group = appDir + "-" + cwd
 
