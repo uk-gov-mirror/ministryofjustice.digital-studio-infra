@@ -113,7 +113,8 @@ def create_certificate(dns_names, fqdn, resource_group, certbot_location):
            "--work-dir", certbot_location,
            "--logs-dir", certbot_location,
            "--force-renewal",
-           "--agree-tos"
+           "--agree-tos",
+           "--non-interactive"
            ]
 
     cmd.extend(domains_to_renew)
