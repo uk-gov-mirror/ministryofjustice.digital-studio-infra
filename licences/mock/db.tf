@@ -14,7 +14,7 @@ resource "aws_security_group" "db" {
     from_port       = 1433
     to_port         = 1433
     protocol        = "tcp"
-    cidr_blocks     = ["${var.ips["office"]}/32", "${var.ips["mojvpn"]}/32"]
+    cidr_blocks     = ["0.0.0.0/0"]
     security_groups = ["${aws_security_group.ec2.id}"]
   }
 
