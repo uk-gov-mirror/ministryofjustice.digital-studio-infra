@@ -1,42 +1,86 @@
 variable "app-name" {
   type    = "string"
-  default = "omic-dev"
+  default = "keyworker-api-prod"
 }
 
 variable "tags" {
   type = "map"
 
   default {
-    Service     = "omic-ui"
-    Environment = "Dev"
+    Service     = "keyworker-api"
+    Environment = "Prod"
   }
 }
 
-# This resource is managed in multiple places (omic ui stage)
+# This resource is managed in multiple places (keyworker api preprod)
 resource "aws_elastic_beanstalk_application" "app" {
-  name        = "omic-ui"
-  description = "omic-ui"
+  name        = "keyworker-api"
+  description = "keyworker-api"
 }
 
-resource "random_id" "session-secret" {
-  byte_length = 40
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "keyworker-api.service.hmpps.dsd.io"
+  validation_method = "DNS"
+  tags = "${var.tags}"
 }
 
-resource "azurerm_resource_group" "group" {
-  name     = "omic-ui-dev"
-  location = "ukwest"
-  tags     = "${var.tags}"
+resource "aws_security_group" "elb" {
+  name        = "${var.app-name}-elb"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "ELB"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-elb"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
-resource "azurerm_application_insights" "insights" {
-  name                = "${var.app-name}"
-  location            = "North Europe"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  application_type    = "Web"
-}
+resource "aws_security_group" "ec2" {
+  name        = "${var.app-name}-ec2"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "elasticbeanstalk EC2 instances"
 
-data "aws_acm_certificate" "cert" {
-  domain = "${var.app-name}.hmpps.dsd.io"
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = ["${aws_security_group.elb.id}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-ec2"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 data "aws_elastic_beanstalk_solution_stack" "docker" {
@@ -49,6 +93,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   application         = "${aws_elastic_beanstalk_application.app.name}"
   solution_stack_name = "${data.aws_elastic_beanstalk_solution_stack.docker.name}"
   tier                = "WebServer"
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.ec2.id}"
+  }
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -75,6 +125,24 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   setting {
+    namespace = "aws:elasticbeanstalk:environment"
+    name      = "LoadBalancerType"
+    value     = "classic"
+  }
+
+  setting {
+    namespace = "aws:elb:loadbalancer"
+    name      = "ManagedSecurityGroup"
+    value     = "${aws_security_group.elb.id}"
+  }
+
+  setting {
+    namespace = "aws:elb:loadbalancer"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.elb.id}"
+  }
+
+  setting {
     namespace = "aws:elb:listener:443"
     name      = "ListenerProtocol"
     value     = "HTTPS"
@@ -83,7 +151,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:listener:443"
     name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.cert.arn}"
+    value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
@@ -165,99 +233,84 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "USE_API_GATEWAY_AUTH"
+    value     = "true"
+  }
+
+  setting {
     namespace = "aws:elasticbeanstalk:cloudwatch:logs"
     name      = "StreamLogs"
     value     = "true"
   }
 
-  # Begin app-specific config settings
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
-    value     = "yes"
+    value     = "true"
   }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_ENDPOINT_URL"
-    value     = "https://noms-api-dev.dsd.io/elite2api/"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "KEYWORKER_API_URL"
-    value     = "https://keyworker-api-dev.hmpps.dsd.io/"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "NN_ENDPOINT_URL"
-    value     = "https://notm-dev.hmpps.dsd.io/"
-  }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_TOKEN"
     value     = "${data.aws_ssm_parameter.api-gateway-token.value}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_CLIENT_ID"
-    value     = "elite2apiclient"
+    name      = "JWT_PUBLIC_KEY"
+    value     = "${data.aws_ssm_parameter.jwt-public-key.value}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_CLIENT_SECRET"
-    value     = "${data.aws_ssm_parameter.api-client-secret.value}"
+    name      = "ELITE2_API_URI_ROOT"
+    value     = "https://gateway.nomis-api.service.justice.gov.uk/elite2api/api"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_PRIVATE_KEY"
     value     = "${data.aws_ssm_parameter.api-gateway-private-key.value}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${azurerm_application_insights.insights.instrumentation_key}"
+    name      = "APP_DB_URL"
+    value     = "jdbc:postgresql://${aws_db_instance.db.endpoint}/${aws_db_instance.db.name}?sslmode=verify-full"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "HMPPS_COOKIE_NAME"
-    value     = "hmpps-session-dev"
+    name      = "SPRING_DATASOURCE_USERNAME"
+    value     = "${aws_db_instance.db.username}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "HMPPS_COOKIE_DOMAIN"
-    value     = "hmpps.dsd.io"
+    name      = "SPRING_DATASOURCE_PASSWORD"
+    value     = "${aws_db_instance.db.password}"
   }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SESSION_COOKIE_SECRET"
-    value     = "${random_id.session-secret.b64}"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "NODE_ENV"
-    value     = "production"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "GOOGLE_ANALYTICS_ID"
-    value     = "UA-106741063-1"
-  }
+
   tags = "${var.tags}"
 }
 
 resource "azurerm_dns_cname_record" "cname" {
-  name                = "${var.app-name}"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "keyworker-api"
+  zone_name           = "service.hmpps.dsd.io"
+  resource_group_name = "webops-prod"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
-# Allow AWS's ACM to manage omic-dev.hmpps.dsd.io
+# Allow AWS's ACM to manage keyworker-api.service.hmpps.dsd.io
+locals {
+  aws_record_name     = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,var.dns_zone_name,"")}"
+}
+
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_79224e76e3cf7223cd35155455755acc.omic-dev"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+  zone_name           = "${var.dns_zone_name}"
+  resource_group_name = "webops-prod"
   ttl                 = "300"
-  record              = "_3f84403eebcf649218bc22a4654a5fa4.acm-validations.aws."
+  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }

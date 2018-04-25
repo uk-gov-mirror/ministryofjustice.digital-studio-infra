@@ -1,6 +1,6 @@
 .env*
 .terraform
-terraform.tfstate*
+*.tfstate*
 *.tfplan
 graph.png
 node_modules/

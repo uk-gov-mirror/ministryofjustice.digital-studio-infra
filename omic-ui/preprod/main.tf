@@ -1,6 +1,6 @@
 variable "app-name" {
   type    = "string"
-  default = "omic-dev"
+  default = "omic-preprod"
 }
 
 variable "tags" {
@@ -8,11 +8,11 @@ variable "tags" {
 
   default {
     Service     = "omic-ui"
-    Environment = "Dev"
+    Environment = "PreProd"
   }
 }
 
-# This resource is managed in multiple places (omic ui stage)
+# This resource is managed in multiple places (omic ui prod)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "omic-ui"
   description = "omic-ui"
@@ -23,7 +23,7 @@ resource "random_id" "session-secret" {
 }
 
 resource "azurerm_resource_group" "group" {
-  name     = "omic-ui-dev"
+  name     = "omic-ui-preprod"
   location = "ukwest"
   tags     = "${var.tags}"
 }
@@ -35,8 +35,52 @@ resource "azurerm_application_insights" "insights" {
   application_type    = "Web"
 }
 
-data "aws_acm_certificate" "cert" {
-  domain = "${var.app-name}.hmpps.dsd.io"
+resource "aws_acm_certificate" "cert" {
+  domain_name = "${var.app-name}.service.hmpps.dsd.io"
+  validation_method = "DNS"
+  tags = "${var.tags}"
+}
+
+locals {
+  allowed-list = [
+    "${var.ips["office"]}/32",
+    "${var.ips["quantum"]}/32",
+    "${var.ips["health-kick"]}/32",
+    "${var.ips["mojvpn"]}/32",
+  ]
+}
+
+resource "aws_security_group" "elb" {
+  name        = "${var.app-name}-elb"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "ELB"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = "${local.allowed-list}"
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = "${local.allowed-list}"
+  }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-elb"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 data "aws_elastic_beanstalk_solution_stack" "docker" {
@@ -83,7 +127,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:listener:443"
     name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.cert.arn}"
+    value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
@@ -170,94 +214,98 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "true"
   }
 
-  # Begin app-specific config settings
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
     value     = "yes"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_ENDPOINT_URL"
-    value     = "https://noms-api-dev.dsd.io/elite2api/"
+    value     = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api/"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "KEYWORKER_API_URL"
-    value     = "https://keyworker-api-dev.hmpps.dsd.io/"
+    value     = "https://keyworker-api-preprod.service.hmpps.dsd.io/"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NN_ENDPOINT_URL"
-    value     = "https://notm-dev.hmpps.dsd.io/"
+    value     = "https://notm-preprod.service.hmpps.dsd.io/"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_TOKEN"
     value     = "${data.aws_ssm_parameter.api-gateway-token.value}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_ID"
     value     = "elite2apiclient"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_SECRET"
     value     = "${data.aws_ssm_parameter.api-client-secret.value}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_PRIVATE_KEY"
     value     = "${data.aws_ssm_parameter.api-gateway-private-key.value}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
     value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_NAME"
-    value     = "hmpps-session-dev"
+    value     = "hmpps-session-preprod"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_DOMAIN"
-    value     = "hmpps.dsd.io"
+    value     = "service.hmpps.dsd.io"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SESSION_COOKIE_SECRET"
     value     = "${random_id.session-secret.b64}"
   }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "NODE_ENV"
-    value     = "production"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "GOOGLE_ANALYTICS_ID"
-    value     = "UA-106741063-1"
-  }
+
   tags = "${var.tags}"
 }
 
 resource "azurerm_dns_cname_record" "cname" {
   name                = "${var.app-name}"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  zone_name           = "service.hmpps.dsd.io"
+  resource_group_name = "webops-prod"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
-# Allow AWS's ACM to manage omic-dev.hmpps.dsd.io
+# Allow AWS's ACM to manage omic-preprod.service.hmpps.dsd.io
+locals {
+  aws_record_name     = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,var.dns_zone_name,"")}"
+}
+
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_79224e76e3cf7223cd35155455755acc.omic-dev"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+  zone_name           = "${var.dns_zone_name}"
+  resource_group_name = "webops-prod"
   ttl                 = "300"
-  record              = "_3f84403eebcf649218bc22a4654a5fa4.acm-validations.aws."
+  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }
