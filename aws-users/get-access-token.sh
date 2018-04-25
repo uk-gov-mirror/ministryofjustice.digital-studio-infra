@@ -1,11 +1,10 @@
-#!/bin/bash
-
 # Wrapper for obtaining security tokens on MFA enabled accounts.
 
 accountid=$1
 username=$2
 
-read -p "Enter MFA code: " mfa_code
+echo -n "Enter MFA code: "
+read mfa_code
 
 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 
