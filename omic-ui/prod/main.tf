@@ -297,6 +297,16 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "SESSION_COOKIE_SECRET"
     value     = "${random_id.session-secret.b64}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NODE_ENV"
+    value     = "production"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "GOOGLE_ANALYTICS_ID"
+    value     = "UA-106741063-2"
+  }
 
   tags = "${var.tags}"
 }
