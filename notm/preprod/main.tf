@@ -123,6 +123,7 @@ resource "azurerm_app_service" "app" {
     NODE_ENV                       = "production"
     API_ENDPOINT_URL               = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api/"
     USE_API_GATEWAY_AUTH           = "yes"
+    KEYWORKER_API_URL              = "https://keyworker-api-preprod.service.hmpps.dsd.io/"
     NOMS_TOKEN                     = "${data.external.vault.result.noms_token}"
     NOMS_PRIVATE_KEY               = "${data.external.vault.result.noms_private_key}"
     API_GATEWAY_PRIVATE_KEY        = "${data.external.vault.result.api_gateway_private_key}"
