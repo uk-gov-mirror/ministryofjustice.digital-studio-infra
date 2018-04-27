@@ -35,9 +35,12 @@ resource "azurerm_application_insights" "insights" {
   application_type    = "Web"
 }
 
-data "aws_acm_certificate" "cert" {
-  domain = "${var.app-name}.hmpps.dsd.io"
+resource "aws_acm_certificate" "cert" {
+  domain_name = "${var.app-name}.${var.dns_zone_name}"
+  validation_method = "DNS"
+  tags = "${var.tags}"
 }
+
 
 data "aws_elastic_beanstalk_solution_stack" "docker" {
   most_recent = true
@@ -83,7 +86,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:listener:443"
     name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.cert.arn}"
+    value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
@@ -254,10 +257,14 @@ resource "azurerm_dns_cname_record" "cname" {
 }
 
 # Allow AWS's ACM to manage omic-dev.hmpps.dsd.io
+locals {
+  aws_record_name     = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,var.dns_zone_name,"")}"
+}
+
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_79224e76e3cf7223cd35155455755acc.omic-dev"
-  zone_name           = "hmpps.dsd.io"
+  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+  zone_name           = "${var.dns_zone_name}"
   resource_group_name = "webops"
   ttl                 = "300"
-  record              = "_3f84403eebcf649218bc22a4654a5fa4.acm-validations.aws."
+  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }
