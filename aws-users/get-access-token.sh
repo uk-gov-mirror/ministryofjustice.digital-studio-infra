@@ -3,6 +3,13 @@
 accountid=$1
 username=$2
 
+if [ $# -lt 2 ]
+  then
+    echo "Please provide the AWS account number and your user name."
+    return 1
+fi
+
+
 echo -n "Enter MFA code: "
 read mfa_code
 
