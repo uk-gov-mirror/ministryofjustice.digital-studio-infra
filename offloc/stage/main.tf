@@ -1,36 +1,22 @@
-variable "app-name" {
-  type    = "string"
-  default = "offloc-stage"
-}
-
-variable "tags" {
-  type = "map"
-
-  default {
-    Service     = "offloc"
-    Environment = "stage"
-  }
-}
-
 resource "azurerm_resource_group" "group" {
-  name     = "${var.app-name}"
+  name     = "${local.name}"
   location = "ukwest"
-  tags     = "${var.tags}"
+  tags     = "${local.tags}"
 }
 
 resource "azurerm_storage_account" "storage" {
-  name                     = "offlocstagestorage"
+  name                     = "${var.storage}"
   resource_group_name      = "${azurerm_resource_group.group.name}"
   location                 = "${azurerm_resource_group.group.location}"
   account_tier             = "Standard"
   account_replication_type = "RAGRS"
   enable_blob_encryption   = true
 
-  tags = "${var.tags}"
+  tags = "${local.tags}"
 }
 
 resource "azurerm_key_vault" "vault" {
-  name                = "${var.app-name}"
+  name                = "${local.name}"
   resource_group_name = "${azurerm_resource_group.group.name}"
   location            = "${azurerm_resource_group.group.location}"
 
@@ -63,7 +49,7 @@ resource "azurerm_key_vault" "vault" {
 
   access_policy {
     tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${local.azure_offloc_group_oid}"
+    object_id          = "${local.app_team_oid}"
     key_permissions    = []
     secret_permissions = "${var.azure_secret_permissions_all}"
   }
@@ -72,7 +58,7 @@ resource "azurerm_key_vault" "vault" {
   enabled_for_disk_encryption     = false
   enabled_for_template_deployment = true
 
-  tags = "${var.tags}"
+  tags = "${local.tags}"
 }
 
 resource "random_id" "session" {
@@ -80,7 +66,7 @@ resource "random_id" "session" {
 }
 
 resource "azurerm_app_service_plan" "app" {
-  name                = "${var.app-name}"
+  name                = "${local.name}"
   location            = "${azurerm_resource_group.group.location}"
   resource_group_name = "${azurerm_resource_group.group.name}"
 
@@ -90,39 +76,41 @@ resource "azurerm_app_service_plan" "app" {
     capacity = 1
   }
 
-  tags = "${var.tags}"
+  tags = "${local.tags}"
 }
 
 resource "azurerm_application_insights" "insights" {
-  name                = "${var.app-name}"
+  name                = "${local.name}"
   location            = "North Europe"
   resource_group_name = "${azurerm_resource_group.group.name}"
   application_type    = "Web"
 }
 
 resource "azurerm_app_service" "app" {
-  name                = "${var.app-name}"
+  name                = "${local.name}"
   location            = "${azurerm_resource_group.group.location}"
   resource_group_name = "${azurerm_resource_group.group.name}"
   app_service_plan_id = "${azurerm_app_service_plan.app.id}"
 
-  tags = "${var.tags}"
+  tags = "${local.tags}"
 
   app_settings {
-    WEBSITE_NODE_DEFAULT_VERSION   = "8.4.0"
-    APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_application_insights.insights.instrumentation_key}"
-    NODE_ENV                       = "production"
-    SESSION_SECRET                 = "${random_id.session.b64}"
+    WEBSITE_NODE_DEFAULT_VERSION    = "8.4.0"
+    APPINSIGHTS_INSTRUMENTATIONKEY  = "${azurerm_application_insights.insights.instrumentation_key}"
+    NODE_ENV                        = "production"
+    SESSION_SECRET                  = "${random_id.session.b64}"
+    AZURE_STORAGE_CONNECTION_STRING = "${azurerm_storage_account.storage.primary_connection_string}"
+    AZURE_STORAGE_CONTAINER_NAME    = "cde"
   }
 }
 
 resource "azurerm_dns_cname_record" "app" {
-  name                = "${var.app-name}"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${local.cname}"
+  zone_name           = "${local.dns_zone_name}"
+  resource_group_name = "${local.dns_zone_rg}"
   ttl                 = "300"
-  record              = "${var.app-name}.azurewebsites.net"
-  tags                = "${var.tags}"
+  record              = "${local.name}.azurewebsites.net"
+  tags                = "${local.tags}"
 }
 
 resource "azurerm_template_deployment" "ssl" {
@@ -136,12 +124,13 @@ resource "azurerm_template_deployment" "ssl" {
     hostname         = "${azurerm_dns_cname_record.app.name}.${azurerm_dns_cname_record.app.zone_name}"
     keyVaultId       = "${azurerm_key_vault.vault.id}"
     keyVaultCertName = "${replace("${azurerm_dns_cname_record.app.name}.${azurerm_dns_cname_record.app.zone_name}", ".", "DOT")}"
-    service          = "${var.tags["Service"]}"
-    environment      = "${var.tags["Environment"]}"
+    service          = "${local.tags["Service"]}"
+    environment      = "${local.tags["Environment"]}"
   }
 }
 
 resource "azurerm_template_deployment" "github" {
+  count               = "${local.github_deploy_branch == "" ? 0 : 1}"
   name                = "github"
   resource_group_name = "${azurerm_resource_group.group.name}"
   deployment_mode     = "Incremental"
@@ -150,11 +139,12 @@ resource "azurerm_template_deployment" "github" {
   parameters {
     name    = "${azurerm_app_service.app.name}"
     repoURL = "https://github.com/ministryofjustice/offloc-server.git"
-    branch  = "deploy-to-stage"
+    branch  = "${local.github_deploy_branch}"
   }
 }
 
 resource "github_repository_webhook" "deploy" {
+  count      = "${local.github_deploy_branch == "" ? 0 : 1}"
   repository = "offloc-server"
 
   name = "web"
@@ -173,5 +163,5 @@ resource "github_repository_webhook" "deploy" {
 module "slackhook" {
   source   = "../../shared/modules/slackhook"
   app_name = "${azurerm_app_service.app.name}"
-  channels = ["offloc-replacement"]
+  channels = "${var.deployment-channels}"
 }
