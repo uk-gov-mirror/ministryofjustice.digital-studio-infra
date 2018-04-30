@@ -41,6 +41,19 @@ A script has been created to generate the AWS security token required for the CL
 
 e.g. ```. ./get-access-token.sh 589133037702 JackSmith```
 
+If you have multiple AWS accounts configured you can pass the name of the profile as a third parameter. Doing so will pass the correct access key id and secret.
+
+Example profile:
+
+```
+[dev]
+ aws_access_key_id = <key id value>
+ aws_secret_access_key = <secret value>
+```
+The command would then be: ```. ./get-access-token.sh 589133037702 JackSmith dev```
+
+
+
 ## Set up GPG for encryption/decryption for first time passwords
 
 In order to set first time login passwords for AWS users we need to be able to encrypt the generated passwords using GPG.
