@@ -5,7 +5,7 @@ resource "azurerm_resource_group" "group" {
 }
 
 resource "azurerm_storage_account" "storage" {
-  name                     = "${var.storage}"
+  name                     = "${local.storage}"
   resource_group_name      = "${azurerm_resource_group.group.name}"
   location                 = "${azurerm_resource_group.group.location}"
   account_tier             = "Standard"
@@ -91,6 +91,7 @@ resource "azurerm_app_service" "app" {
   location            = "${azurerm_resource_group.group.location}"
   resource_group_name = "${azurerm_resource_group.group.name}"
   app_service_plan_id = "${azurerm_app_service_plan.app.id}"
+  https_only          = true
 
   tags = "${local.tags}"
 
@@ -117,7 +118,7 @@ resource "azurerm_template_deployment" "ssl" {
   name                = "ssl"
   resource_group_name = "${azurerm_resource_group.group.name}"
   deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/appservice-ssl.template.json")}"
+  template_body       = "${file("../../shared/appservice-tls12.template.json")}"
 
   parameters {
     name             = "${azurerm_app_service.app.name}"
@@ -161,7 +162,8 @@ resource "github_repository_webhook" "deploy" {
 }
 
 module "slackhook" {
-  source   = "../../shared/modules/slackhook"
-  app_name = "${azurerm_app_service.app.name}"
-  channels = "${var.deployment-channels}"
+  source             = "../../shared/modules/slackhook"
+  app_name           = "${azurerm_app_service.app.name}"
+  channels           = "${var.deployment-channels}"
+  azure_subscription = "${var.azure_subscription}"
 }

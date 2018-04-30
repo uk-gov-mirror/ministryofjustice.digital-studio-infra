@@ -8,19 +8,15 @@ variable "env" {
   default = "stage"
 }
 
-variable "storage" {
-  type    = "string"
-  default = "offlocstagestorage"
-}
-
 variable "deployment-channels" {
   type    = "list"
   default = ["offloc-replacement"]
 }
 
 locals {
-  name  = "${var.app}-${var.env}"
-  cname = "${local.name}"
+  name    = "${var.app}-${var.env}"
+  storage = "${var.app}${var.env}storage"
+  cname   = "${local.name}"
 
   github_deploy_branch = "deploy-to-${var.env}"
 

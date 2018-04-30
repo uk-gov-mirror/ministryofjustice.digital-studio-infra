@@ -1,3 +1,8 @@
+variable "azure_subscription" {
+  type    = "string"
+  default = "production"
+}
+
 variable "azure_subscription_id" {
   type    = "string"
   default = "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
@@ -39,6 +44,6 @@ variable "azure_secret_permissions_all" {
 }
 
 locals {
-  "dns_zone_name" = "hmpps.dsd.io"
-  "dns_zone_rg"   = "webops"
+  "dns_zone_name" = "service.hmpps.dsd.io"
+  "dns_zone_rg"   = "webops-prod"
 }
