@@ -2,6 +2,7 @@
 
 accountid=$1
 username=$2
+profile=$3
 
 if [ $# -lt 2 ]
   then
@@ -9,13 +10,17 @@ if [ $# -lt 2 ]
     return 1
 fi
 
+if [ -z $3 ]
+  then
+    profile=default
+fi
 
 echo -n "Enter MFA code: "
 read mfa_code
 
 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 
-json_result=$(aws sts get-session-token --serial-number arn:aws:iam::$accountid:mfa/$username --token-code $mfa_code)
+json_result=$(aws sts get-session-token --serial-number arn:aws:iam::$accountid:mfa/$username --token-code $mfa_code --profile $profile)
 
 if [ $? -eq 0 ]; then
     echo "Session token ok"
@@ -31,5 +36,5 @@ if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$AWS_
 then
   echo "FAIL: Environment variables have not been set."
 else
-  echo "Authentication successfully set."
+  echo "Authentication successfully set using $profile profile."
 fi

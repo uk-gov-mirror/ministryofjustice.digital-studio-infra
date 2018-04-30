@@ -19,7 +19,7 @@ resource "aws_elastic_beanstalk_application" "app" {
 }
 
 resource "aws_acm_certificate" "cert" {
-  domain_name       = "keyworker-api.service.hmpps.dsd.io"
+  domain_name       = "keyworker-api.${var.dns_zone_name}"
   validation_method = "DNS"
   tags = "${var.tags}"
 }
