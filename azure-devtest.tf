@@ -1,3 +1,8 @@
+variable "azure_subscription" {
+  type    = "string"
+  default = "development"
+}
+
 variable "azure_subscription_id" {
   type    = "string"
   default = "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
