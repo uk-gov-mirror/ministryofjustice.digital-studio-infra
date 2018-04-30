@@ -28,6 +28,10 @@ variable "azure_jenkins_sp_oid" {
   default = "880790d6-77d8-4f9b-9df7-f60097801381"
 }
 
+locals {
+  azure_empty_group_oid = "2e86efbd-c741-452f-8922-5c9d91120bff"
+}
+
 variable "azure_secret_permissions_all" {
   type = "list"
 
