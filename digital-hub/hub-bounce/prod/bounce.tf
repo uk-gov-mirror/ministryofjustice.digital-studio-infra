@@ -35,7 +35,7 @@ resource "azurerm_network_security_group" "hub-bounce-prod-nsg" {
     protocol                   = "TCP"
     source_port_range          = "*"
     destination_port_range     = "80"
-    source_address_prefix      = "35.177.252.195/32"
+    source_address_prefix      = "${var.ips["health-kick"]}"
     destination_address_prefix = "*"
   }
 
