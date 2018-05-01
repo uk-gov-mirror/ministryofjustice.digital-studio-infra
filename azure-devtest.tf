@@ -1,6 +1,5 @@
-variable "azure_subscription" {
-  type    = "string"
-  default = "development"
+locals {
+  azure_subscription = "development"
 }
 
 variable "azure_subscription_id" {

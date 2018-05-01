@@ -1,6 +1,5 @@
-variable "azure_subscription" {
-  type    = "string"
-  default = "production"
+locals {
+  azure_subscription = "production"
 }
 
 variable "azure_subscription_id" {

@@ -165,5 +165,5 @@ module "slackhook" {
   source             = "../../shared/modules/slackhook"
   app_name           = "${azurerm_app_service.app.name}"
   channels           = "${var.deployment-channels}"
-  azure_subscription = "${var.azure_subscription}"
+  azure_subscription = "${local.azure_subscription}"
 }
