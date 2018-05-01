@@ -1,9 +1,9 @@
 variable "app-name" {
   type    = "string"
-  default = "licences-mock"
+  default = "licences-stage"
 }
 
-# This resource is managed in multiple places (licences stage)
+# This resource is managed in multiple places (licences mock)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "licences"
   description = "licences"
@@ -231,7 +231,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
+    value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -246,7 +246,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NOMIS_API_URL"
-    value     = "https://licences-nomis-mocks.herokuapp.com/elite2api"
+    value     = "https://noms-api-dev.dsd.io/elite2api"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -279,6 +279,17 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "NODE_ENV"
     value     = "production"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NOMIS_GW_TOKEN"
+    value     = "${data.external.vault.result.elite_api_gateway_token}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NOMIS_GW_KEY"
+    value     = "${data.external.vault.result.elite_api_gateway_private_key}"
+  }
+
   tags = "${var.tags}"
 }
 
@@ -291,9 +302,9 @@ resource "azurerm_dns_cname_record" "cname" {
 }
 
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_7ac2509e32e89c189806d3eccd973161.licences-mock"
+  name                = "_4d69ee137a14e9cf43c11a6b3dd0f20f.licences-stage"
   zone_name           = "hmpps.dsd.io"
   resource_group_name = "webops"
   ttl                 = "300"
-  record              = "_c0f012c76b2277660098f229219a2b02.acm-validations.aws."
+  record              = "_268e3210c84d79b7c2f40926b98df74b.acm-validations.aws."
 }
