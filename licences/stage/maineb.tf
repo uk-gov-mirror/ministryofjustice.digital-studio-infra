@@ -236,7 +236,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_ENABLED"
-    value     = "false"
+    value     = "yes"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -246,7 +246,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NOMIS_API_URL"
-    value     = "https://noms-api-dev.dsd.io/elite2api"
+    value     = "https://noms-api-dev.dsd.io/elite2api/api"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
