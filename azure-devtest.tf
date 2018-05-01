@@ -1,3 +1,7 @@
+locals {
+  azure_subscription = "development"
+}
+
 variable "azure_subscription_id" {
   type    = "string"
   default = "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
@@ -75,4 +79,9 @@ variable "azure_secret_permissions_all" {
     "restore",
     "set",
   ]
+}
+
+locals {
+  "dns_zone_name" = "hmpps.dsd.io"
+  "dns_zone_rg"   = "webops"
 }
