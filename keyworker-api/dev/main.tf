@@ -280,6 +280,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "SPRING_DATASOURCE_PASSWORD"
     value     = "${aws_db_instance.db.password}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SPRING_PROFILES_ACTIVE"
+    value     = "batch"
+  }
   tags = "${var.tags}"
 }
 
