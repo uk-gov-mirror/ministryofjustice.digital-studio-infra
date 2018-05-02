@@ -23,11 +23,6 @@ provider "aws" {
   region              = "${var.aws_region}"
 }
 
-variable "dns_zone_name" {
-    type = "string"
-    default = "service.hmpps.dsd.io"
-}
-
 variable "elastic-beanstalk-single-docker" {
   type    = "string"
   default = "64bit Amazon Linux 2017.09 v2.9.2 running Docker 17.12.0-ce"
@@ -35,4 +30,10 @@ variable "elastic-beanstalk-single-docker" {
 
 locals {
   elb_ssl_policy = "ELBSecurityPolicy-TLS-1-2-2017-01"
+}
+
+#Config for Azure
+locals {
+  dns_zone_name           = "service.hmpps.dsd.io"
+  dns_zone_resource_group = "webops-prod"
 }
