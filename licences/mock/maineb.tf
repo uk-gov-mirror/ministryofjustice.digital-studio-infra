@@ -3,6 +3,16 @@ variable "app-name" {
   default = "licences-mock"
 }
 
+variable "tags" {
+  type = "map"
+
+  default {
+    Service     = "Licences"
+    Environment = "Mock"
+  }
+}
+
+
 # This resource is managed in multiple places (licences stage)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "licences"
@@ -12,6 +22,19 @@ resource "aws_elastic_beanstalk_application" "app" {
 data "aws_acm_certificate" "cert" {
   domain = "${var.app-name}.hmpps.dsd.io"
 }
+
+resource "random_id" "session-secret" {
+  byte_length = 40
+}
+
+
+resource "azurerm_application_insights" "insights" {
+  name                = "${var.app-name}"
+  location            = "North Europe"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  application_type    = "Web"
+}
+
 
 resource "aws_security_group" "elb" {
   name        = "${var.app-name}-elb"
@@ -231,7 +254,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
+    value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
