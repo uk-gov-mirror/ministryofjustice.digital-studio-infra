@@ -3,6 +3,15 @@ variable "app-name" {
   default = "licences-stage"
 }
 
+variable "tags" {
+  type = "map"
+
+  default {
+    Service     = "Licences"
+    Environment = "Stage"
+  }
+}
+
 # This resource is managed in multiple places (licences mock)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "licences"
@@ -12,6 +21,18 @@ resource "aws_elastic_beanstalk_application" "app" {
 data "aws_acm_certificate" "cert" {
   domain = "${var.app-name}.hmpps.dsd.io"
 }
+
+resource "random_id" "session-secret" {
+  byte_length = 40
+}
+
+resource "azurerm_application_insights" "insights" {
+  name                = "${var.app-name}"
+  location            = "North Europe"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  application_type    = "Web"
+}
+
 
 resource "aws_security_group" "elb" {
   name        = "${var.app-name}-elb"
@@ -282,12 +303,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NOMIS_GW_TOKEN"
-    value     = "${data.external.vault.result.elite_api_gateway_token}"
+    value     = "${data.aws_ssm_parameter.api_gateway_token.value}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NOMIS_GW_KEY"
-    value     = "${data.external.vault.result.elite_api_gateway_private_key}"
+    value     = "${data.aws_ssm_parameter.api_gateway_private_key.value}"
   }
 
   tags = "${var.tags}"

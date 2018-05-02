@@ -1,37 +1,16 @@
-variable "env-name" {
-  type    = "string"
-  default = "licences-mock"
-}
-
-variable "tags" {
-  type = "map"
-
-  default {
-    Service     = "Licences"
-    Environment = "Mock"
-  }
-}
-
-resource "random_id" "session-secret" {
-  byte_length = 40
-}
-
-resource "random_id" "sql-ui-password" {
-  byte_length = 32
-}
 
 resource "random_id" "sql-nomis-batchload-password" {
   byte_length = 32
 }
 
 resource "azurerm_resource_group" "group" {
-  name     = "${var.env-name}"
+  name     = "${var.app-name}"
   location = "ukwest"
   tags     = "${var.tags}"
 }
 
 resource "azurerm_storage_account" "storage" {
-  name                     = "${replace(var.env-name, "-", "")}storage"
+  name                     = "${replace(var.app-name, "-", "")}storage"
   resource_group_name      = "${azurerm_resource_group.group.name}"
   location                 = "${azurerm_resource_group.group.location}"
   account_tier             = "Standard"
@@ -49,7 +28,7 @@ resource "azurerm_storage_container" "logs" {
 }
 
 resource "azurerm_key_vault" "vault" {
-  name                = "${var.env-name}"
+  name                = "${var.app-name}"
   resource_group_name = "${azurerm_resource_group.group.name}"
   location            = "${azurerm_resource_group.group.location}"
 
@@ -94,39 +73,10 @@ resource "azurerm_key_vault" "vault" {
   tags = "${var.tags}"
 }
 
-module "sql" {
-  source              = "../../shared/modules/azure-sql"
-  name                = "${var.env-name}"
-  resource_group      = "${azurerm_resource_group.group.name}"
-  location            = "${azurerm_resource_group.group.location}"
-  administrator_login = "licences"
-
-  firewall_rules = [
-    {
-      label = "Open to the world"
-      start = "0.0.0.0"
-      end   = "255.255.255.255"
-    },
-  ]
-
-  audit_storage_account = "${azurerm_storage_account.storage.name}"
-  edition               = "Basic"
-  collation             = "SQL_Latin1_General_CP1_CI_AS"
-  tags                  = "${var.tags}"
-
-  db_users = {
-    ui = "${random_id.sql-ui-password.b64}"
-  }
-
-  setup_queries = [
-    "ALTER ROLE db_datareader ADD MEMBER ui",
-    "ALTER ROLE db_datawriter ADD MEMBER ui",
-  ]
-}
 
 module "sql-nomis-batchload" {
   source              = "../../shared/modules/azure-sql"
-  name                = "nomis-batchload-${var.env-name}"
+  name                = "nomis-batchload-${var.app-name}"
   resource_group      = "${azurerm_resource_group.group.name}"
   location            = "${azurerm_resource_group.group.location}"
   administrator_login = "licences"
@@ -169,16 +119,3 @@ data "external" "sas-url" {
   }
 }
 
-resource "azurerm_template_deployment" "insights" {
-  name                = "${var.env-name}"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/insights.template.json")}"
-
-  parameters {
-    name        = "${var.env-name}"
-    location    = "northeurope"                // Not in UK yet
-    service     = "${var.tags["Service"]}"
-    environment = "${var.tags["Environment"]}"
-  }
-}
