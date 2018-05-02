@@ -1,17 +1,3 @@
-variable "app-name" {
-  type    = "string"
-  default = "keyworker-api-dev"
-}
-
-variable "tags" {
-  type = "map"
-
-  default {
-    Service     = "keyworker-api"
-    Environment = "Dev"
-  }
-}
-
 # This resource is managed in multiple places (keyworker api stage)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "keyworker-api"
@@ -19,9 +5,9 @@ resource "aws_elastic_beanstalk_application" "app" {
 }
 
 resource "aws_acm_certificate" "cert" {
-  domain_name       = "${var.app-name}.${var.dns_zone_name}"
+  domain_name       = "${var.app-name}.${local.dns_zone_name}"
   validation_method = "DNS"
-  tags = "${var.tags}"
+  tags              = "${var.tags}"
 }
 
 resource "aws_security_group" "elb" {
@@ -175,7 +161,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:policies:tlshigh"
     name      = "SSLReferencePolicy"
-    value     = "ELBSecurityPolicy-TLS-1-2-2017-01"
+    value     = "${local.elb_ssl_policy}"
   }
 
   setting {
@@ -258,7 +244,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "ELITE2_API_URI_ROOT"
-    value     = "https://noms-api-dev.dsd.io/elite2api/api"
+    value     = "${local.elite2_api_uri_root}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -290,21 +276,21 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 
 resource "azurerm_dns_cname_record" "cname" {
   name                = "${var.app-name}"
-  zone_name           = "${var.dns_zone_name}"
-  resource_group_name = "webops"
+  zone_name           = "${local.dns_zone_name}"
+  resource_group_name = "${local.dns_zone_resource_group}"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
 # Allow AWS's ACM to manage keyworker-api-dev.hmpps.dsd.io
 locals {
-  aws_record_name     = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,var.dns_zone_name,"")}"
+  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.dns_zone_name,"")}"
 }
 
 resource "azurerm_dns_cname_record" "acm-verify" {
   name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
-  zone_name           = "${var.dns_zone_name}"
-  resource_group_name = "webops"
+  zone_name           = "${local.dns_zone_name}"
+  resource_group_name = "${local.dns_zone_resource_group}"
   ttl                 = "300"
   record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }

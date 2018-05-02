@@ -32,3 +32,7 @@ variable "elastic-beanstalk-single-docker" {
   type    = "string"
   default = "64bit Amazon Linux 2017.09 v2.9.2 running Docker 17.12.0-ce"
 }
+
+locals {
+  elb_ssl_policy = "ELBSecurityPolicy-TLS-1-2-2017-01"
+}

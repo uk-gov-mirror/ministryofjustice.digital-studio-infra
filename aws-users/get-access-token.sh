@@ -1,26 +1,23 @@
 # Wrapper for obtaining security tokens on MFA enabled accounts.
 
-accountid=$1
-username=$2
-profile=$3
+profile=$1
 
-if [ $# -lt 2 ]
-  then
-    echo "Please provide the AWS account number and your user name."
-    return 1
-fi
-
-if [ -z $3 ]
+if [ -z $1 ]
   then
     profile=default
 fi
 
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+
+mfa_devices=$(aws iam list-mfa-devices --profile $profile)
+
+mfa_arn=$(echo $mfa_devices | jq -r '.MFADevices[0].SerialNumber')
+
 echo -n "Enter MFA code: "
 read mfa_code
 
-unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 
-json_result=$(aws sts get-session-token --serial-number arn:aws:iam::$accountid:mfa/$username --token-code $mfa_code --profile $profile)
+json_result=$(aws sts get-session-token --serial-number $mfa_arn --token-code $mfa_code --profile $profile)
 
 if [ $? -eq 0 ]; then
     echo "Session token ok"
