@@ -12,18 +12,19 @@ variable "tags" {
   }
 }
 
-resource "azurerm_resource_group" "group" {
-  name     = "omic-ui-stage"
-  location = "ukwest"
-  tags     = "${var.tags}"
-}
-
+# App settings
 locals {
   api_endpoint_url  = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/"
   api_client_id     = "omic"
   keyworker_api_url = "https://keyworker-api-stage.hmpps.dsd.io/"
   nn_endpoint_url   = "https://notm-stage.hmpps.dsd.io/"
   hmpps_cookie_name = "hmpps-session-stage"
+}
+
+# Azure config
+locals {
+  azurerm_resource_group = "omic-ui-stage"
+  azure_region = "ukwest"
 }
 
 locals {
