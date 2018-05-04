@@ -4,12 +4,6 @@ resource "aws_elastic_beanstalk_application" "app" {
   description = "keyworker-api"
 }
 
-resource "aws_acm_certificate" "cert" {
-  domain_name       = "${var.app-name}.${local.dns_zone_name}"
-  validation_method = "DNS"
-  tags              = "${var.tags}"
-}
-
 resource "aws_security_group" "elb" {
   name        = "${var.app-name}-elb"
   vpc_id      = "${aws_vpc.vpc.id}"
@@ -274,15 +268,26 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   tags = "${var.tags}"
 }
 
+locals {
+cname = "${replace(var.app-name,"-prod","")}"
+}
+
+# Allow AWS's ACM to manage the apps SSL cert.
+
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${local.cname}.${local.dns_zone_name}"
+  validation_method = "DNS"
+  tags              = "${var.tags}"
+}
+
 resource "azurerm_dns_cname_record" "cname" {
-  name                = "${var.app-name}"
+  name                = "${local.cname}"
   zone_name           = "${local.dns_zone_name}"
   resource_group_name = "${local.dns_zone_resource_group}"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
-# Allow AWS's ACM to manage keyworker-api-dev.hmpps.dsd.io
 locals {
   aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.dns_zone_name,"")}"
 }

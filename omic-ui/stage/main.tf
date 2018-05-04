@@ -1,18 +1,4 @@
-variable "app-name" {
-  type    = "string"
-  default = "omic-stage"
-}
-
-variable "tags" {
-  type = "map"
-
-  default {
-    Service     = "omic-ui"
-    Environment = "Stage"
-  }
-}
-
-# This resource is managed in multiple places (omic ui dev)
+# This resource is managed in multiple places (all omic-ui environments)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "omic-ui"
   description = "omic-ui"
@@ -22,33 +8,11 @@ resource "random_id" "session-secret" {
   byte_length = 40
 }
 
-resource "azurerm_resource_group" "group" {
-  name     = "omic-ui-stage"
-  location = "ukwest"
-  tags     = "${var.tags}"
-}
-
 resource "azurerm_application_insights" "insights" {
   name                = "${var.app-name}"
   location            = "North Europe"
   resource_group_name = "${azurerm_resource_group.group.name}"
   application_type    = "Web"
-}
-
-resource "aws_acm_certificate" "cert" {
-  domain_name = "${var.app-name}.${var.dns_zone_name}"
-  validation_method = "DNS"
-  tags = "${var.tags}"
-}
-
-locals {
-  allowed-list = [
-    "${var.ips["office"]}/32",
-    "${var.ips["quantum"]}/32",
-    "${var.ips["health-kick"]}/32",
-    "${var.ips["mojvpn"]}/32",
-    "82.37.105.223/32",             # Source for security testing
-  ]
 }
 
 resource "aws_security_group" "elb" {
@@ -164,7 +128,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:policies:tlshigh"
     name      = "SSLReferencePolicy"
-    value     = "ELBSecurityPolicy-TLS-1-2-2017-01"
+    value     = "${local.elb_ssl_policy}"
   }
 
   setting {
@@ -227,68 +191,78 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "true"
   }
 
-  # Begin app-specific config settings
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
     value     = "yes"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_ENDPOINT_URL"
-    value     = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/"
+    value     = "${local.api_endpoint_url}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "KEYWORKER_API_URL"
-    value     = "https://keyworker-api-stage.hmpps.dsd.io/"
+    value     = "${local.keyworker_api_url}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NN_ENDPOINT_URL"
-    value     = "https://notm-stage.hmpps.dsd.io/"
+    value     = "${local.nn_endpoint_url}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_TOKEN"
     value     = "${data.aws_ssm_parameter.api-gateway-token.value}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_ID"
-    value     = "omic"
+    value     = "${local.api_client_id}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_SECRET"
     value     = "${data.aws_ssm_parameter.api-client-secret.value}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_PRIVATE_KEY"
     value     = "${data.aws_ssm_parameter.api-gateway-private-key.value}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
     value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_NAME"
-    value     = "hmpps-session-stage"
+    value     = "${local.hmpps_cookie_name}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_DOMAIN"
-    value     = "hmpps.dsd.io"
+    value     = "${local.dns_zone_name}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SESSION_COOKIE_SECRET"
     value     = "${random_id.session-secret.b64}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NODE_ENV"
@@ -298,23 +272,34 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   tags = "${var.tags}"
 }
 
+locals {
+  cname = "${replace(var.app-name,"-prod","")}"
+}
+
+# Allow AWS's ACM to manage the apps FQDN
+
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${local.cname}.${local.dns_zone_name}"
+  validation_method = "DNS"
+  tags              = "${var.tags}"
+}
+
 resource "azurerm_dns_cname_record" "cname" {
-  name                = "${var.app-name}"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${local.cname}"
+  zone_name           = "${local.dns_zone_name}"
+  resource_group_name = "${local.dns_zone_resource_group}"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
-# Allow AWS's ACM to manage omic-stage.hmpps.dsd.io
 locals {
-  aws_record_name     = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,var.dns_zone_name,"")}"
+  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.dns_zone_name,"")}"
 }
 
 resource "azurerm_dns_cname_record" "acm-verify" {
   name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
-  zone_name           = "${var.dns_zone_name}"
-  resource_group_name = "webops"
+  zone_name           = "${local.dns_zone_name}"
+  resource_group_name = "${local.dns_zone_resource_group}"
   ttl                 = "300"
   record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }
