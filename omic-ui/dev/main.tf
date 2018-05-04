@@ -8,6 +8,12 @@ resource "random_id" "session-secret" {
   byte_length = 40
 }
 
+resource "azurerm_resource_group" "group" {
+  name     = "${local.azurerm_resource_group}"
+  location = "${local.azure_region}"
+  tags     = "${var.tags}"
+}
+
 resource "azurerm_application_insights" "insights" {
   name                = "${var.app-name}"
   location            = "North Europe"

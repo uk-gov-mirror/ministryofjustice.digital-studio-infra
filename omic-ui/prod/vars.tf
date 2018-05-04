@@ -12,18 +12,19 @@ variable "tags" {
   }
 }
 
-resource "azurerm_resource_group" "group" {
-  name     = "omic-ui-prod"
-  location = "ukwest"
-  tags     = "${var.tags}"
-}
-
+# App settings
 locals {
   api_endpoint_url  = "https://gateway.nomis-api.service.justice.gov.uk/elite2api/"
   api_client_id     = "elite2apiclient"
   keyworker_api_url = "https://keyworker-api.service.hmpps.dsd.io/"
   nn_endpoint_url   = "https://notm.service.hmpps.dsd.io/"
   hmpps_cookie_name = "hmpps-session-prod"
+}
+
+# Azure config
+locals {
+  azurerm_resource_group = "omic-ui-prod"
+  azure_region = "ukwest"
 }
 
 locals {
