@@ -264,8 +264,8 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "ELITE2_API_URI_ROOT"
-    value     = "https://gateway.nomis-api.service.justice.gov.uk/elite2api/api"
+    name      = "ELITE2_URI_ROOT"
+    value     = "https://gateway.nomis-api.service.justice.gov.uk/elite2api"
   }
 
   setting {
