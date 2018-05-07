@@ -13,5 +13,5 @@ variable "tags" {
 }
 
 locals {
-  elite2_api_uri_root = "https://gateway.nomis-api.service.justice.gov.uk/elite2api/api"
+  elite2_uri_root = "https://gateway.nomis-api.service.justice.gov.uk/elite2api"
 }

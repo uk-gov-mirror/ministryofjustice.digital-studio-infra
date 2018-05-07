@@ -13,5 +13,5 @@ variable "tags" {
 }
 
 locals {
-    elite2_api_uri_root  = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api/api"
+    elite2_uri_root  = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api"
   }

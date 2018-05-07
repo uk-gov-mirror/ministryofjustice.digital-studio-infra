@@ -1,5 +1,5 @@
 locals {
-  azure_subscription = "development"  
+  azure_subscription = "development"
 }
 
 variable "azure_subscription_id" {
@@ -64,7 +64,6 @@ variable "azure_licences_group_oid" {
 
 locals {
   azure_offloc_group_oid = "f7185b7d-392e-43a0-9fc7-06b8639766ed"
-  azure_resource_group = "webops"
 }
 
 variable "azure_secret_permissions_all" {
@@ -80,4 +79,9 @@ variable "azure_secret_permissions_all" {
     "restore",
     "set",
   ]
+}
+
+locals {
+  "dns_zone_name" = "hmpps.dsd.io"
+  "dns_zone_rg"   = "webops"
 }

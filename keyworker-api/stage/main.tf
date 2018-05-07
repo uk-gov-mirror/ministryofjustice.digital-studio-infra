@@ -237,8 +237,8 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "ELITE2_API_URI_ROOT"
-    value     = "${local.elite2_api_uri_root}"
+    name      = "ELITE2_URI_ROOT"
+    value     = "${local.elite2_uri_root}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
