@@ -1,27 +1,7 @@
-variable "app-name" {
-  type    = "string"
-  default = "keyworker-api-preprod"
-}
-
-variable "tags" {
-  type = "map"
-
-  default {
-    Service     = "keyworker-api"
-    Environment = "PreProd"
-  }
-}
-
-# This resource is managed in multiple places (keyworker api prod)
+# This resource is managed in multiple places (keyworker api stage)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "keyworker-api"
   description = "keyworker-api"
-}
-
-resource "aws_acm_certificate" "cert" {
-  domain_name       = "${var.app-name}.${var.dns_zone_name}"
-  validation_method = "DNS"
-  tags = "${var.tags}"
 }
 
 resource "aws_security_group" "elb" {
@@ -175,7 +155,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:policies:tlshigh"
     name      = "SSLReferencePolicy"
-    value     = "ELBSecurityPolicy-TLS-1-2-2017-01"
+    value     = "${local.elb_ssl_policy}"
   }
 
   setting {
@@ -238,48 +218,43 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "true"
   }
 
+  # Begin app-specific config settings
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
     value     = "true"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_TOKEN"
     value     = "${data.aws_ssm_parameter.api-gateway-token.value}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "JWT_PUBLIC_KEY"
     value     = "${data.aws_ssm_parameter.jwt-public-key.value}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "ELITE2_API_URI_ROOT"
-    value     = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api/api"
+    name      = "ELITE2_URI_ROOT"
+    value     = "${local.elite2_uri_root}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_PRIVATE_KEY"
     value     = "${data.aws_ssm_parameter.api-gateway-private-key.value}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APP_DB_URL"
     value     = "jdbc:postgresql://${aws_db_instance.db.endpoint}/${aws_db_instance.db.name}?sslmode=verify-full"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SPRING_DATASOURCE_USERNAME"
     value     = "${aws_db_instance.db.username}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SPRING_DATASOURCE_PASSWORD"
@@ -290,27 +265,37 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "SPRING_PROFILES_ACTIVE"
     value     = "batch"
   }
-
   tags = "${var.tags}"
 }
 
+locals {
+cname = "${replace(var.app-name,"-prod","")}"
+}
+
+# Allow AWS's ACM to manage the apps SSL cert.
+
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${local.cname}.${local.dns_zone_name}"
+  validation_method = "DNS"
+  tags              = "${var.tags}"
+}
+
 resource "azurerm_dns_cname_record" "cname" {
-  name                = "${var.app-name}"
-  zone_name           = "${var.dns_zone_name}"
-  resource_group_name = "webops-prod"
+  name                = "${local.cname}"
+  zone_name           = "${local.dns_zone_name}"
+  resource_group_name = "${local.dns_zone_resource_group}"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
-# Allow AWS's ACM to manage keyworker-api-preprod.hmpps.dsd.io
 locals {
-  aws_record_name     = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,var.dns_zone_name,"")}"
+  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.dns_zone_name,"")}"
 }
 
 resource "azurerm_dns_cname_record" "acm-verify" {
   name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
-  zone_name           = "${var.dns_zone_name}"
-  resource_group_name = "webops-prod"
+  zone_name           = "${local.dns_zone_name}"
+  resource_group_name = "${local.dns_zone_resource_group}"
   ttl                 = "300"
   record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }
