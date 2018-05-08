@@ -1,0 +1,31 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        }
+    },
+    "resources": [
+      {
+          "apiVersion": "2016-08-01",
+          "type": "Microsoft.Web/sites",
+          "name": "[parameters('name')]",
+          "location": "[resourceGroup().location]",
+          "identity": {
+              "type": "SystemAssigned"
+          },
+          "properties": {}
+      }
+    ],
+    "outputs": {
+        "tenant_id": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Web/sites', parameters('name')), '2016-08-01', 'Full').identity.tenantId]"
+        },
+        "principal_id": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Web/sites', parameters('name')), '2016-08-01', 'Full').identity.principalId]"
+        }
+    }
+}
