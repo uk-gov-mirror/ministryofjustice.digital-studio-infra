@@ -278,7 +278,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "GOOGLE_ANALYTICS_ID"
-    value     = "UA-106741063-2"
+    value     = "${local.google_analytics_id}"
   }
 
   tags = "${var.tags}"

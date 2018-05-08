@@ -14,17 +14,18 @@ variable "tags" {
 
 # App settings
 locals {
-  api_endpoint_url  = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api/"
-  api_client_id     = "omic"
-  keyworker_api_url = "https://keyworker-api-preprod.service.hmpps.dsd.io/"
-  nn_endpoint_url   = "https://notm-preprod.service.hmpps.dsd.io/"
-  hmpps_cookie_name = "hmpps-session-preprod"
+  api_endpoint_url    = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api/"
+  api_client_id       = "omic"
+  keyworker_api_url   = "https://keyworker-api-preprod.service.hmpps.dsd.io/"
+  nn_endpoint_url     = "https://notm-preprod.service.hmpps.dsd.io/"
+  hmpps_cookie_name   = "hmpps-session-preprod"
+  google_analytics_id = ""
 }
 
 # Azure config
 locals {
-  azurerm_resource_group     = "omic-ui-preprod"
-  azure_region = "ukwest"
+  azurerm_resource_group = "omic-ui-preprod"
+  azure_region           = "ukwest"
 }
 
 locals {
