@@ -21,6 +21,39 @@ resource "azurerm_application_insights" "insights" {
   application_type    = "Web"
 }
 
+resource "aws_security_group" "elb" {
+  name        = "${var.app-name}-elb"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "ELB"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = "${local.allowed-list}"
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = "${local.allowed-list}"
+  }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-elb"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 data "aws_elastic_beanstalk_solution_stack" "docker" {
   most_recent = true
   name_regex  = "^64bit Amazon Linux .* v2.* running Docker 17.*$"
@@ -54,6 +87,18 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "ServiceRole"
     value     = "aws-elasticbeanstalk-service-role"
+  }
+
+  setting {
+    namespace = "aws:elb:loadbalancer"
+    name      = "ManagedSecurityGroup"
+    value     = "${aws_security_group.elb.id}"
+  }
+
+  setting {
+    namespace = "aws:elb:loadbalancer"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.elb.id}"
   }
 
   setting {
@@ -222,7 +267,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "GOOGLE_ANALYTICS_ID"
-    value     = "UA-106741063-1"
+    value     = "${local.google_analytics_id}"
   }
   tags = "${var.tags}"
 }
