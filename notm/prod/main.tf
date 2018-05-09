@@ -91,7 +91,6 @@ data "external" "vault" {
   query {
     vault                   = "${azurerm_key_vault.vault.name}"
     noms_token              = "noms-token"
-    noms_private_key        = "noms-private-key"
     api_gateway_private_key = "api-gateway-private-key"
     google_analytics_id     = "google-analytics-id"
     api_client_secret       = "api-client-secret"
@@ -123,8 +122,9 @@ resource "azurerm_app_service" "app" {
     NODE_ENV                       = "production"
     API_ENDPOINT_URL               = "https://gateway.nomis-api.service.justice.gov.uk/elite2api/"
     USE_API_GATEWAY_AUTH           = "yes"
+    KEYWORKER_API_URL              = "https://keyworker-api.service.hmpps.dsd.io/"
+    OMIC_UI_URL                    = "https://omic.service.hmpps.dsd.io/"
     NOMS_TOKEN                     = "${data.external.vault.result.noms_token}"
-    NOMS_PRIVATE_KEY               = "${data.external.vault.result.noms_private_key}"
     API_GATEWAY_PRIVATE_KEY        = "${data.external.vault.result.api_gateway_private_key}"
     API_CLIENT_ID                  = "elite2apiclient"
     API_CLIENT_SECRET              = "${data.external.vault.result.api_client_secret}"
