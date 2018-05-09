@@ -265,6 +265,16 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "SPRING_PROFILES_ACTIVE"
     value     = "batch"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "ELITE2API_CLIENT_CLIENTID"
+    value     = "${local.omic_clientid}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "ELITE2API_CLIENT_CLIENTSECRET"
+    value     = "${data.aws_ssm_parameter.omic-admin-secret.value}"
+  }
   tags = "${var.tags}"
 }
 
