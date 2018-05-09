@@ -30,10 +30,6 @@ locals {
 
 locals {
   allowed-list = [
-    "${var.ips["office"]}/32",
-    "${var.ips["quantum"]}/32",
-    "${var.ips["health-kick"]}/32",
-    "${var.ips["mojvpn"]}/32",
-    "82.37.105.223/32",
+    "0.0.0.0/0",
   ]
 }
