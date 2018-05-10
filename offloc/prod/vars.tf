@@ -20,6 +20,8 @@ locals {
 
   github_deploy_branch = ""
 
+  extra_dns_zone = "offloc.service.justice.gov.uk"
+
   app_team_oid = "${local.azure_empty_group_oid}"
 
   tags {
