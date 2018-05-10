@@ -142,6 +142,23 @@ resource "azurerm_dns_cname_record" "app" {
   tags                = "${local.tags}"
 }
 
+resource "azurerm_dns_zone" "extra" {
+  count               = "${local.extra_dns_zone == "" ? 0 : 1}"
+  name                = "${local.extra_dns_zone}"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  tags                = "${local.tags}"
+}
+
+resource "azurerm_dns_cname_record" "extra" {
+  count               = "${local.extra_dns_zone == "" ? 0 : 1}"
+  name                = "www"
+  zone_name           = "${azurerm_dns_zone.extra.name}"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  ttl                 = "300"
+  record              = "${local.name}.azurewebsites.net"
+  tags                = "${local.tags}"
+}
+
 resource "azurerm_template_deployment" "ssl" {
   name                = "ssl"
   resource_group_name = "${azurerm_resource_group.group.name}"
@@ -153,6 +170,22 @@ resource "azurerm_template_deployment" "ssl" {
     hostname         = "${azurerm_dns_cname_record.app.name}.${azurerm_dns_cname_record.app.zone_name}"
     keyVaultId       = "${azurerm_key_vault.vault.id}"
     keyVaultCertName = "${replace("${azurerm_dns_cname_record.app.name}.${azurerm_dns_cname_record.app.zone_name}", ".", "DOT")}"
+    service          = "${local.tags["Service"]}"
+    environment      = "${local.tags["Environment"]}"
+  }
+}
+
+resource "azurerm_template_deployment" "ssl-extra" {
+  name                = "ssl-extra"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  deployment_mode     = "Incremental"
+  template_body       = "${file("../../shared/appservice-tls12.template.json")}"
+
+  parameters {
+    name             = "${azurerm_app_service.app.name}"
+    hostname         = "${azurerm_dns_cname_record.extra.name}.${azurerm_dns_cname_record.extra.zone_name}"
+    keyVaultId       = "${azurerm_key_vault.vault.id}"
+    keyVaultCertName = "${replace("${azurerm_dns_cname_record.extra.name}.${azurerm_dns_cname_record.extra.zone_name}", ".", "DOT")}"
     service          = "${local.tags["Service"]}"
     environment      = "${local.tags["Environment"]}"
   }

@@ -55,4 +55,24 @@
   "keyvault": "webops-jenkins-prod",
   "subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
 }
+,
+{
+  "azure_app": "offloc-prod",
+  "hostname": "offloc",
+  "zone": "service.hmpps.dsd.io",
+  "dns_resource_group": "webops-prod",
+  "resource_group": "offloc-prod",
+  "keyvault": "offloc-prod",
+  "subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
+}
+,
+{
+  "azure_app": "offloc-prod",
+  "hostname": "www",
+  "zone": "offloc.service.justice.gov.uk",
+  "dns_resource_group": "offloc-prod",
+  "resource_group": "offloc-prod",
+  "keyvault": "offloc-prod",
+  "subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
+}
 ]
