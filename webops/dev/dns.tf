@@ -130,6 +130,34 @@ resource "azurerm_dns_ns_record" "nomis-api" {
   }
 }
 
+resource "azurerm_dns_ns_record" "offloc" {
+  name                = "offloc-stage-zone"
+  zone_name           = "${azurerm_dns_zone.hmpps.name}"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  ttl                 = "300"
+
+  record {
+    nsdname = "ns1-03.azure-dns.com."
+  }
+
+  record {
+    nsdname = "ns2-03.azure-dns.net."
+  }
+
+  record {
+    nsdname = "ns3-03.azure-dns.org."
+  }
+
+  record {
+    nsdname = "ns4-03.azure-dns.info."
+  }
+
+  tags {
+    Service     = "WebOps"
+    Environment = "Management"
+  }
+}
+
 resource "azurerm_dns_cname_record" "search" {
   name                = "search"
   zone_name           = "${azurerm_dns_zone.noms.name}"
