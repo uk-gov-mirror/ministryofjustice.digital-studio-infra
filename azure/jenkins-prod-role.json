@@ -1,5 +1,5 @@
 {
-  "Name": "digital-studio-jenkins",
+  "Name": "digital-studio-jenkins-prod",
   "IsCustom": true,
   "Description": "All permissions needed for jenkins jobs",
   "Actions": [
@@ -18,6 +18,6 @@
     "Microsoft.KeyVault/vaults/secrets/write"
   ],
   "AssignableScopes": [
-    "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+    "/subscriptions/a5ddf257-3b21-4ba9-a28c-ab30f751b383"
   ]
 }

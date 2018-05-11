@@ -8,9 +8,9 @@ import argparse
 import base64
 import logging
 
-sys.path.insert(0, './')
+# sys.path.insert(0, './')
 
-from tools.python_modules import azure_account
+from .tools.python_modules import azure_account
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
