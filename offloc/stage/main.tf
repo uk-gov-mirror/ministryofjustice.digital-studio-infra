@@ -15,6 +15,12 @@ resource "azurerm_storage_account" "storage" {
   tags = "${local.tags}"
 }
 
+resource "azurerm_role_assignment" "jenkins-write-storage" {
+  scope                = "${azurerm_storage_account.storage.id}"
+  role_definition_name = "Contributor"
+  principal_id         = "${local.azure_fixngo_jenkins_oid}"
+}
+
 resource "azurerm_key_vault" "vault" {
   name                = "${local.name}"
   resource_group_name = "${azurerm_resource_group.group.name}"
