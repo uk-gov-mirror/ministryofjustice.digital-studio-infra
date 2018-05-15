@@ -13,5 +13,6 @@ variable "tags" {
 }
 
 locals {
-    elite2_uri_root  = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api"
-  }
+  elite2_uri_root  = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api"
+  omic_clientid = "omicadmin"
+}

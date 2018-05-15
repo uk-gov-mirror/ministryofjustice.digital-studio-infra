@@ -14,4 +14,5 @@ variable "tags" {
 
 locals {
   elite2_uri_root = "https://noms-api-dev.dsd.io/elite2api"
+  omic_clientid = "omicadmin"
 }
