@@ -61,8 +61,8 @@ resource "azurerm_key_vault" "vault" {
   }
 
   access_policy {
-    tenant_id          = "${azurerm_template_deployment.app-msi.outputs.tenant_id}"
-    object_id          = "${azurerm_template_deployment.app-msi.outputs.principal_id}"
+    tenant_id          = "${azurerm_app_service.app.identity.0.tenant_id}"
+    object_id          = "${azurerm_app_service.app.identity.0.principal_id}"
     key_permissions    = []
     secret_permissions = ["get", "set", "list", "delete"]
   }
@@ -120,23 +120,16 @@ resource "azurerm_app_service" "app" {
     # Can't use resource property here otherwise we create a dependency cycle
     KEY_VAULT_URL = "https://${local.name}.vault.azure.net/"
   }
-}
 
-resource "azurerm_template_deployment" "app-msi" {
-  name                = "app-msi"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/appservice-msi.template.json")}"
-
-  parameters {
-    name = "${azurerm_app_service.app.name}"
+  identity {
+    type = "SystemAssigned"
   }
 }
 
 resource "azurerm_role_assignment" "app-read-storage" {
   scope                = "${azurerm_storage_account.storage.id}"
   role_definition_name = "Contributor"
-  principal_id         = "${azurerm_template_deployment.app-msi.outputs.principal_id}"
+  principal_id         = "${azurerm_app_service.app.identity.0.principal_id}"
 }
 
 resource "azurerm_dns_cname_record" "app" {
