@@ -27,8 +27,7 @@ locals {
   elb_ssl_policy = "ELBSecurityPolicy-TLS-1-2-2017-01"
 }
 
-#Config for Azure
 locals {
-  dns_zone_name           = "service.hmpps.dsd.io"
-  dns_zone_resource_group = "webops-prod"
+  azure_dns_zone_name = "service.hmpps.dsd.io"
+  azure_dns_zone_rg   = "webops-prod"
 }

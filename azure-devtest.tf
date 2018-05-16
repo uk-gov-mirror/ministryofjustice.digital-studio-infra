@@ -83,6 +83,6 @@ variable "azure_secret_permissions_all" {
 }
 
 locals {
-  "dns_zone_name" = "hmpps.dsd.io"
-  "dns_zone_rg"   = "webops"
+  dns_zone_name = "hmpps.dsd.io"
+  dns_zone_rg   = "webops"
 }
