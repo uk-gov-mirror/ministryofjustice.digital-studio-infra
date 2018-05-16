@@ -16,8 +16,8 @@ data "external" "vault" {
 
   query {
     vault            = "${var.vault-name}"
-    users-webops     = "users-webops"
-    users-developers = "users-developers"
+    users-webops     = "webops"
+    users-developers = "developers"
   }
 }
 
@@ -55,7 +55,7 @@ locals {
 resource "aws_iam_user_login_profile" "user" {
   count           = "${length(local.all_users)}"
   user            = "${element(local.all_users, count.index)}"
-  pgp_key         = "${file(var.gpg_key)}"
+  pgp_key         = "${var.gpg_key}"
   password_length = 14
 }
 

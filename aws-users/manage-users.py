@@ -14,9 +14,9 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 parser = argparse.ArgumentParser(
     description='Script to create the config for AWS user accounts')
 
-parser.add_argument("-e", "--environment", help="Prod or Devtest environment")
+parser.add_argument("-e", "--environment", help="Prod or Devtest environment", choices=["devtest", "prod"], required=True)
 parser.add_argument("-u", "--users", help="Users to add/del to AWS")
-parser.add_argument("-a", "--user-action", help="Add or delete Users (add/del)")
+parser.add_argument("-a", "--user-action", help="Add or delete Users (add/del)", choices=["add", "del", "list"], required=True)
 parser.add_argument("-g", "--group", help="user type to update e.g. webops, developers etc.")
 
 args = parser.parse_args()
@@ -52,6 +52,10 @@ def manage_users(environment, user_action,group):
 
         except subprocess.CalledProcessError:
             logging.info("Key vault secret for " + user_type + " doesn't exist. It will be created if required.")
+
+        if user_action == "list":
+            print(user_list)
+            continue
 
         users = args.users.split(",")
 
