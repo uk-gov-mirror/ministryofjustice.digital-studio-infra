@@ -34,6 +34,6 @@ locals {
 
 #Config for Azure
 locals {
-  dns_zone_name           = "hmpps.dsd.io"
-  dns_zone_resource_group = "webops"
+  azure_dns_zone_name = "hmpps.dsd.io"
+  azure_dns_zone_rg   = "webops"
 }

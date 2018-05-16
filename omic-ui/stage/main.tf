@@ -260,7 +260,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_DOMAIN"
-    value     = "${local.dns_zone_name}"
+    value     = "${local.azure_dns_zone_name}"
   }
 
   setting {
@@ -291,27 +291,27 @@ locals {
 # Allow AWS's ACM to manage the apps FQDN
 
 resource "aws_acm_certificate" "cert" {
-  domain_name       = "${local.cname}.${local.dns_zone_name}"
+  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
   validation_method = "DNS"
   tags              = "${var.tags}"
 }
 
 resource "azurerm_dns_cname_record" "cname" {
   name                = "${local.cname}"
-  zone_name           = "${local.dns_zone_name}"
-  resource_group_name = "${local.dns_zone_resource_group}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
 locals {
-  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.dns_zone_name,"")}"
+  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
 }
 
 resource "azurerm_dns_cname_record" "acm-verify" {
   name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
-  zone_name           = "${local.dns_zone_name}"
-  resource_group_name = "${local.dns_zone_resource_group}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "300"
   record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }
