@@ -1,6 +1,10 @@
-variable "gpg_key" {
-  type    = "string"
-  default = ""
+resource "aws_iam_account_password_policy" "strict" {
+  minimum_password_length        = 14
+  require_lowercase_characters   = true
+  require_numbers                = true
+  require_uppercase_characters   = true
+  require_symbols                = false
+  allow_users_to_change_password = true
 }
 
 resource "aws_iam_group" "webops" {
@@ -24,39 +28,41 @@ data "external" "vault" {
 locals {
   aws_users_webops     = "${compact(split(",",data.external.vault.result.users-webops))}"
   aws_users_developers = "${compact(split(",",data.external.vault.result.users-developers))}"
+
+  all_users = "${concat(local.aws_users_webops,local.aws_users_developers)}"
 }
 
 resource "aws_iam_user" "user" {
-  count = "${length(local.aws_users_webops)}"
-  name  = "${element(local.aws_users_webops, count.index)}"
-}
+  count = "${length(local.all_users)}"
+  name  = "${element(local.all_users, count.index)}"
 
-resource "aws_iam_user" "user-developer" {
-  count = "${length(local.aws_users_developers)}"
-  name  = "${element(local.aws_users_developers, count.index)}"
+  provisioner "local-exec" {
+    interpreter = ["bash", "-e", "-c"]
+
+    command = <<SHELL
+    password=$(pwgen 20 1)
+    echo Initial Password: "$password"
+    aws iam create-login-profile \
+      --user-name "${element(local.aws_users_webops, count.index)}" \
+      --password "$password" \
+      --password-reset-required
+SHELL
+  }
+
+  # For deletion first use
+  # aws iam delete-login-profile --user-name XXXX
 }
 
 resource "aws_iam_group_membership" "webops_group_membership" {
   name  = "webops-group-membership"
-  users = ["${aws_iam_user.user.*.name}"]
+  users = ["${local.aws_users_webops}"]
   group = "${aws_iam_group.webops.name}"
 }
 
 resource "aws_iam_group_membership" "developers_group_membership" {
   name  = "developers-group-membership"
-  users = ["${aws_iam_user.user-developer.*.name}"]
+  users = ["${local.aws_users_developers}"]
   group = "${aws_iam_group.developers.name}"
-}
-
-locals {
-  all_users = "${concat(local.aws_users_webops,local.aws_users_developers)}"
-}
-
-resource "aws_iam_user_login_profile" "user" {
-  count           = "${length(local.all_users)}"
-  user            = "${element(local.all_users, count.index)}"
-  pgp_key         = "${var.gpg_key}"
-  password_length = 14
 }
 
 data "template_file" "enable_mfa_policy" {
