@@ -275,6 +275,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "ELITE2API_CLIENT_CLIENTSECRET"
     value     = "${data.aws_ssm_parameter.omic-admin-secret.value}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SERVER_CONNECTION_TIMEOUT"
+    value     = "180000"
+  }
   tags = "${var.tags}"
 }
 
