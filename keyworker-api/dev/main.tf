@@ -278,7 +278,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SERVER_CONNECTION_TIMEOUT"
-    value     = "180000"
+    value     = "${local.server_timeout}"
   }
   tags = "${var.tags}"
 }
