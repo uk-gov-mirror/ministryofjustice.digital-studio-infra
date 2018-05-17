@@ -22,7 +22,7 @@ echo "Using profile [$profile]"
 
 unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 
-mfa_devices=$(aws iam list-mfa-devices --profile $profile)
+mfa_devices=$(aws iam list-mfa-devices --profile $profile --output json)
 
 if [ $? -ne 0 ]; then
   echo "Failed to find MFA device"
@@ -36,7 +36,7 @@ echo -n "Enter MFA code: "
 read mfa_code
 
 
-json_result=$(aws sts get-session-token --serial-number $mfa_arn --token-code $mfa_code --profile $profile)
+json_result=$(aws sts get-session-token --serial-number $mfa_arn --token-code $mfa_code --profile $profile --output json)
 
 if [ $? -eq 0 ]; then
     echo "Session token ok"
