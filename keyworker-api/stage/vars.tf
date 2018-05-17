@@ -15,4 +15,5 @@ variable "tags" {
 locals {
   elite2_uri_root = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api"
   omic_clientid = "omicadmin"
+  server_timeout = "180000"
 }
