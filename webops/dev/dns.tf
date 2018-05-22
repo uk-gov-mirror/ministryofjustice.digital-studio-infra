@@ -158,6 +158,34 @@ resource "azurerm_dns_ns_record" "offloc" {
   }
 }
 
+resource "azurerm_dns_ns_record" "probation" {
+  name                = "probation"
+  zone_name           = "${azurerm_dns_zone.hmpps.name}"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  ttl                 = "300"
+
+  record {
+    nsdname = "ns-1247.awsdns-27.org."
+  }
+
+  record {
+    nsdname = "ns-1910.awsdns-46.co.uk."
+  }
+
+  record {
+    nsdname = "ns-244.awsdns-30.com."
+  }
+
+  record {
+    nsdname = "ns-972.awsdns-57.net."
+  }
+
+  tags {
+    Service     = "WebOps"
+    Environment = "Management"
+  }
+}
+
 resource "azurerm_dns_cname_record" "search" {
   name                = "search"
   zone_name           = "${azurerm_dns_zone.noms.name}"
