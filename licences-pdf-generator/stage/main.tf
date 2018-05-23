@@ -1,6 +1,6 @@
 variable "app-name" {
   type    = "string"
-  default = "licences-pdf-generator"
+  default = "licences-pdf-generator-stage"
 }
 
 variable "tags" {
@@ -12,10 +12,9 @@ variable "tags" {
   }
 }
 
-# This resource is managed in multiple places (omic ui stage)
 resource "aws_elastic_beanstalk_application" "app" {
-  name        = "${var.app-name}"
-  description = "${var.app-name}"
+  name        = "licences-pdf-generator"
+  description = "licences-pdf-generator"
 }
 
 resource "random_id" "session-secret" {
@@ -177,11 +176,10 @@ resource "azurerm_dns_cname_record" "cname" {
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
-# Allow AWS's ACM to manage omic-dev.hmpps.dsd.io
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_79224e76e3cf7223cd35155455755acc.omic-dev"
+  name                = "_d49945320db149178fcf627aaa54872f.licences-pdf-generator-stage"
   zone_name           = "hmpps.dsd.io"
   resource_group_name = "webops"
   ttl                 = "300"
-  record              = "_3f84403eebcf649218bc22a4654a5fa4.acm-validations.aws."
+  record              = "_0a13510f92d10d5bedb7054f120fd615.acm-validations.aws."
 }

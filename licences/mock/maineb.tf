@@ -273,6 +273,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "PDF_SERVICE_HOST"
+    value     = "https://licences-nomis-mocks.herokuapp.com"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "DB_NAME"
     value     = "${aws_db_instance.db.name}"
   }
