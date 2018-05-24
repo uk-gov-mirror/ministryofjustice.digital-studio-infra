@@ -281,6 +281,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "${local.google_analytics_id}"
   }
 
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name = "WEB_SESSION_TIMEOUT_IN_MINUTES"
+    value = "${local.web_session_timeout}"
+  }
+
   tags = "${var.tags}"
 }
 
