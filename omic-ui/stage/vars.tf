@@ -15,11 +15,12 @@ variable "tags" {
 # App settings
 locals {
   api_endpoint_url    = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/"
-  api_client_id       = "omic"
+  api_client_id       = "elite2apiclient"
   keyworker_api_url   = "https://keyworker-api-stage.hmpps.dsd.io/"
   nn_endpoint_url     = "https://notm-stage.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-stage"
   google_analytics_id = ""
+  web_session_timeout = "60"
 }
 
 # Azure config
