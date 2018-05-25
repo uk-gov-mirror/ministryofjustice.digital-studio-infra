@@ -13,7 +13,9 @@ variable "tags" {
 }
 
 locals {
-  elite2_uri_root = "https://gateway.nomis-api.service.justice.gov.uk/elite2api"
-  omic_clientid = "omicadmin"
-  server_timeout = "180000"
+  elite2_uri_root        = "https://gateway.nomis-api.service.justice.gov.uk/elite2api"
+  omic_clientid          = "omicadmin"
+  server_timeout         = "180000"
+  azurerm_resource_group = "keyworker-api-prod"
+  azure_region           = "ukwest"
 }
