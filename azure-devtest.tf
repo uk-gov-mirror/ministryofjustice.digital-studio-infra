@@ -63,7 +63,8 @@ variable "azure_licences_group_oid" {
 }
 
 locals {
-  azure_offloc_group_oid = "f7185b7d-392e-43a0-9fc7-06b8639766ed"
+  azure_offloc_group_oid   = "f7185b7d-392e-43a0-9fc7-06b8639766ed"
+  azure_fixngo_jenkins_oid = "23d9e503-7bb8-4f5a-8080-72329bd434cf"
 }
 
 variable "azure_secret_permissions_all" {
@@ -82,6 +83,6 @@ variable "azure_secret_permissions_all" {
 }
 
 locals {
-  "dns_zone_name" = "hmpps.dsd.io"
-  "dns_zone_rg"   = "webops"
+  dns_zone_name = "hmpps.dsd.io"
+  dns_zone_rg   = "webops"
 }

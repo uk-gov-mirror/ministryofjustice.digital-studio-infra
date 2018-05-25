@@ -28,7 +28,8 @@ variable "azure_jenkins_sp_oid" {
 }
 
 locals {
-  azure_empty_group_oid = "2e86efbd-c741-452f-8922-5c9d91120bff"
+  azure_empty_group_oid    = "2e86efbd-c741-452f-8922-5c9d91120bff"
+  azure_fixngo_jenkins_oid = "d2f0d768-d785-4e6f-98d6-fab105032ff1"
 }
 
 variable "azure_secret_permissions_all" {
@@ -47,6 +48,6 @@ variable "azure_secret_permissions_all" {
 }
 
 locals {
-  "dns_zone_name" = "service.hmpps.dsd.io"
-  "dns_zone_rg"   = "webops-prod"
+  dns_zone_name = "service.hmpps.dsd.io"
+  dns_zone_rg   = "webops-prod"
 }

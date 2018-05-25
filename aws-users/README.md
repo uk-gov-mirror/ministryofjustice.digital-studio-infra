@@ -24,24 +24,26 @@ e.g. to add two users to the developers group:
 
 Parameters:
 
--e, --environment The environment the user is created for. Determines the Azure key vault used.
+-e, --environment The environment the user is created for. Determines the Azure key vault used. (Required)
 -u, --users A comma separated list of users to add or delete.
--a, --user-action Action to take i.e. add or delete.
+-a, --user-action Action to take i.e. add, delete or list. (Required)
 -g, --group The group the user will belong to e.g. developers  
 
 TBC: Add groups of developers in the format <dev team>_developers   
 
 ## Generating an access token to use AWS CLI with MFA enabled.
 
-A script has been created to generate the AWS security token required for the CLI when MFA is enabled. The script parameters are the AWS account number and username. The script should be sourced when run to correctly export the necessary environment variables. The security token, along with an access key id and secret are stored as environment variables and will be valid for 12 hours.
+A script has been created to generate the AWS security token required for the CLI when MFA is enabled.
+
+The script parameter is the name of the profile in your AWS credentials file (usually found at ~/.aws/credentials). If no parameter is given it will use the default profile created by the AWS configure command.
+
+The script should be sourced when run to correctly export the necessary environment variables. The security token, along with an access key id and secret are stored as environment variables and will be valid for 12 hours.
 
 1. Ensure your AWS CLI has been set up with ```aws configure```. Credentials are required to get the security token, they will not allow any further access.
 
 2. Source the ```get-access-token.sh``` script to obtain an access token.
 
-e.g. ```. ./get-access-token.sh 589133037702 JackSmith```
-
-If you have multiple AWS accounts configured you can pass the name of the profile as a third parameter. Doing so will pass the correct access key id and secret.
+e.g. ```. ./get-access-token.sh dev```
 
 Example profile:
 
@@ -50,29 +52,3 @@ Example profile:
  aws_access_key_id = <key id value>
  aws_secret_access_key = <secret value>
 ```
-The command would then be: ```. ./get-access-token.sh 589133037702 JackSmith dev```
-
-
-
-## Set up GPG for encryption/decryption for first time passwords
-
-In order to set first time login passwords for AWS users we need to be able to encrypt the generated passwords using GPG.
-
-1. Install GPG.
-
-  e.g. For Mac
-```brew install gpg```
-
-2. ```gpg --gen-key``` Follow the prompts. The passphrase set here will be used when decrypting the generated password.
-
-3. ```gpg --list-keys``` Get the key ID.
-
-4. ```gpg --export public-key-id | base64 > my-public-key.asc``` Export the public key, using the ID form step 2, and save it for use with Terraform.
-
-5. Add ```export GPG_TTY=$(tty)``` to you bash profile.
-
-## Running Terraform to update AWS.
-
-1. Change to the environment directory e.g. aws-users/prod
-
-2. Run terraform plan, then apply with the parameter ```-var 'gpg_key=<path-to-public-key>'```
