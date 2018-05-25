@@ -100,4 +100,14 @@
   "keyvault": "offloc-stage",
   "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
 }
+,
+{
+  "azure_app": "offloc-stage",
+  "hostname": "www",
+  "zone": "offloc-stage-zone.hmpps.dsd.io",
+  "dns_resource_group": "offloc-stage",
+  "resource_group": "offloc-stage",
+  "keyvault": "offloc-stage",
+  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+}
 ]

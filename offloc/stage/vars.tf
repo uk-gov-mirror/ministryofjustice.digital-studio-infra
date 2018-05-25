@@ -20,6 +20,8 @@ locals {
 
   github_deploy_branch = "deploy-to-${var.env}"
 
+  extra_dns_zone = "${var.app}-${var.env}-zone.hmpps.dsd.io"
+
   app_team_oid = "${local.azure_offloc_group_oid}"
 
   tags {
