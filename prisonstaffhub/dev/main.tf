@@ -191,6 +191,26 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_GATEWAY_TOKEN"
+    value     = "${data.aws_ssm_parameter.api-gateway-token.value}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_CLIENT_ID"
+    value     = "elite2apiclient"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_CLIENT_SECRET"
+    value     = "${data.aws_ssm_parameter.api-client-secret.value}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_GATEWAY_PRIVATE_KEY"
+    value     = "${data.aws_ssm_parameter.api-gateway-private-key.value}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
     value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
