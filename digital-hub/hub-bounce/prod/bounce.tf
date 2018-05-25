@@ -16,14 +16,26 @@ resource "azurerm_network_security_group" "hub-bounce-prod-nsg" {
   resource_group_name = "${azurerm_resource_group.hub-bounce-prod.name}"
 
   security_rule {
-    name                       = "default-allow-ssh"
+    name                       = "default-allow-ssh-office"
     priority                   = 1000
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "TCP"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = "*"
+    source_address_prefix      = "${var.ips["office"]}"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "default-allow-ssh-mojvpn"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "TCP"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "${var.ips["mojvpn"]}"
     destination_address_prefix = "*"
   }
 
