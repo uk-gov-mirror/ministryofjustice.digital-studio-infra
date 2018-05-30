@@ -52,14 +52,26 @@ resource "azurerm_network_security_group" "hub-bounce-prod-nsg" {
   }
 
   security_rule {
-    name                       = "default-allow-ssh-dxc2"
+    name                       = "default-allow-ssh-dxc-15"
     priority                   = 1003
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "TCP"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = "109.151.4.165"
+    source_address_prefix      = "15.0.0.0/8"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "default-allow-ssh-dxc-16"
+    priority                   = 1004
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "TCP"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "16.0.0.0/8"
     destination_address_prefix = "*"
   }
 
