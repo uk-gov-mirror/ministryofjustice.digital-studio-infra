@@ -230,10 +230,24 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "StreamLogs"
     value     = "true"
   }
+
+  # Rolling updates
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MinSize"
+    value     = "${local.instances}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MaxSize"
+    value     = "${local.instances}"
+  }
+
   setting {
     namespace = "aws:autoscaling:updatepolicy:rollingupdate"
     name      = "RollingUpdateEnabled"
-    value     = "true"
+    value     = "${local.mininstances == "0" ? "false" : "true"}"
   }
 
   setting {
@@ -241,16 +255,17 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "RollingUpdateType"
     value     = "Health"
   }
+
   setting {
     namespace = "aws:autoscaling:updatepolicy:rollingupdate"
     name      = "MinInstancesInService"
-    value     = "1"
+    value     = "${local.mininstances}"
   }
 
   setting {
     namespace = "aws:elasticbeanstalk:command"
     name      = "DeploymentPolicy"
-    value     = "RollingWithAdditionalBatch"
+    value     = "${local.instances == local.mininstances ? "RollingWithAdditionalBatch" : "Rolling"}"
   }
 
   setting {
@@ -258,6 +273,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "MaxBatchSize"
     value     = "1"
   }
+
   # Begin app-specific config settings
 
   setting {

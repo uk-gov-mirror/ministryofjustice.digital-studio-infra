@@ -12,6 +12,12 @@ variable "tags" {
   }
 }
 
+# Instance and Deployment settings
+locals {
+  instances = "2"
+  mininstances = "1"
+}
+
 # App settings
 locals {
   api_endpoint_url    = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/"

@@ -12,6 +12,12 @@ variable "tags" {
   }
 }
 
+# Instance and Deployment settings
+locals {
+  instances = "2"
+  mininstances = "1"
+}
+
 locals {
   elite2_uri_root        = "https://gateway.nomis-api.service.justice.gov.uk/elite2api"
   omic_clientid          = "omicadmin"
