@@ -1,19 +1,3 @@
-variable "newnomis-apps" {
-  default = [
-    "arn:aws:elasticbeanstalk:eu-west-2:589133037702:application/keyworker-api",
-    "arn:aws:elasticbeanstalk:eu-west-2:589133037702:application/omic-ui",
-    "arn:aws:elasticbeanstalk:eu-west-2:589133037702:applicationversion/keyworker-api/*",
-    "arn:aws:elasticbeanstalk:eu-west-2:589133037702:applicationversion/omic-ui/*",
-    "arn:aws:elasticbeanstalk:eu-west-2:589133037702:configurationtemplate/keyworker-api/*",
-    "arn:aws:elasticbeanstalk:eu-west-2:589133037702:configurationtemplate/omic-ui/*",
-    "arn:aws:elasticbeanstalk:eu-west-2:589133037702:environment/keyworker-api/*",
-    "arn:aws:elasticbeanstalk:eu-west-2:589133037702:environment/omic-ui/*"
-  ]
-}
-
-locals {
-  newnomis_apps_list = "${join("\",\"",var.newnomis-apps)}"
-}
 
 resource "aws_iam_account_password_policy" "strict" {
   minimum_password_length        = 14
