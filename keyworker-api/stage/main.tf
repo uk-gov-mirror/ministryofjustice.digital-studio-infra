@@ -241,7 +241,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MaxSize"
-    value     = "${local.instances}"
+    value     = "${local.instances + (local.instances == local.mininstances ? 1 : 0)}"
   }
 
   setting {
@@ -345,7 +345,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 }
 
 locals {
-cname = "${replace(var.app-name,"-prod","")}"
+  cname = "${replace(var.app-name,"-prod","")}"
 }
 
 # Allow AWS's ACM to manage the apps SSL cert.

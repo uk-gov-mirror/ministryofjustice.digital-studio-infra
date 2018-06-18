@@ -207,7 +207,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MaxSize"
-    value     = "${local.instances}"
+    value     = "${local.instances + (local.instances == local.mininstances ? 1 : 0)}"
   }
 
   setting {

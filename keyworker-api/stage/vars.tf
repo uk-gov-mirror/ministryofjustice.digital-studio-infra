@@ -15,7 +15,7 @@ variable "tags" {
 # Instance and Deployment settings
 locals {
   instances = "2"
-  mininstances = "0"
+  mininstances = "1"
 }
 
 locals {
