@@ -12,6 +12,12 @@ variable "tags" {
   }
 }
 
+# Instance and Deployment settings
+locals {
+  instances = "1"
+  mininstances = "0"
+}
+
 # App settings
 locals {
   api_endpoint_url    = "https://noms-api-dev.dsd.io/elite2api/"
