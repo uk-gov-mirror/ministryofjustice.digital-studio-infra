@@ -208,15 +208,15 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
         ip11 = "212.137.36.234"
 
         # ARK Data Center - NPS and HMCTS users transitioned under TTP
-        ip12 = "195.59.75.0/24"
+        ip12 = "195.59.75.0"
         subnet12 = "255.255.255.0"
-        ip13 = "194.33.192.0/25"
+        ip13 = "194.33.192.0"
         subnet13 = "255.255.255.128"
-        ip14 = "194.33.193.0/25"
+        ip14 = "194.33.193.0"
         subnet14 = "255.255.255.128"
-        ip15 = "194.33.196.0/25"
+        ip15 = "194.33.196.0"
         subnet15 = "255.255.255.128"
-        ip16 = "194.33.197.0/25"
+        ip16 = "194.33.197.0"
         subnet16 = "255.255.255.128"
     }
 
