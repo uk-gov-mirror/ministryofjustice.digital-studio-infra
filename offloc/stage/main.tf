@@ -5,20 +5,15 @@ resource "azurerm_resource_group" "group" {
 }
 
 resource "azurerm_storage_account" "storage" {
-  name                     = "${local.storage}"
-  resource_group_name      = "${azurerm_resource_group.group.name}"
-  location                 = "${azurerm_resource_group.group.location}"
-  account_tier             = "Standard"
-  account_replication_type = "RAGRS"
-  enable_blob_encryption   = true
+  name                      = "${local.storage}"
+  resource_group_name       = "${azurerm_resource_group.group.name}"
+  location                  = "${azurerm_resource_group.group.location}"
+  account_tier              = "Standard"
+  account_replication_type  = "RAGRS"
+  enable_blob_encryption    = true
+  enable_https_traffic_only = true
 
   tags = "${local.tags}"
-}
-
-resource "azurerm_role_assignment" "jenkins-write-storage" {
-  scope                = "${azurerm_storage_account.storage.id}"
-  role_definition_name = "Contributor"
-  principal_id         = "${local.azure_fixngo_jenkins_oid}"
 }
 
 resource "azurerm_key_vault" "vault" {
@@ -58,13 +53,6 @@ resource "azurerm_key_vault" "vault" {
     object_id          = "${local.app_team_oid}"
     key_permissions    = []
     secret_permissions = "${var.azure_secret_permissions_all}"
-  }
-
-  access_policy {
-    tenant_id          = "${azurerm_app_service.app.identity.0.tenant_id}"
-    object_id          = "${azurerm_app_service.app.identity.0.principal_id}"
-    key_permissions    = []
-    secret_permissions = ["get", "set", "list", "delete"]
   }
 
   enabled_for_deployment          = false
@@ -114,11 +102,11 @@ resource "azurerm_app_service" "app" {
     SESSION_SECRET                 = "${random_id.session.b64}"
     AZURE_STORAGE_CONTAINER_NAME   = "cde"
     AZURE_STORAGE_RESOURCE_GROUP   = "${azurerm_resource_group.group.name}"
-    AZURE_STORAGE_ACCOUNT_NAME     = "${azurerm_storage_account.storage.name}"
+    AZURE_STORAGE_ACCOUNT_NAME     = "${azurerm_storage_account.app.name}"
     AZURE_STORAGE_SUBSCRIPTION_ID  = "${var.azure_subscription_id}"
 
     # Can't use resource property here otherwise we create a dependency cycle
-    KEY_VAULT_URL = "https://${local.name}.vault.azure.net/"
+    KEY_VAULT_URL = "https://${local.name}-users.vault.azure.net/"
   }
 
   identity {
@@ -126,10 +114,66 @@ resource "azurerm_app_service" "app" {
   }
 }
 
-resource "azurerm_role_assignment" "app-read-storage" {
-  scope                = "${azurerm_storage_account.storage.id}"
+resource "azurerm_storage_account" "app" {
+  name                      = "${replace(local.name, "-", "")}app"
+  resource_group_name       = "${azurerm_resource_group.group.name}"
+  location                  = "${azurerm_resource_group.group.location}"
+  account_tier              = "Standard"
+  account_replication_type  = "RAGRS"
+  enable_blob_encryption    = true
+  enable_https_traffic_only = true
+
+  tags = "${local.tags}"
+}
+
+resource "azurerm_role_assignment" "jenkins-write-storage" {
+  scope                = "${azurerm_storage_account.app.id}"
   role_definition_name = "Contributor"
+  principal_id         = "${local.azure_fixngo_jenkins_oid}"
+}
+
+resource "azurerm_role_assignment" "app-read-storage" {
+  scope                = "${azurerm_storage_account.app.id}"
+  role_definition_name = "Storage Account Key Operator Service Role"
   principal_id         = "${azurerm_app_service.app.identity.0.principal_id}"
+}
+
+resource "azurerm_key_vault" "app" {
+  name                = "${local.name}-users"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  location            = "${azurerm_resource_group.group.location}"
+
+  sku {
+    name = "standard"
+  }
+
+  tenant_id = "${var.azure_tenant_id}"
+
+  access_policy {
+    tenant_id          = "${var.azure_tenant_id}"
+    object_id          = "${var.azure_webops_group_oid}"
+    key_permissions    = []
+    secret_permissions = "${var.azure_secret_permissions_all}"
+  }
+
+  access_policy {
+    tenant_id          = "${var.azure_tenant_id}"
+    object_id          = "${local.app_team_oid}"
+    key_permissions    = []
+    secret_permissions = "${var.azure_secret_permissions_all}"
+  }
+
+  access_policy {
+    tenant_id          = "${azurerm_app_service.app.identity.0.tenant_id}"
+    object_id          = "${azurerm_app_service.app.identity.0.principal_id}"
+    key_permissions    = []
+    secret_permissions = ["get", "set", "list", "delete"]
+  }
+
+  enabled_for_deployment          = false
+  enabled_for_disk_encryption     = false
+  enabled_for_template_deployment = false
+  tags                            = "${local.tags}"
 }
 
 resource "azurerm_dns_cname_record" "app" {
