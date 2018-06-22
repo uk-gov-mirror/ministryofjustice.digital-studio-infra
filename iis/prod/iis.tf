@@ -129,12 +129,12 @@ module "sql" {
 }
 
 resource "azurerm_sql_firewall_rule" "app-access" {
-  count               = "${length(split(",", azurerm_template_deployment.webapp.outputs["ips"]))}"
+  count               = "${length(split(",", azurerm_app_service.app.outbound_ip_addresses))}"
   name                = "Application IP ${count.index}"
   resource_group_name = "${azurerm_resource_group.group.name}"
   server_name         = "${module.sql.server_name}"
-  start_ip_address    = "${element(split(",", azurerm_template_deployment.webapp.outputs["ips"]), count.index)}"
-  end_ip_address      = "${element(split(",", azurerm_template_deployment.webapp.outputs["ips"]), count.index)}"
+  start_ip_address    = "${element(split(",", azurerm_app_service.app.outbound_ip_addresses), count.index)}"
+  end_ip_address      = "${element(split(",", azurerm_app_service.app.outbound_ip_addresses), count.index)}"
 }
 
 resource "azurerm_app_service_plan" "plan" {
@@ -145,8 +145,14 @@ resource "azurerm_app_service_plan" "plan" {
   kind = "app"
 
   sku {
-    tier = "Standard"
-    size = "S1"
+    tier     = "Standard"
+    size     = "S1"
+    capacity = "2"
+  }
+
+  tags {
+    Service     = "${var.tags["Service"]}"
+    Environment = "${var.tags["Environment"]}"
   }
 }
 
@@ -155,6 +161,21 @@ resource "azurerm_app_service" "app" {
   location            = "${azurerm_resource_group.group.location}"
   resource_group_name = "${azurerm_resource_group.group.name}"
   app_service_plan_id = "${azurerm_app_service_plan.plan.id}"
+
+  app_settings {
+    DB_USER                            = "iisuser"
+    DB_PASS                            = "${random_id.sql-iisuser-password.b64}"
+    DB_SERVER                          = "${module.sql.db_server}"
+    DB_NAME                            = "${module.sql.db_name}"
+    SESSION_SECRET                     = "${random_id.session-secret.b64}"
+    CLIENT_ID                          = "${data.external.vault.result.client_id}"
+    CLIENT_SECRET                      = "${data.external.vault.result.client_secret}"
+    TOKEN_HOST                         = "https://signon.service.justice.gov.uk"
+    ADMINISTRATORS                     = "${data.external.vault.result.administrators}"
+    APPINSIGHTS_INSTRUMENTATIONKEY     = "${azurerm_application_insights.app.instrumentation_key}"
+    WEBSITE_HTTPLOGGING_RETENTION_DAYS = "180"
+    WEBSITE_NODE_DEFAULT_VERSION       = "6.9.1"
+  }
 
   site_config {
     always_on   = true
@@ -238,83 +259,24 @@ resource "azurerm_app_service" "app" {
       subnet_mask = "255.255.255.128"
     }
   }
-
-  app_settings {
-    DB_USER                            = "iisuser"
-    DB_PASS                            = "${random_id.sql-iisuser-password.b64}"
-    DB_SERVER                          = "${module.sql.db_server}"
-    DB_NAME                            = "${module.sql.db_name}"
-    SESSION_SECRET                     = "${random_id.session-secret.b64}"
-    CLIENT_ID                          = "${data.external.vault.result.client_id}"
-    CLIENT_SECRET                      = "${data.external.vault.result.client_secret}"
-    TOKEN_HOST                         = "https://signon.service.justice.gov.uk"
-    ADMINISTRATORS                     = "${data.external.vault.result.administrators}"
-    APPINSIGHTS_INSTRUMENTATIONKEY     = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
-    WEBSITE_HTTPLOGGING_RETENTION_DAYS = "180"
-    WEBSITE_NODE_DEFAULT_VERSION       = "6.9.1"
-    WEBSITE_HTTPLOGGING_CONTAINER_URL  = "https://iisprodstorage.blob.core.windows.net/web-logs?st=2017-05-15T00:00:00Z&se=2217-05-15T00:00:00Z&sp=rwdl&sv=2017-07-29&sr=c&sig=4smgZTRmqENDkpBQOytOwGwH96uy2YiS4Wdl4B0Mmxo%3D"
-  }
 }
 
-resource "azurerm_template_deployment" "webapp" {
-  name                = "webapp"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/appservice.template.json")}"
-
-  parameters {
-    name        = "${var.app-name}"
-    service     = "${var.tags["Service"]}"
-    environment = "${var.tags["Environment"]}"
-    workers     = "2"
-    sku_name    = "S1"
-    sku_tier    = "Standard"
-  }
-}
-
-data "external" "sas-url" {
-  program = ["python3", "../../tools/container-sas-url-cli-auth.py"]
-
-  query {
-    subscription_id = "${var.azure_subscription_id}"
-    tenant_id       = "${var.azure_tenant_id}"
-    resource_group  = "${azurerm_resource_group.group.name}"
-    storage_account = "${azurerm_storage_account.storage.name}"
-    container       = "web-logs"
-    permissions     = "rwdl"
-    start_date      = "2017-05-15T00:00:00Z"
-    end_date        = "2217-05-15T00:00:00Z"
-  }
-}
-
-resource "azurerm_template_deployment" "webapp-weblogs" {
-  name                = "webapp-weblogs"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/appservice-weblogs.template.json")}"
-
-  parameters {
-    name       = "${azurerm_template_deployment.webapp.parameters.name}"
-    storageSAS = "${data.external.sas-url.result.url}"
-  }
-
-  depends_on = ["azurerm_template_deployment.webapp"]
-}
-
-resource "azurerm_template_deployment" "insights" {
+resource "azurerm_application_insights" "app" {
   name                = "${var.app-name}"
+  location            = "northeurope"                          // Not in UK yet
   resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/insights.template.json")}"
+  application_type    = "web"
 
-  parameters {
-    name         = "${azurerm_template_deployment.webapp.parameters.name}"
-    location     = "northeurope"                                                 // Not in UK yet
-    service      = "${var.tags["Service"]}"
-    environment  = "${var.tags["Environment"]}"
-    appServiceId = "${azurerm_template_deployment.webapp.outputs["resourceId"]}"
+  tags {
+    Service     = "${var.tags["Service"]}"
+    Environment = "${var.tags["Environment"]}"
   }
 }
+
+/*
+built in feature now - can remove once tf resource added
+https://www.terraform.io/docs/providers/azurerm/d/key_vault_secret.html
+*/
 
 data "external" "vault" {
   program = ["python3", "../../tools/keyvault-data-cli-auth.py"]
@@ -332,29 +294,6 @@ data "external" "vault" {
   }
 }
 
-resource "azurerm_template_deployment" "webapp-config" {
-  name                = "webapp-config"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../webapp-config.template.json")}"
-
-  parameters {
-    name                           = "${azurerm_template_deployment.webapp.parameters.name}"
-    DB_USER                        = "iisuser"
-    DB_PASS                        = "${random_id.sql-iisuser-password.b64}"
-    DB_SERVER                      = "${module.sql.db_server}"
-    DB_NAME                        = "${module.sql.db_name}"
-    SESSION_SECRET                 = "${random_id.session-secret.b64}"
-    CLIENT_ID                      = "${data.external.vault.result.client_id}"
-    CLIENT_SECRET                  = "${data.external.vault.result.client_secret}"
-    TOKEN_HOST                     = "https://signon.service.justice.gov.uk"
-    ADMINISTRATORS                 = "${data.external.vault.result.administrators}"
-    APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
-  }
-
-  depends_on = ["azurerm_template_deployment.webapp"]
-}
-
 resource "azurerm_template_deployment" "webapp-ssl" {
   name                = "webapp-ssl"
   resource_group_name = "${azurerm_resource_group.group.name}"
@@ -362,7 +301,7 @@ resource "azurerm_template_deployment" "webapp-ssl" {
   template_body       = "${file("../../shared/appservice-ssl.template.json")}"
 
   parameters {
-    name             = "${azurerm_template_deployment.webapp.parameters.name}"
+    name             = "${azurerm_app_service.app.name}"
     hostname         = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
     keyVaultId       = "${azurerm_key_vault.vault.id}"
     keyVaultCertName = "hpaDOTserviceDOThmppsDOTdsdDOTio"
@@ -370,12 +309,12 @@ resource "azurerm_template_deployment" "webapp-ssl" {
     environment      = "${var.tags["Environment"]}"
   }
 
-  depends_on = ["azurerm_template_deployment.webapp"]
+  depends_on = ["azurerm_app_service.app"]
 }
 
 module "slackhook" {
   source             = "../../shared/modules/slackhook"
-  app_name           = "${azurerm_template_deployment.webapp.parameters.name}"
+  app_name           = "${azurerm_app_service.app.name}"
   azure_subscription = "production"
   channels           = ["shef_changes", "hpa"]
 }
