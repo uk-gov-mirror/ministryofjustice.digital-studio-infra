@@ -159,19 +159,23 @@ resource "azurerm_app_service" "app" {
     default_documents = ["Default.htm", "Default.html", "Default.asp", "index.htm", "index.html", "iisstart.htm", "default.aspx", "index.php", "hostingstart.html"]
 
     ip_restriction {
-      ip_address = "217.33.148.210"
+      ip_address = "${var.ips["office"]}"
     }
 
     ip_restriction {
-      ip_address = "62.25.109.197"
+      ip_address = "${var.ips["quantum"]}"
     }
 
     ip_restriction {
-      ip_address = "35.177.252.195"
+      ip_address = "${var.ips["health-kick"]}"
     }
 
     ip_restriction {
-      ip_address = "157.203.176.138"
+      ip_address = "${var.ips["mojvpn"]}"
+    }
+
+    ip_restriction {
+      ip_address  = "157.203.176.138"
       subnet_mask = "255.255.255.254"
     }
 
@@ -180,7 +184,7 @@ resource "azurerm_app_service" "app" {
     }
 
     ip_restriction {
-      ip_address = "157.203.177.190"
+      ip_address  = "157.203.177.190"
       subnet_mask = "255.255.255.254"
     }
 
@@ -205,27 +209,27 @@ resource "azurerm_app_service" "app" {
     }
 
     ip_restriction {
-      ip_address = "195.59.75.0"
+      ip_address  = "195.59.75.0"
       subnet_mask = "255.255.255.0"
     }
 
     ip_restriction {
-      ip_address = "194.33.192.0"
+      ip_address  = "194.33.192.0"
       subnet_mask = "255.255.255.128"
     }
 
     ip_restriction {
-      ip_address = "194.33.193.0"
+      ip_address  = "194.33.193.0"
       subnet_mask = "255.255.255.128"
     }
 
     ip_restriction {
-      ip_address = "194.33.196.0"
+      ip_address  = "194.33.196.0"
       subnet_mask = "255.255.255.128"
     }
 
     ip_restriction {
-      ip_address = "194.33.197.0"
+      ip_address  = "194.33.197.0"
       subnet_mask = "255.255.255.128"
     }
   }
@@ -243,6 +247,7 @@ resource "azurerm_app_service" "app" {
     APPINSIGHTS_INSTRUMENTATIONKEY     = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
     WEBSITE_HTTPLOGGING_RETENTION_DAYS = "180"
     WEBSITE_NODE_DEFAULT_VERSION       = "6.9.1"
+    WEBSITE_HTTPLOGGING_CONTAINER_URL  = "https://iisprodstorage.blob.core.windows.net/web-logs?st=2017-05-15T00:00:00Z&se=2217-05-15T00:00:00Z&sp=rwdl&sv=2017-07-29&sr=c&sig=4smgZTRmqENDkpBQOytOwGwH96uy2YiS4Wdl4B0Mmxo%3D"
   }
 }
 
@@ -304,48 +309,6 @@ resource "azurerm_template_deployment" "insights" {
     environment  = "${var.tags["Environment"]}"
     appServiceId = "${azurerm_template_deployment.webapp.outputs["resourceId"]}"
   }
-}
-
-resource "azurerm_template_deployment" "webapp-whitelist" {
-  name                = "webapp-whitelist"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/appservice-whitelist.template.json")}"
-
-  parameters {
-    name = "${azurerm_template_deployment.webapp.parameters.name}"
-    ip1  = "${var.ips["office"]}"
-    ip2  = "${var.ips["quantum"]}"
-    ip3  = "${var.ips["health-kick"]}"
-
-    # DOM1 ATOS
-    ip4     = "157.203.176.138"
-    subnet4 = "255.255.255.254"
-    ip5     = "157.203.176.140"
-    ip6     = "157.203.177.190"
-    subnet6 = "255.255.255.254"
-    ip7     = "157.203.177.192"
-
-    # DOM1 Vodafone NAT
-    ip8  = "62.25.109.201"
-    ip9  = "62.25.109.203"
-    ip10 = "212.137.36.233"
-    ip11 = "212.137.36.234"
-
-    # ARK Data Center - NPS and HMCTS users transitioned under TTP
-    ip12     = "195.59.75.0"
-    subnet12 = "255.255.255.0"
-    ip13     = "194.33.192.0"
-    subnet13 = "255.255.255.128"
-    ip14     = "194.33.193.0"
-    subnet14 = "255.255.255.128"
-    ip15     = "194.33.196.0"
-    subnet15 = "255.255.255.128"
-    ip16     = "194.33.197.0"
-    subnet16 = "255.255.255.128"
-  }
-
-  depends_on = ["azurerm_template_deployment.webapp"]
 }
 
 data "external" "vault" {
