@@ -12,6 +12,12 @@ variable "tags" {
   }
 }
 
+# Instance and Deployment settings
+locals {
+  instances = "2"
+  mininstances = "1"
+}
+
 # App settings
 locals {
   api_endpoint_url    = "https://gateway.nomis-api.service.justice.gov.uk/elite2api/"

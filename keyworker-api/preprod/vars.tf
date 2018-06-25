@@ -12,6 +12,12 @@ variable "tags" {
   }
 }
 
+# Instance and Deployment settings
+locals {
+  instances = "1"
+  mininstances = "1"
+}
+
 locals {
   elite2_uri_root        = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api"
   omic_clientid          = "omicadmin"
