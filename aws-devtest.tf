@@ -31,3 +31,9 @@ variable "elastic-beanstalk-single-docker" {
 locals {
   elb_ssl_policy = "ELBSecurityPolicy-TLS-1-2-2017-01"
 }
+
+#Config for Azure
+locals {
+  azure_dns_zone_name = "hmpps.dsd.io"
+  azure_dns_zone_rg   = "webops"
+}

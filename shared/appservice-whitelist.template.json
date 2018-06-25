@@ -180,6 +180,17 @@
         "subnet15": {
             "type": "string",
             "defaultValue": "255.255.255.255"
+        },
+        "ip16": {
+            "type": "string",
+            "defaultValue": "192.0.2.16",
+            "metadata": {
+                "description": "placeholder: equivalent to an empty record"
+            }
+        },
+        "subnet16": {
+            "type": "string",
+            "defaultValue": "255.255.255.255"
         }
     },
     "resources": [

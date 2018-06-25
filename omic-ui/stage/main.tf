@@ -1,18 +1,4 @@
-variable "app-name" {
-  type    = "string"
-  default = "omic-stage"
-}
-
-variable "tags" {
-  type = "map"
-
-  default {
-    Service     = "omic-ui"
-    Environment = "Stage"
-  }
-}
-
-# This resource is managed in multiple places (omic ui dev)
+# This resource is managed in multiple places (all omic-ui environments)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "omic-ui"
   description = "omic-ui"
@@ -23,8 +9,8 @@ resource "random_id" "session-secret" {
 }
 
 resource "azurerm_resource_group" "group" {
-  name     = "omic-ui-stage"
-  location = "ukwest"
+  name     = "${local.azurerm_resource_group}"
+  location = "${local.azure_region}"
   tags     = "${var.tags}"
 }
 
@@ -33,20 +19,6 @@ resource "azurerm_application_insights" "insights" {
   location            = "North Europe"
   resource_group_name = "${azurerm_resource_group.group.name}"
   application_type    = "Web"
-}
-
-data "aws_acm_certificate" "cert" {
-  domain = "${var.app-name}.hmpps.dsd.io"
-}
-
-locals {
-  allowed-list = [
-    "${var.ips["office"]}/32",
-    "${var.ips["quantum"]}/32",
-    "${var.ips["health-kick"]}/32",
-    "${var.ips["mojvpn"]}/32",
-    "82.37.105.223/32",             # Source for security testing
-  ]
 }
 
 resource "aws_security_group" "elb" {
@@ -138,7 +110,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:listener:443"
     name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.cert.arn}"
+    value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
@@ -162,7 +134,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:policies:tlshigh"
     name      = "SSLReferencePolicy"
-    value     = "ELBSecurityPolicy-TLS-1-2-2017-01"
+    value     = "${local.elb_ssl_policy}"
   }
 
   setting {
@@ -225,6 +197,49 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "true"
   }
 
+  # Rolling updates
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MinSize"
+    value     = "${local.instances}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MaxSize"
+    value     = "${local.instances + (local.instances == local.mininstances ? 1 : 0)}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateEnabled"
+    value     = "${local.mininstances == "0" ? "false" : "true"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateType"
+    value     = "Health"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MinInstancesInService"
+    value     = "${local.mininstances}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:command"
+    name      = "DeploymentPolicy"
+    value     = "${local.instances == local.mininstances ? "RollingWithAdditionalBatch" : "Rolling"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MaxBatchSize"
+    value     = "1"
+  }
+
   # Begin app-specific config settings
 
   setting {
@@ -235,17 +250,17 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_ENDPOINT_URL"
-    value     = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/"
+    value     = "${local.api_endpoint_url}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "KEYWORKER_API_URL"
-    value     = "https://keyworker-api-stage.hmpps.dsd.io/"
+    value     = "${local.keyworker_api_url}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NN_ENDPOINT_URL"
-    value     = "https://notm-stage.hmpps.dsd.io/"
+    value     = "${local.nn_endpoint_url}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -255,7 +270,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_ID"
-    value     = "omic"
+    value     = "${local.api_client_id}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -275,34 +290,59 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_NAME"
-    value     = "hmpps-session-stage"
+    value     = "${local.hmpps_cookie_name}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_DOMAIN"
-    value     = "hmpps.dsd.io"
+    value     = "${local.azure_dns_zone_name}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SESSION_COOKIE_SECRET"
     value     = "${random_id.session-secret.b64}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NODE_ENV"
+    value     = "production"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "GOOGLE_ANALYTICS_ID"
+    value     = "${local.google_analytics_id}"
+  }
   tags = "${var.tags}"
 }
 
+locals {
+  cname = "${replace(var.app-name,"-prod","")}"
+}
+
+# Allow AWS's ACM to manage the apps FQDN
+
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
+  validation_method = "DNS"
+  tags              = "${var.tags}"
+}
+
 resource "azurerm_dns_cname_record" "cname" {
-  name                = "${var.app-name}"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${local.cname}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
-# Allow AWS's ACM to manage omic-stage.hmpps.dsd.io
+locals {
+  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
+}
+
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_f506263e0801e0bbae5c53047b69cc0a.omic-stage"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "300"
-  record              = "_5ef9109510441c9c28efcb7369982219.acm-validations.aws."
+  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }

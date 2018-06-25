@@ -9,7 +9,9 @@
     "Microsoft.Network/dnsZones/TXT/delete",
     "Microsoft.Resources/deployments/*",
     "Microsoft.KeyVault/vaults/*",
-    "Microsoft.Web/serverfarms/*"
+    "Microsoft.Web/serverfarms/*",
+    "Microsoft.Network/applicationGateways/read",
+    "Microsoft.Network/applicationGateways/write"
   ],
   "NotActions": [
     "Microsoft.KeyVault/vaults/accessPolicies/write",
@@ -19,4 +21,3 @@
     "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
   ]
 }
-

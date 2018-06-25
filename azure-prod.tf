@@ -1,3 +1,7 @@
+locals {
+  azure_subscription = "production"
+}
+
 variable "azure_subscription_id" {
   type    = "string"
   default = "a5ddf257-3b21-4ba9-a28c-ab30f751b383"
@@ -23,6 +27,11 @@ variable "azure_jenkins_sp_oid" {
   default = "880790d6-77d8-4f9b-9df7-f60097801381"
 }
 
+locals {
+  azure_empty_group_oid    = "2e86efbd-c741-452f-8922-5c9d91120bff"
+  azure_fixngo_jenkins_oid = "d2f0d768-d785-4e6f-98d6-fab105032ff1"
+}
+
 variable "azure_secret_permissions_all" {
   type = "list"
 
@@ -36,4 +45,9 @@ variable "azure_secret_permissions_all" {
     "restore",
     "set",
   ]
+}
+
+locals {
+  dns_zone_name = "service.hmpps.dsd.io"
+  dns_zone_rg   = "webops-prod"
 }

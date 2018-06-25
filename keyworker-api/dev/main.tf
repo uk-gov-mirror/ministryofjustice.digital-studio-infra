@@ -1,25 +1,7 @@
-variable "app-name" {
-  type    = "string"
-  default = "keyworker-api-dev"
-}
-
-variable "tags" {
-  type = "map"
-
-  default {
-    Service     = "keyworker-api"
-    Environment = "Dev"
-  }
-}
-
 # This resource is managed in multiple places (keyworker api stage)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "keyworker-api"
   description = "keyworker-api"
-}
-
-data "aws_acm_certificate" "cert" {
-  domain = "${var.app-name}.hmpps.dsd.io"
 }
 
 resource "aws_security_group" "elb" {
@@ -86,6 +68,19 @@ data "aws_elastic_beanstalk_solution_stack" "docker" {
   name_regex  = "^64bit Amazon Linux .* v2.* running Docker 17.*$"
 }
 
+resource "azurerm_resource_group" "group" {
+  name     = "${local.azurerm_resource_group}"
+  location = "${local.azure_region}"
+  tags     = "${var.tags}"
+}
+
+resource "azurerm_application_insights" "insights" {
+  name                = "${var.app-name}"
+  location            = "North Europe"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  application_type    = "Web"
+}
+
 resource "aws_elastic_beanstalk_environment" "app-env" {
   name                = "${var.app-name}"
   application         = "${aws_elastic_beanstalk_application.app.name}"
@@ -149,7 +144,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:listener:443"
     name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.cert.arn}"
+    value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
@@ -173,7 +168,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:policies:tlshigh"
     name      = "SSLReferencePolicy"
-    value     = "ELBSecurityPolicy-TLS-1-2-2017-01"
+    value     = "${local.elb_ssl_policy}"
   }
 
   setting {
@@ -236,12 +231,55 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "true"
   }
 
+  # Rolling updates
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MinSize"
+    value     = "${local.instances}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MaxSize"
+    value     = "${local.instances + (local.instances == local.mininstances ? 1 : 0)}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateEnabled"
+    value     = "${local.mininstances == "0" ? "false" : "true"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateType"
+    value     = "Health"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MinInstancesInService"
+    value     = "${local.mininstances}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:command"
+    name      = "DeploymentPolicy"
+    value     = "${local.instances == local.mininstances ? "RollingWithAdditionalBatch" : "Rolling"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MaxBatchSize"
+    value     = "1"
+  }
+
   # Begin app-specific config settings
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
-    value     = "true"
+    value     = "false"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -255,8 +293,8 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "ELITE2_API_URI_ROOT"
-    value     = "https://noms-api-dev.dsd.io/elite2api/api"
+    name      = "ELITE2_URI_ROOT"
+    value     = "${local.elite2_uri_root}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -278,21 +316,62 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "SPRING_DATASOURCE_PASSWORD"
     value     = "${aws_db_instance.db.password}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SPRING_PROFILES_ACTIVE"
+    value     = "batch"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "ELITE2API_CLIENT_CLIENTID"
+    value     = "${local.omic_clientid}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "ELITE2API_CLIENT_CLIENTSECRET"
+    value     = "${data.aws_ssm_parameter.omic-admin-secret.value}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SERVER_CONNECTION_TIMEOUT"
+    value     = "${local.server_timeout}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "APPLICATION_INSIGHTS_IKEY"
+    value     = "${azurerm_application_insights.insights.instrumentation_key}"
+  }
   tags = "${var.tags}"
 }
 
+locals {
+  cname = "${replace(var.app-name,"-prod","")}"
+}
+
+# Allow AWS's ACM to manage the apps SSL cert.
+
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
+  validation_method = "DNS"
+  tags              = "${var.tags}"
+}
+
 resource "azurerm_dns_cname_record" "cname" {
-  name                = "${var.app-name}"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${local.cname}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
+locals {
+  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
+}
+
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_bea8514516acc235b1c7a61407bd4e47.keyworker-api-dev"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "300"
-  record              = "_fa356c8ae40aa381ad67c8199f6b4cfe.acm-validations.aws."
+  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }
