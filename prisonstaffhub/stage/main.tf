@@ -201,7 +201,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
-    value     = "no"
+    value     = "yes"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -286,7 +286,7 @@ resource "azurerm_dns_cname_record" "cname" {
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
-# Allow AWS's ACM to manage prisonstaffhub-dev.hmpps.dsd.io
+# Allow AWS's ACM to manage prisonstaffhub-stage.hmpps.dsd.io
 locals {
   aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
 }
