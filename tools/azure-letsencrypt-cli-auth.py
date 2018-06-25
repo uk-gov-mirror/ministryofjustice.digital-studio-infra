@@ -250,7 +250,7 @@ def store_password(password,vault):
         )
 
     except subprocess.CalledProcessError:
-        sys.exit("There was an error saving the passowrd to the vault")
+        sys.exit("There was an error saving the password to the vault")
 
 def get_local_certificate_expiry(saved_cert):
 
