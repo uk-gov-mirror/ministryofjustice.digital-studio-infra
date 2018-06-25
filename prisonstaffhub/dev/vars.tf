@@ -14,7 +14,7 @@ variable "tags" {
 
 # App settings
 locals {
-  api_endpoint_url    = "https://noms-api-dev.dsd.io/elite2api/"
+  api_endpoint_url    = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/"
   api_client_id       = "elite2apiclient"
   keyworker_api_url   = "https://keyworker-api-dev.hmpps.dsd.io/"
   nn_endpoint_url     = "https://notm-dev.hmpps.dsd.io/"
