@@ -19,7 +19,7 @@ locals {
 }
 
 locals {
-  elite2_uri_root        = "https://noms-api-dev.dsd.io/elite2api"
+  elite2_uri_root        = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api"
   omic_clientid          = "omicadmin"
   server_timeout         = "60000"
   azurerm_resource_group = "keyworker-api-dev"
