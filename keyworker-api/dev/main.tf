@@ -279,7 +279,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
-    value     = "true"
+    value     = "false"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"

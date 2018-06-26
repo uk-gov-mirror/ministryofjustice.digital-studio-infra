@@ -1,21 +1,15 @@
 variable "app-name" {
   type    = "string"
-  default = "omic-dev"
+  default = "prisonstaffhub-dev"
 }
 
 variable "tags" {
   type = "map"
 
   default {
-    Service     = "omic-ui"
+    Service     = "prisonstaffhub"
     Environment = "Dev"
   }
-}
-
-# Instance and Deployment settings
-locals {
-  instances = "1"
-  mininstances = "0"
 }
 
 # App settings
@@ -30,7 +24,7 @@ locals {
 
 # Azure config
 locals {
-  azurerm_resource_group = "omic-ui-dev"
+  azurerm_resource_group = "prisonstaffhub-dev"
   azure_region           = "ukwest"
 }
 
