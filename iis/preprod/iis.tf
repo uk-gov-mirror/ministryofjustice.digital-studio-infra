@@ -101,6 +101,11 @@ module "sql" {
             start = "${var.ips["office"]}"
             end = "${var.ips["office"]}"
         },
+        {
+            label = "MOJ Digital"
+            start = "${var.ips["mojvpn"]}"
+            end = "${var.ips["mojvpn"]}"
+        },
     ]
     audit_storage_account = "${azurerm_storage_account.storage.name}"
     edition = "Standard"
