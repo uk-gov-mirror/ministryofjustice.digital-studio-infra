@@ -257,7 +257,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_ENABLED"
-    value     = "yes"
+    value     = "no"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -267,7 +267,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NOMIS_API_URL"
-    value     = "https://noms-api-dev.dsd.io/elite2api/api"
+    value     = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/api"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -305,6 +305,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "NODE_ENV"
     value     = "production"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_CLIENT_SECRET"
+    value     = "${data.aws_ssm_parameter.api_client_secret.value}"
+  }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NOMIS_GW_TOKEN"

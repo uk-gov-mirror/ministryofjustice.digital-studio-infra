@@ -75,3 +75,7 @@ data "aws_ssm_parameter" "api_gateway_token" {
 data "aws_ssm_parameter" "api_gateway_private_key" {
   name = "/licences/stage/api_gateway_private_key"
 }
+
+data "aws_ssm_parameter" "api_client_secret" {
+  name = "/licences/stage/api_client_secret"
+}
