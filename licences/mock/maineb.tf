@@ -12,7 +12,6 @@ variable "tags" {
   }
 }
 
-
 # This resource is managed in multiple places (licences stage)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "licences"
@@ -27,14 +26,12 @@ resource "random_id" "session-secret" {
   byte_length = 40
 }
 
-
 resource "azurerm_application_insights" "insights" {
   name                = "${var.app-name}"
   location            = "North Europe"
   resource_group_name = "${azurerm_resource_group.group.name}"
   application_type    = "Web"
 }
-
 
 resource "aws_security_group" "elb" {
   name        = "${var.app-name}-elb"
@@ -97,7 +94,7 @@ resource "aws_security_group" "ec2" {
 
 data "aws_elastic_beanstalk_solution_stack" "docker" {
   most_recent = true
-  name_regex  = "^64bit Amazon Linux .* v2.* running Docker 17.*$"
+  name_regex  = "^64bit Amazon Linux .* v2.* running Docker .*$"
 }
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
@@ -256,31 +253,37 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
     value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_ENABLED"
     value     = "no"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "ENABLE_TEST_UTILS"
     value     = "true"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NOMIS_API_URL"
     value     = "https://licences-nomis-mocks.herokuapp.com/elite2api"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "PDF_SERVICE_HOST"
     value     = "https://licences-nomis-mocks.herokuapp.com"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "DB_NAME"
     value     = "${aws_db_instance.db.name}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "DB_SERVER"
@@ -292,21 +295,25 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "DB_USER"
     value     = "${aws_db_instance.db.username}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "DB_PASS"
     value     = "${aws_db_instance.db.password}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SESSION_SECRET"
     value     = "${random_id.session-secret.b64}"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NODE_ENV"
     value     = "production"
   }
+
   tags = "${var.tags}"
 }
 
