@@ -8,3 +8,4 @@ sshkey.pub
 *.swp
 *.pyc
 config.tf.json
+.idea
