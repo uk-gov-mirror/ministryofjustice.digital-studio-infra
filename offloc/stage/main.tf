@@ -206,7 +206,7 @@ resource "azurerm_template_deployment" "ssl" {
   name                = "ssl"
   resource_group_name = "${azurerm_resource_group.group.name}"
   deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/appservice-tls12.template.json")}"
+  template_body       = "${file("../../shared/appservice-tls10.template.json")}"
 
   parameters {
     name             = "${azurerm_app_service.app.name}"
@@ -222,7 +222,7 @@ resource "azurerm_template_deployment" "ssl-extra" {
   name                = "ssl-extra"
   resource_group_name = "${azurerm_resource_group.group.name}"
   deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/appservice-tls12.template.json")}"
+  template_body       = "${file("../../shared/appservice-tls10.template.json")}"
 
   parameters {
     name             = "${azurerm_app_service.app.name}"
