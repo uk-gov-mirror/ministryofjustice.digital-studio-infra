@@ -1,12 +1,5 @@
-locals {
-  tags = {
-    Service     = "Hub"
-    Environment = "Stage"
-  }
-}
-
 resource "azurerm_resource_group" "group" {
-  name     = "digital-hub-stage"
+  name     = "${local.name}"
   location = "uksouth"
 }
 
