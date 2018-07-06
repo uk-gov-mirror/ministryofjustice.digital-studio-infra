@@ -17,6 +17,16 @@ resource "azurerm_dns_a_record" "hub" {
   tags = "${local.tags}"
 }
 
+resource "azurerm_dns_cname_record" "drupal" {
+  name                = "drupal.${local.name}"
+  zone_name           = "hmpps.dsd.io"
+  resource_group_name = "webops"
+  ttl                 = "300"
+  record              = "${azurerm_dns_a_record.hub.name}.${azurerm_dns_a_record.hub.zone_name}"
+
+  tags = "${local.tags}"
+}
+
 locals {
   hub_bounce_prod_ip = "51.140.76.188"
 }
