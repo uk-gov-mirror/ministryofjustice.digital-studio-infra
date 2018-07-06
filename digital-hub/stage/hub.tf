@@ -49,15 +49,21 @@ resource "azurerm_network_security_group" "hub" {
   }
 
   security_rule {
-    name                       = "allow-http-https"
-    priority                   = 1100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "TCP"
-    source_port_range          = "*"
+    name      = "allow-http-https"
+    priority  = 1100
+    direction = "Inbound"
+    access    = "Allow"
+    protocol  = "TCP"
+
     destination_port_ranges    = ["80", "443"]
-    source_address_prefix      = "*"
     destination_address_prefix = "*"
+
+    source_port_range = "*"
+
+    source_address_prefixes = [
+      "${var.ips["office"]}",
+      "${var.ips["mojvpn"]}",
+    ]
   }
 
   security_rule {
