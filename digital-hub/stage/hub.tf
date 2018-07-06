@@ -104,6 +104,11 @@ resource "azurerm_virtual_machine" "hub" {
   network_interface_ids = ["${azurerm_network_interface.hub.id}"]
   vm_size               = "Standard_A2_v2"
 
+  boot_diagnostics {
+    enabled     = true
+    storage_uri = "${azurerm_storage_account.storage.primary_blob_endpoint}"
+  }
+
   delete_os_disk_on_termination    = true
   delete_data_disks_on_termination = true
 
@@ -123,10 +128,18 @@ resource "azurerm_virtual_machine" "hub" {
   }
 
   storage_data_disk {
-    name              = "${local.name}-storage"
+    name              = "${local.name}-data"
     create_option     = "Empty"
     managed_disk_type = "Standard_LRS"
     lun               = 0
+    disk_size_gb      = "64"
+  }
+
+  storage_data_disk {
+    name              = "${local.name}-content"
+    create_option     = "Empty"
+    managed_disk_type = "Standard_LRS"
+    lun               = 1
     disk_size_gb      = "256"
   }
 
