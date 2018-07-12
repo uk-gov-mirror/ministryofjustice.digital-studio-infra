@@ -18,5 +18,14 @@
     "keyvault": "nomisapi-t3",
     "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
     "gateway_name": "nomisapi-t3-appgw"
+  },
+  {
+    "hostname": "prometheus-devtest",
+    "zone": "hmpps.dsd.io",
+    "dns_resource_group": "webops",
+    "nomisapi_resource_group": "prometheus-app-gw-devtest",
+    "keyvault": "prom-app-gw-devtest",
+    "subscription": "b1f3cebb-4988-4ff9-9259-f02ad7744fcb",
+    "gateway_name": "prometheus-app-gw-devtest"
   }
 ]
