@@ -130,7 +130,7 @@ resource "azurerm_app_service" "app" {
     API_ENDPOINT_URL               = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/"
     KEYWORKER_API_URL              = "https://keyworker-api-stage.hmpps.dsd.io/"
     OMIC_UI_URL                    = "https://omic-stage.hmpps.dsd.io/"
-    USE_API_GATEWAY_AUTH           = "yes"
+    USE_API_GATEWAY_AUTH           = "no"
     NOMS_TOKEN                     = "${data.external.vault.result.noms_token}"
     API_GATEWAY_PRIVATE_KEY        = "${data.external.vault.result.api_gateway_private_key}"
     API_CLIENT_ID                  = "elite2apiclient"
