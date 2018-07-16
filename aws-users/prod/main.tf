@@ -33,26 +33,6 @@ locals {
   all_users = "${concat(local.aws_users_webops,local.aws_users_newnomis_developers)}"
 }
 
-resource "aws_iam_user" "user" {
-  count = "${length(local.all_users)}"
-  name  = "${element(local.all_users, count.index)}"
-
-  provisioner "local-exec" {
-    interpreter = ["bash", "-e", "-c"]
-
-    command = <<SHELL
-    password=$(pwgen 20 1)
-    echo Initial Password: "$password"
-    aws iam create-login-profile \
-      --user-name "${element(local.all_users, count.index)}" \
-      --password "$password" \
-      --password-reset-required
-SHELL
-  }
-
-  # For deletion first use
-  # aws iam delete-login-profile --user-name XXXX
-}
 
 resource "aws_iam_group_membership" "webops_group_membership" {
   name  = "webops-group-membership"
