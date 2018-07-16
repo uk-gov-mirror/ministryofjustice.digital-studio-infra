@@ -92,16 +92,54 @@ resource "azurerm_application_gateway" "o11y-app-gw" {
 
   # This should be dymanically generated list of backend servers
   backend_address_pool {
-    name            = "o11y-app-gw-beap-${local.env-name}"
+    name            = "o11y-be-pool"
     ip_address_list = ["10.102.0.4"]
   }
 
   backend_http_settings {
-    name                  = "o11y-app-gw-be-htst-${local.env-name}"
+    name                  = "grafana"
     cookie_based_affinity = "Disabled"
     port                  = 80
     protocol              = "Http"
     request_timeout       = 1
+  }
+
+  backend_http_settings {
+    name                  = "prometheus"
+    cookie_based_affinity = "Disabled"
+    port                  = 8080
+    protocol              = "Http"
+    request_timeout       = 1
+    probe_name            = "prometheus-probe"
+  }
+
+  backend_http_settings {
+    name                  = "alertmanager"
+    cookie_based_affinity = "Disabled"
+    port                  = 9093
+    protocol              = "Http"
+    request_timeout       = 1
+    probe_name            = "alertmanager-probe"
+  }
+
+  probe {
+    name                = "alertmanager-probe"
+    protocol            = "Http"
+    path                = "/alertmanager/"
+    host                = "127.0.0.1"
+    interval            = "30"
+    timeout             = "30"
+    unhealthy_threshold = "5"
+  }
+
+  probe {
+    name                = "prometheus-probe"
+    protocol            = "Http"
+    path                = "/prometheus/"
+    host                = "127.0.0.1"
+    interval            = "30"
+    timeout             = "30"
+    unhealthy_threshold = "5"
   }
 
   http_listener {
@@ -120,13 +158,31 @@ resource "azurerm_application_gateway" "o11y-app-gw" {
   }
 
   request_routing_rule {
-    name                       = "o11y-app-gw-rqrt-${local.env-name}"
-    rule_type                  = "Basic"
+    name                       = "o11y-app-gw-routing-rules"
+    rule_type                  = "PathBasedRouting"
     http_listener_name         = "o11y-app-gw-httplstn-${local.env-name}"
-    backend_address_pool_name  = "o11y-app-gw-beap-${local.env-name}"
-    backend_http_settings_name = "o11y-app-gw-be-htst-${local.env-name}"
+    url_path_map_name          = "o11y-path-map"
   }
-  tags = "${var.o11y-tags}"
+
+  url_path_map {
+    name                               = "o11y-path-map"
+    default_backend_address_pool_name  = "o11y-be-pool"
+    default_backend_http_settings_name = "grafana"
+
+    path_rule {
+      name                       = "prometheus"
+      paths                      = ["/prometheus*"]
+      backend_address_pool_name  = "o11y-be-pool"
+      backend_http_settings_name = "prometheus"
+    }
+
+    path_rule {
+      name                       = "alertmanager"
+      paths                      = ["/alertmanager*"]
+      backend_address_pool_name  = "o11y-be-pool"
+      backend_http_settings_name = "alertmanager"
+    }
+  }
 }
 
 # Setup keyvault for storing SSL certificate in, this is used by jenkins for the lets-encrypt autorenewals
