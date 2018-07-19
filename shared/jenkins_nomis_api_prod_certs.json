@@ -34,7 +34,7 @@
   {
     "hostname": "o11y",
     "zone": "service.hmpps.dsd.io",
-    "dns_resource_group": "webops",
+    "dns_resource_group": "webops-prod",
     "nomisapi_resource_group": "o11y-app-gw-prod",
     "keyvault": "o11y-app-gw-prod",
     "subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
