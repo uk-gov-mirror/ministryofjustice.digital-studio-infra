@@ -30,7 +30,7 @@ resource "azurerm_public_ip" "o11y-app-gw-pip" {
 # Nice DNS name for easy access
 resource "azurerm_dns_cname_record" "o11y" {
   name                = "o11y-${local.env-name}"
-  zone_name           = "${azurerm_dns_zone.noms.name}"
+  zone_name           = "${azurerm_dns_zone.hmpps.name}"
   resource_group_name = "${azurerm_resource_group.group.name}"
   ttl                 = "300"
   record              = "o11y-${local.env-name}.${azurerm_public_ip.o11y-app-gw-pip.location}.cloudapp.azure.com"
