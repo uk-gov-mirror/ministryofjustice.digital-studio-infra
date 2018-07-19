@@ -30,5 +30,14 @@
     "gateway_name": "nomisapi-prod-appgw",
     "extra_host": "gateway.prod",
     "extra_zone": "nomis-api.service.hmpps.dsd.io"
+  },
+  {
+    "hostname": "o11y",
+    "zone": "service.hmpps.dsd.io",
+    "dns_resource_group": "webops",
+    "nomisapi_resource_group": "o11y-app-gw-prod",
+    "keyvault": "o11y-app-gw-prod",
+    "subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+    "gateway_name": "o11y-app-gw-prod"
   }
 ]
