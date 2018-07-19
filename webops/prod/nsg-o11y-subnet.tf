@@ -27,7 +27,7 @@ resource "azurerm_network_security_group" "o11y-app-gw" {
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "TCP"
-    source_address_prefix    = "*" 
+    source_address_prefix    = "*"
     source_port_range          = "*"
     destination_address_prefix = "10.0.3.0/29"
     destination_port_ranges    = ["65503-65534"]

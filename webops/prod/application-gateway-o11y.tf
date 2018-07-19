@@ -1,5 +1,5 @@
 locals {
-  env-name = "devtest"
+  env-name = "prod"
 }
 
 variable "o11y-tags" {
@@ -29,8 +29,8 @@ resource "azurerm_public_ip" "o11y-app-gw-pip" {
 
 # Nice DNS name for easy access
 resource "azurerm_dns_cname_record" "o11y" {
-  name                = "o11y-${local.env-name}"
-  zone_name           = "${azurerm_dns_zone.hmpps.name}"
+  name                = "o11y"
+  zone_name           = "${azurerm_dns_zone.service-hmpps.name}"
   resource_group_name = "${azurerm_resource_group.group.name}"
   ttl                 = "300"
   record              = "o11y-${local.env-name}.${azurerm_public_ip.o11y-app-gw-pip.location}.cloudapp.azure.com"
@@ -46,10 +46,10 @@ resource "azurerm_virtual_network" "o11y-app-gw-net" {
 }
 
 resource "azurerm_virtual_network_peering" "o11y-app-gw-to-noms-mgnt" {
-  name                        = "o11y-app-gw-to-noms-mgnt"
-  resource_group_name         = "${azurerm_resource_group.o11y-app-gw.name}"
-  virtual_network_name        = "${azurerm_virtual_network.o11y-app-gw-net.name}"
-  remote_virtual_network_id   = "/subscriptions/b1f3cebb-4988-4ff9-9259-f02ad7744fcb/resourceGroups/Network-NOMS-Mgmt/providers/Microsoft.Network/virtualNetworks/NOMS-Mgmt"
+  name                         = "o11y-app-gw-to-noms-mgnt"
+  resource_group_name          = "${azurerm_resource_group.o11y-app-gw.name}"
+  virtual_network_name         = "${azurerm_virtual_network.o11y-app-gw-net.name}"
+  remote_virtual_network_id    = "/subscriptions/1d95dcda-65b2-4273-81df-eb979c6b547b/resourceGroups/Network-NOMS-Mgmt-Live/providers/Microsoft.Network/virtualNetworks/NOMS-Mgmt-Live"
   allow_virtual_network_access = true
 }
 
@@ -94,7 +94,7 @@ resource "azurerm_application_gateway" "o11y-app-gw" {
   # This should be dymanically generated list of backend servers
   backend_address_pool {
     name            = "o11y-be-pool"
-    ip_address_list = ["10.102.0.4"]
+    ip_address_list = ["10.40.128.6"]
   }
 
   backend_http_settings {
