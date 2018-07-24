@@ -1,29 +1,17 @@
-variable "app-name" {
-  type    = "string"
-  default = "licences-stage"
-}
-
-variable "tags" {
-  type = "map"
-
-  default {
-    Service     = "Licences"
-    Environment = "Stage"
-  }
-}
-
-# This resource is managed in multiple places (licences mock)
+# This resource is managed in multiple places (all prisonstaffhub environments)
 resource "aws_elastic_beanstalk_application" "app" {
-  name        = "licences"
-  description = "licences"
-}
-
-data "aws_acm_certificate" "cert" {
-  domain = "${var.app-name}.hmpps.dsd.io"
+  name        = "prisonstaffhub"
+  description = "prisonstaffhub"
 }
 
 resource "random_id" "session-secret" {
   byte_length = 40
+}
+
+resource "azurerm_resource_group" "group" {
+  name     = "${local.azurerm_resource_group}"
+  location = "${local.azure_region}"
+  tags     = "${var.tags}"
 }
 
 resource "azurerm_application_insights" "insights" {
@@ -32,7 +20,6 @@ resource "azurerm_application_insights" "insights" {
   resource_group_name = "${azurerm_resource_group.group.name}"
   application_type    = "Web"
 }
-
 
 resource "aws_security_group" "elb" {
   name        = "${var.app-name}-elb"
@@ -43,14 +30,14 @@ resource "aws_security_group" "elb" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = "${local.allowed-list}"
   }
 
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = "${local.allowed-list}"
   }
 
   egress {
@@ -67,35 +54,9 @@ resource "aws_security_group" "elb" {
   }
 }
 
-resource "aws_security_group" "ec2" {
-  name        = "${var.app-name}-ec2"
-  vpc_id      = "${aws_vpc.vpc.id}"
-  description = "elasticbeanstalk EC2 instances"
-
-  ingress {
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    security_groups = ["${aws_security_group.elb.id}"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = "${merge(map("Name", "${var.app-name}-ec2"), var.tags)}"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
 data "aws_elastic_beanstalk_solution_stack" "docker" {
   most_recent = true
-  name_regex  = "^64bit Amazon Linux .* v2.* running Docker 17.*$"
+  name_regex  = "^64bit Amazon Linux .* v2.* running Docker *.*$"
 }
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
@@ -103,12 +64,6 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   application         = "${aws_elastic_beanstalk_application.app.name}"
   solution_stack_name = "${data.aws_elastic_beanstalk_solution_stack.docker.name}"
   tier                = "WebServer"
-
-  setting {
-    namespace = "aws:autoscaling:launchconfiguration"
-    name      = "SecurityGroups"
-    value     = "${aws_security_group.ec2.id}"
-  }
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -135,12 +90,6 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   setting {
-    namespace = "aws:elasticbeanstalk:environment"
-    name      = "LoadBalancerType"
-    value     = "classic"
-  }
-
-  setting {
     namespace = "aws:elb:loadbalancer"
     name      = "ManagedSecurityGroup"
     value     = "${aws_security_group.elb.id}"
@@ -161,7 +110,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:listener:443"
     name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.cert.arn}"
+    value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
@@ -185,7 +134,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:policies:tlshigh"
     name      = "SSLReferencePolicy"
-    value     = "ELBSecurityPolicy-TLS-1-2-2017-01"
+    value     = "${local.elb_ssl_policy}"
   }
 
   setting {
@@ -247,8 +196,75 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "StreamLogs"
     value     = "true"
   }
+  # Rolling updates
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MinSize"
+    value     = "${local.instances}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MaxSize"
+    value     = "${local.instances + (local.instances == local.mininstances ? 1 : 0)}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateEnabled"
+    value     = "${local.mininstances == "0" ? "false" : "true"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateType"
+    value     = "Health"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MinInstancesInService"
+    value     = "${local.mininstances}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:command"
+    name      = "DeploymentPolicy"
+    value     = "${local.instances == local.mininstances ? "RollingWithAdditionalBatch" : "Rolling"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MaxBatchSize"
+    value     = "1"
+  }
 
   # Begin app-specific config settings
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "USE_API_GATEWAY_AUTH"
+    value     = "no"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_ENDPOINT_URL"
+    value     = "${local.api_endpoint_url}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NN_ENDPOINT_URL"
+    value     = "${local.nn_endpoint_url}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_CLIENT_ID"
+    value     = "${local.api_client_id}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_CLIENT_SECRET"
+    value     = "${data.aws_ssm_parameter.api-client-secret.value}"
+  }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
@@ -256,48 +272,17 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_GATEWAY_ENABLED"
-    value     = "no"
+    name      = "HMPPS_COOKIE_NAME"
+    value     = "${local.hmpps_cookie_name}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "ENABLE_TEST_UTILS"
-    value     = "true"
+    name      = "HMPPS_COOKIE_DOMAIN"
+    value     = "${local.azure_dns_zone_name}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "NOMIS_API_URL"
-    value     = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/api"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "PDF_SERVICE_HOST"
-    value     = "https://licences-pdf-generator-stage.hmpps.dsd.io"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "DB_NAME"
-    value     = "${aws_db_instance.db.name}"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "DB_SERVER"
-    value     = "${replace(aws_db_instance.db.endpoint, ":5432", "")}"
-  }
-
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "DB_USER"
-    value     = "${aws_db_instance.db.username}"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "DB_PASS"
-    value     = "${aws_db_instance.db.password}"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SESSION_SECRET"
+    name      = "SESSION_COOKIE_SECRET"
     value     = "${random_id.session-secret.b64}"
   }
   setting {
@@ -307,40 +292,41 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_CLIENT_SECRET"
-    value     = "${data.aws_ssm_parameter.api_client_secret.value}"
+    name      = "GOOGLE_ANALYTICS_ID"
+    value     = "${local.google_analytics_id}"
   }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "ADMIN_API_CLIENT_SECRET"
-    value     = "${data.aws_ssm_parameter.admin_api_client_secret.value}"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "NOMIS_GW_TOKEN"
-    value     = "${data.aws_ssm_parameter.api_gateway_token.value}"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "NOMIS_GW_KEY"
-    value     = "${data.aws_ssm_parameter.api_gateway_private_key.value}"
-  }
-
   tags = "${var.tags}"
 }
 
+locals {
+  cname = "${replace(var.app-name,"-prod","")}"
+}
+
+# Allow AWS's ACM to manage the apps FQDN
+
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
+  validation_method = "DNS"
+  tags              = "${var.tags}"
+}
+
 resource "azurerm_dns_cname_record" "cname" {
-  name                = "${var.app-name}"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${local.cname}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
+# Allow AWS's ACM to manage prisonstaffhub-preprod.service.hmpps.dsd.io
+locals {
+  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
+}
+
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_4d69ee137a14e9cf43c11a6b3dd0f20f.licences-stage"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "300"
-  record              = "_268e3210c84d79b7c2f40926b98df74b.acm-validations.aws."
+  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }

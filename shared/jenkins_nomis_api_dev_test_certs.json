@@ -18,5 +18,14 @@
     "keyvault": "nomisapi-t3",
     "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
     "gateway_name": "nomisapi-t3-appgw"
+  },
+  {
+    "hostname": "o11y-devtest",
+    "zone": "noms.dsd.io",
+    "dns_resource_group": "webops",
+    "nomisapi_resource_group": "o11y-app-gw-devtest",
+    "keyvault": "o11y-app-gw-devtest",
+    "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "o11y-app-gw-devtest"
   }
 ]
