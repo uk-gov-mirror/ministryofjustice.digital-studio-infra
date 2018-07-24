@@ -17,6 +17,16 @@ resource "azurerm_dns_a_record" "hub" {
   tags = "${local.tags}"
 }
 
+resource "azurerm_dns_cname_record" "drupal" {
+  name                = "drupal.${local.name}"
+  zone_name           = "hmpps.dsd.io"
+  resource_group_name = "webops"
+  ttl                 = "300"
+  record              = "${azurerm_dns_a_record.hub.name}.${azurerm_dns_a_record.hub.zone_name}"
+
+  tags = "${local.tags}"
+}
+
 locals {
   hub_bounce_prod_ip = "51.140.76.188"
 }
@@ -39,15 +49,16 @@ resource "azurerm_network_security_group" "hub" {
   }
 
   security_rule {
-    name                       = "allow-http-https"
-    priority                   = 1100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "TCP"
-    source_port_range          = "*"
+    name      = "allow-http-https"
+    priority  = 1100
+    direction = "Inbound"
+    access    = "Allow"
+    protocol  = "TCP"
+
     destination_port_ranges    = ["80", "443"]
-    source_address_prefix      = "*"
     destination_address_prefix = "*"
+    source_port_range          = "*"
+    source_address_prefix      = "*"
   }
 
   security_rule {
@@ -97,6 +108,24 @@ resource "azurerm_network_interface" "hub" {
   tags = "${local.tags}"
 }
 
+resource "azurerm_managed_disk" "hub-data" {
+  name                 = "${local.name}-data"
+  location             = "${azurerm_resource_group.group.location}"
+  resource_group_name  = "${azurerm_resource_group.group.name}"
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = "64"
+}
+
+resource "azurerm_managed_disk" "hub-content" {
+  name                 = "${local.name}-content"
+  location             = "${azurerm_resource_group.group.location}"
+  resource_group_name  = "${azurerm_resource_group.group.name}"
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = "256"
+}
+
 resource "azurerm_virtual_machine" "hub" {
   name                  = "${local.name}-vm"
   location              = "uksouth"
@@ -104,8 +133,13 @@ resource "azurerm_virtual_machine" "hub" {
   network_interface_ids = ["${azurerm_network_interface.hub.id}"]
   vm_size               = "Standard_A2_v2"
 
+  boot_diagnostics {
+    enabled     = true
+    storage_uri = "${azurerm_storage_account.storage.primary_blob_endpoint}"
+  }
+
   delete_os_disk_on_termination    = true
-  delete_data_disks_on_termination = true
+  delete_data_disks_on_termination = false
 
   storage_image_reference {
     publisher = "Canonical"
@@ -123,11 +157,19 @@ resource "azurerm_virtual_machine" "hub" {
   }
 
   storage_data_disk {
-    name              = "${local.name}-storage"
-    create_option     = "Empty"
-    managed_disk_type = "Standard_LRS"
-    lun               = 0
-    disk_size_gb      = "256"
+    name            = "${azurerm_managed_disk.hub-data.name}"
+    managed_disk_id = "${azurerm_managed_disk.hub-data.id}"
+    create_option   = "Attach"
+    lun             = 0
+    disk_size_gb    = "${azurerm_managed_disk.hub-data.disk_size_gb}"
+  }
+
+  storage_data_disk {
+    name            = "${azurerm_managed_disk.hub-content.name}"
+    managed_disk_id = "${azurerm_managed_disk.hub-content.id}"
+    create_option   = "Attach"
+    lun             = 1
+    disk_size_gb    = "${azurerm_managed_disk.hub-content.disk_size_gb}"
   }
 
   os_profile {

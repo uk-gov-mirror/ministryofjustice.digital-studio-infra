@@ -14,12 +14,18 @@ variable "tags" {
 
 # App settings
 locals {
-  api_endpoint_url    = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/"
+  api_endpoint_url    = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/"
   api_client_id       = "elite2apiclient"
   keyworker_api_url   = "https://keyworker-api-stage.hmpps.dsd.io/"
   nn_endpoint_url     = "https://notm-stage.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-stage"
   google_analytics_id = ""
+}
+
+# Instance and Deployment settings
+locals {
+  instances = "2"
+  mininstances = "1"
 }
 
 # Azure config

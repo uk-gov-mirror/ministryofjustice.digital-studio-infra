@@ -56,7 +56,7 @@ resource "aws_security_group" "elb" {
 
 data "aws_elastic_beanstalk_solution_stack" "docker" {
   most_recent = true
-  name_regex  = "^64bit Amazon Linux .* v2.* running Docker 17.*$"
+  name_regex  = "^64bit Amazon Linux .* v2.* running Docker *.*$"
 }
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
@@ -196,8 +196,51 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "StreamLogs"
     value     = "true"
   }
+  # Rolling updates
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MinSize"
+    value     = "${local.instances}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MaxSize"
+    value     = "${local.instances + (local.instances == local.mininstances ? 1 : 0)}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateEnabled"
+    value     = "${local.mininstances == "0" ? "false" : "true"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateType"
+    value     = "Health"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MinInstancesInService"
+    value     = "${local.mininstances}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:command"
+    name      = "DeploymentPolicy"
+    value     = "${local.instances == local.mininstances ? "RollingWithAdditionalBatch" : "Rolling"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MaxBatchSize"
+    value     = "1"
+  }
 
   # Begin app-specific config settings
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "USE_API_GATEWAY_AUTH"
@@ -215,11 +258,6 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_GATEWAY_TOKEN"
-    value     = "${data.aws_ssm_parameter.api-gateway-token.value}"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_ID"
     value     = "${local.api_client_id}"
   }
@@ -227,11 +265,6 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_SECRET"
     value     = "${data.aws_ssm_parameter.api-client-secret.value}"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_GATEWAY_PRIVATE_KEY"
-    value     = "${data.aws_ssm_parameter.api-gateway-private-key.value}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
