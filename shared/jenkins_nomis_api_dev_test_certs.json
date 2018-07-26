@@ -21,7 +21,7 @@
   },
   {
     "hostname": "o11y-devtest",
-    "zone": "noms.dsd.io",
+    "zone": "hmpps.dsd.io",
     "dns_resource_group": "webops",
     "nomisapi_resource_group": "o11y-app-gw-devtest",
     "keyvault": "o11y-app-gw-devtest",
