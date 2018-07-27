@@ -48,10 +48,36 @@ python3 tools/initial-setup.py
 
 ### Terraform initialization
 
-In order to authenticate with the Azure RM APIs you'll need to be able to login via the azure cli.  e.g.
+-In order to authenticate with the Azure RM APIs you'll need to be able to login via the azure cli.  e.g.
 
 ```
 $ az login
+
+-In order to authenticate with AWS CLI, there are 2 methond that you will to be able achieve this, see instruction below:
+
+Scripted
+--------
+Checkout https://github.com/ministryofjustice/digital-studio-infra
+source ./aws-users/get-access-token.sh [AWS profile name]
+This script will ask for your MFA code and setup the required AWS environment variables containing the session token.  See manual steps, or look inside the script.
+
+Manual Steps
+------------
+retreive the ARN for your MFA device from the IAM service above: "arn:aws:iam::409876543212:mfa/BobSmith"
+run following with aws cli, using token code from your device: 
+"aws sts get-session-token --serial-number 'arn:aws:iam::409876543212:mfa/BobSmith' --token-code 123456 --duration-seconds 129600"
+aws will return temporary credentials (expire after "duration-seconds" above):
+AccessKeyId
+SecretAccessKey
+SessionToken
+Re-export the temp credentials respecively as:
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_SESSION_TOKEN
+Test your access with something like aws s3 ls or aws describe-instances
+These credentials will be used and indeed required going forward - note that they expire after a max of 36 hours (129600 seconds from above).
+
+
 ```
 
 See [the terraform documentation](https://www.terraform.io/docs/providers/azurerm/authenticating_via_azure_cli.html) for full details.
