@@ -1,29 +1,83 @@
-variable "app-name" {
-  type    = "string"
-  default = "licences-stage"
+resource "azurerm_storage_account" "storage" {
+  name                     = "${substr(format("%s%s", replace(var.app-name, "-", ""), "storage"),0,24)}"
+  resource_group_name      = "${azurerm_resource_group.group.name}"
+  location                 = "${azurerm_resource_group.group.location}"
+  account_tier             = "Standard"
+  account_replication_type = "RAGRS"
+  enable_blob_encryption   = true
+
+  tags = "${var.tags}"
 }
 
-variable "tags" {
-  type = "map"
+resource "azurerm_storage_container" "logs" {
+  name                  = "web-logs"
+  resource_group_name   = "${azurerm_resource_group.group.name}"
+  storage_account_name  = "${azurerm_storage_account.storage.name}"
+  container_access_type = "private"
+}
 
-  default {
-    Service     = "Licences"
-    Environment = "Stage"
+resource "azurerm_key_vault" "vault" {
+  name                = "${var.app-name}"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  location            = "${azurerm_resource_group.group.location}"
+
+  sku {
+    name = "standard"
   }
+
+  tenant_id = "${var.azure_tenant_id}"
+
+  access_policy {
+    tenant_id          = "${var.azure_tenant_id}"
+    object_id          = "${var.azure_webops_group_oid}"
+    key_permissions    = []
+    secret_permissions = "${var.azure_secret_permissions_all}"
+  }
+
+  access_policy {
+    tenant_id          = "${var.azure_tenant_id}"
+    object_id          = "${var.azure_app_service_oid}"
+    key_permissions    = []
+    secret_permissions = ["get"]
+  }
+
+  access_policy {
+    tenant_id          = "${var.azure_tenant_id}"
+    object_id          = "${var.azure_jenkins_sp_oid}"
+    key_permissions    = []
+    secret_permissions = ["set"]
+  }
+
+  access_policy {
+    tenant_id          = "${var.azure_tenant_id}"
+    object_id          = "${var.azure_licences_group_oid}"
+    key_permissions    = []
+    secret_permissions = "${var.azure_secret_permissions_all}"
+  }
+
+  enabled_for_deployment          = false
+  enabled_for_disk_encryption     = false
+  enabled_for_template_deployment = true
+
+  tags = "${var.tags}"
 }
 
-# This resource is managed in multiple places (licences mock)
+
+# This resource is managed in multiple places
 resource "aws_elastic_beanstalk_application" "app" {
-  name        = "licences"
-  description = "licences"
+  name        = "nomis-batchload"
+  description = "nomis-batchload"
 }
 
-data "aws_acm_certificate" "cert" {
-  domain = "${var.app-name}.hmpps.dsd.io"
-}
 
 resource "random_id" "session-secret" {
   byte_length = 40
+}
+
+resource "azurerm_resource_group" "group" {
+  name     = "${local.azurerm_resource_group}"
+  location = "${local.azure_region}"
+  tags     = "${var.tags}"
 }
 
 resource "azurerm_application_insights" "insights" {
@@ -32,7 +86,6 @@ resource "azurerm_application_insights" "insights" {
   resource_group_name = "${azurerm_resource_group.group.name}"
   application_type    = "Web"
 }
-
 
 resource "aws_security_group" "elb" {
   name        = "${var.app-name}-elb"
@@ -43,14 +96,14 @@ resource "aws_security_group" "elb" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = "${local.allowed-list}"
   }
 
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = "${local.allowed-list}"
   }
 
   egress {
@@ -95,7 +148,7 @@ resource "aws_security_group" "ec2" {
 
 data "aws_elastic_beanstalk_solution_stack" "docker" {
   most_recent = true
-  name_regex  = "^64bit Amazon Linux .* v2.* running Docker 17.*$"
+  name_regex  = "^64bit Amazon Linux .* v2.* running Docker *.*$"
 }
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
@@ -161,7 +214,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:listener:443"
     name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.cert.arn}"
+    value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
@@ -185,7 +238,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elb:policies:tlshigh"
     name      = "SSLReferencePolicy"
-    value     = "ELBSecurityPolicy-TLS-1-2-2017-01"
+    value     = "${local.elb_ssl_policy}"
   }
 
   setting {
@@ -248,12 +301,51 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "true"
   }
 
-  # Begin app-specific config settings
+  # Rolling updates
   setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${azurerm_application_insights.insights.instrumentation_key}"
+    namespace = "aws:autoscaling:asg"
+    name      = "MinSize"
+    value     = "${local.instances}"
   }
+
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MaxSize"
+    value     = "${local.instances + (local.instances == local.mininstances ? 1 : 0)}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateEnabled"
+    value     = "${local.mininstances == "0" ? "false" : "true"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateType"
+    value     = "Health"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MinInstancesInService"
+    value     = "${local.mininstances}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:command"
+    name      = "DeploymentPolicy"
+    value     = "${local.instances == local.mininstances ? "RollingWithAdditionalBatch" : "Rolling"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MaxBatchSize"
+    value     = "1"
+  }
+
+  # Begin app-specific config settings
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_ENABLED"
@@ -261,18 +353,13 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "ENABLE_TEST_UTILS"
-    value     = "true"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NOMIS_API_URL"
-    value     = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/api"
+    value     = "${local.nomis_api_url}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "PDF_SERVICE_HOST"
-    value     = "https://licences-pdf-generator-stage.hmpps.dsd.io"
+    name      = "BATCH_USER_ROLE"
+    value     = "DM"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -284,7 +371,6 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "DB_SERVER"
     value     = "${replace(aws_db_instance.db.endpoint, ":5432", "")}"
   }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "DB_USER"
@@ -308,39 +394,54 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_SECRET"
-    value     = "${data.aws_ssm_parameter.api_client_secret.value}"
+    value     = "${data.aws_ssm_parameter.api-client-secret.value}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "ADMIN_API_CLIENT_ID"
+    value     = "${local.api_client_id}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "ADMIN_API_CLIENT_SECRET"
-    value     = "${data.aws_ssm_parameter.admin_api_client_secret.value}"
+    value     = "${data.aws_ssm_parameter.admin-api-client-secret.value}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "NOMIS_GW_TOKEN"
-    value     = "${data.aws_ssm_parameter.api_gateway_token.value}"
+    name      = "PORT"
+    value     = "3000"
   }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "NOMIS_GW_KEY"
-    value     = "${data.aws_ssm_parameter.api_gateway_private_key.value}"
-  }
-
   tags = "${var.tags}"
 }
 
+locals {
+  cname = "${replace(var.app-name,"-prod","")}"
+}
+
+# Allow AWS's ACM to manage the apps FQDN
+
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
+  validation_method = "DNS"
+  tags              = "${var.tags}"
+}
+
 resource "azurerm_dns_cname_record" "cname" {
-  name                = "${var.app-name}"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${local.cname}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "60"
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
+locals {
+  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
+}
+
 resource "azurerm_dns_cname_record" "acm-verify" {
-  name                = "_4d69ee137a14e9cf43c11a6b3dd0f20f.licences-stage"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
+  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "300"
-  record              = "_268e3210c84d79b7c2f40926b98df74b.acm-validations.aws."
+  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
 }
