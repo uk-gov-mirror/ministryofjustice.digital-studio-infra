@@ -45,7 +45,7 @@ def update_ssl_cert(app_gateway_name, resource_group, gw_cert_name, key_vault):
             ["az", "network", "application-gateway", "ssl-cert", "update",
              "--gateway-name", app_gateway_name,
              "--resource-group", resource_group,
-             "--name", gw-cert-name,
+             "--name", gw_cert_name,
              "--cert-file", "appgw.pfx",
              "--cert-password", certificate["appgw-ssl-certificate-password"]
              ],
