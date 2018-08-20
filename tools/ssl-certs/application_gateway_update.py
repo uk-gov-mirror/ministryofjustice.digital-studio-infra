@@ -61,4 +61,4 @@ def update_ssl_cert(app_gateway_name, resource_group, gw-cert-name, key_vault):
 
 azure_account.azure_set_subscription(args.gw_subscription_id)
 
-update_ssl_cert(args.gateway_name,args.resource_group,args.gw-cert-name,args.key_vault)
+update_ssl_cert(args.gateway_name,args.resource_group,args.gw_cert_name,args.key_vault)
