@@ -6,8 +6,9 @@
     "dns_resource_group": "nomisapi-global-rg",
     "nomisapi_resource_group": "nomisapi-t2-rg",
     "keyvault": "nomisapi-t2",
-    "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
-    "gateway_name": "nomisapi-t2-appgw"
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "nomisapi-t2-appgw",
+    "gw_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
   },
   {
     "azure_app": "nomisapi-t3",
@@ -16,8 +17,9 @@
     "dns_resource_group": "nomisapi-global-rg",
     "nomisapi_resource_group": "nomisapi-t3-rg",
     "keyvault": "nomisapi-t3",
-    "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
-    "gateway_name": "nomisapi-t3-appgw"
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "nomisapi-t3-appgw",
+    "gw_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
   },
   {
     "hostname": "o11y-devtest",
@@ -25,7 +27,28 @@
     "dns_resource_group": "webops",
     "nomisapi_resource_group": "o11y-app-gw-devtest",
     "keyvault": "o11y-app-gw-devtest",
-    "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
-    "gateway_name": "o11y-app-gw-devtest"
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "o11y-app-gw-devtest",
+    "gw_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
+  },
+  {
+    "hostname": "dev-external-web",
+    "zone": "hwpv.hmpps.dsd.io",
+    "dns_resource_group": "hwpv",
+    "nomisapi_resource_group": "apvs-dev",
+    "keyvault": "apvskeyvault",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "dev-app-gw-1",
+    "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
+  },
+  {
+    "hostname": "dev-internal-web",
+    "zone": "hwpv.hmpps.dsd.io",
+    "dns_resource_group": "hwpv",
+    "nomisapi_resource_group": "apvs-dev",
+    "keyvault": "apvskeyvault",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "dev-app-gw-1",
+    "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
   }
 ]
