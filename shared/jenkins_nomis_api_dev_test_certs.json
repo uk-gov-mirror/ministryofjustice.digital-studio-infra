@@ -55,5 +55,104 @@
     "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
     "gateway_name": "dev-app-gw-1",
     "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
+  },
+  {
+    "hostname": "test-external-web",
+    "zone": "hwpv.hmpps.dsd.io",
+    "dns_resource_group": "hwpv",
+    "nomisapi_resource_group": "apvs-dev",
+    "keyvault": "apvskeyvault",
+    "gw_cert_name": "appGatewaySslCert",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "test-app-gw-1",
+    "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
+  },
+  {
+    "hostname": "test-internal-web",
+    "zone": "hwpv.hmpps.dsd.io",
+    "dns_resource_group": "hwpv",
+    "nomisapi_resource_group": "apvs-dev",
+    "keyvault": "apvskeyvault",
+    "gw_cert_name": "appGatewaySslCert",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "test-app-gw-1",
+    "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
+  },
+  {
+    "hostname": "stg-external-web",
+    "zone": "hwpv.hmpps.dsd.io",
+    "dns_resource_group": "hwpv",
+    "nomisapi_resource_group": "apvs-dev",
+    "keyvault": "apvskeyvault",
+    "gw_cert_name": "appGatewaySslCert",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "stg-app-gw-1",
+    "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
+  },
+  {
+    "hostname": "stg-internal-web",
+    "zone": "hwpv.hmpps.dsd.io",
+    "dns_resource_group": "hwpv",
+    "nomisapi_resource_group": "apvs-dev",
+    "keyvault": "apvskeyvault",
+    "gw_cert_name": "appGatewaySslCert",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "stg-app-gw-1",
+    "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
+  },
+  {
+    "hostname": "dev-ci",
+    "zone": "hwpv.hmpps.dsd.io",
+    "dns_resource_group": "hwpv",
+    "nomisapi_resource_group": "apvs-dev",
+    "keyvault": "apvskeyvault",
+    "gw_cert_name": "appGatewaySslCert",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "mgmt-app-gw-1",
+    "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
+  },
+  {
+    "hostname": "dev-nagios",
+    "zone": "hwpv.hmpps.dsd.io",
+    "dns_resource_group": "hwpv",
+    "nomisapi_resource_group": "apvs-dev",
+    "keyvault": "apvskeyvault",
+    "gw_cert_name": "appGatewaySslCert",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "mgmt-app-gw-1",
+    "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
+  },
+  {
+    "hostname": "dev-kibana",
+    "zone": "hwpv.hmpps.dsd.io",
+    "dns_resource_group": "hwpv",
+    "nomisapi_resource_group": "apvs-dev",
+    "keyvault": "apvskeyvault",
+    "gw_cert_name": "appGatewaySslCert",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "mgmt-app-gw-1",
+    "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
+  },
+  {
+    "hostname": "dev-graphite",
+    "zone": "hwpv.hmpps.dsd.io",
+    "dns_resource_group": "hwpv",
+    "nomisapi_resource_group": "apvs-dev",
+    "keyvault": "apvskeyvault",
+    "gw_cert_name": "appGatewaySslCert",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "mgmt-app-gw-1",
+    "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
+  },
+  {
+    "hostname": "dev-grafana",
+    "zone": "hwpv.hmpps.dsd.io",
+    "dns_resource_group": "hwpv",
+    "nomisapi_resource_group": "apvs-dev",
+    "keyvault": "apvskeyvault",
+    "gw_cert_name": "appGatewaySslCert",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateway_name": "mgmt-app-gw-1",
+    "gw_subscription": "9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
   }
 ]
