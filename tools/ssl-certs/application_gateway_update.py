@@ -17,6 +17,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 parser = argparse.ArgumentParser(
     description='Script to update an SSL certificate on an Azure Application Gateway')
 
+parser.add_argument("-b", "--gw-subscription-id", help="App gateway subscription id")
 parser.add_argument("-g", "--resource-group", help="resource_group")
 parser.add_argument("-a", "--gateway-name", help="Azure Application Gateway name")
 parser.add_argument("-k", "--key-vault", help="Azure Key Vault where the certificate is stored")
@@ -58,5 +59,7 @@ def update_ssl_cert(app_gateway_name, resource_group, key_vault):
 
     logging.info("Performing cleanup.")
     os.remove("appgw.pfx")
+
+azure_account.azure_set_subscription(args.gw_subscription_id)
 
 update_ssl_cert(args.gateway_name,args.resource_group,args.key_vault)
