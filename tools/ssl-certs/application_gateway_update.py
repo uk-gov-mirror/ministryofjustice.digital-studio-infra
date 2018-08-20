@@ -25,7 +25,7 @@ parser.add_argument("-n", "--gw-cert-name", help="Azure app gw listener cert nam
 
 args = parser.parse_args()
 
-def update_ssl_cert(app_gateway_name, resource_group, gw-cert-name, key_vault):
+def update_ssl_cert(app_gateway_name, resource_group, gw_cert_name, key_vault):
 
     logging.info("Retrieving certificate.")
 
