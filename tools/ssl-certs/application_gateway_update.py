@@ -17,13 +17,15 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 parser = argparse.ArgumentParser(
     description='Script to update an SSL certificate on an Azure Application Gateway')
 
+parser.add_argument("-b", "--gw-subscription-id", help="App gateway subscription id")
 parser.add_argument("-g", "--resource-group", help="resource_group")
 parser.add_argument("-a", "--gateway-name", help="Azure Application Gateway name")
 parser.add_argument("-k", "--key-vault", help="Azure Key Vault where the certificate is stored")
+parser.add_argument("-n", "--gw-cert-name", help="Azure app gw listener cert name")
 
 args = parser.parse_args()
 
-def update_ssl_cert(app_gateway_name, resource_group, key_vault):
+def update_ssl_cert(app_gateway_name, resource_group, gw_cert_name, key_vault):
 
     logging.info("Retrieving certificate.")
 
@@ -36,8 +38,6 @@ def update_ssl_cert(app_gateway_name, resource_group, key_vault):
     with open("appgw.pfx", "wb") as f:
         f.write(certificate_pfx)
 
-    name = app_gateway_name + "SslCert"
-
     logging.info("Updating Application Gateway with new certificate.")
 
     try:
@@ -45,7 +45,7 @@ def update_ssl_cert(app_gateway_name, resource_group, key_vault):
             ["az", "network", "application-gateway", "ssl-cert", "update",
              "--gateway-name", app_gateway_name,
              "--resource-group", resource_group,
-             "--name", name,
+             "--name", gw_cert_name,
              "--cert-file", "appgw.pfx",
              "--cert-password", certificate["appgw-ssl-certificate-password"]
              ],
@@ -59,4 +59,6 @@ def update_ssl_cert(app_gateway_name, resource_group, key_vault):
     logging.info("Performing cleanup.")
     os.remove("appgw.pfx")
 
-update_ssl_cert(args.gateway_name,args.resource_group,args.key_vault)
+azure_account.azure_set_subscription(args.gw_subscription_id)
+
+update_ssl_cert(args.gateway_name,args.resource_group,args.gw_cert_name,args.key_vault)
