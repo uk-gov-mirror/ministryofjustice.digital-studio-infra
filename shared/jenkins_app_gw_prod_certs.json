@@ -27,7 +27,7 @@
   },
   {
     "hostname": "gateway",
-    "zone": "nomis-api.service.hmpps.dsd.io",
+    "zone": "nomis-api.service.justice.gov.uk",
     "dns_resource_group": "nomisapi-prod-shared-rg",
     "keyvault": "nomisapi-prod",
     "zone_subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
