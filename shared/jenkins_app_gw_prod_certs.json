@@ -31,6 +31,8 @@
     "dns_resource_group": "nomisapi-prod-shared-rg",
     "keyvault": "nomisapi-prod",
     "zone_subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+    "extra_host": "gateway.prod",
+    "extra_zone": "nomis-api.service.hmpps.dsd.io",
     "gateways": [{
       "gw_name": "nomisapi-prod-appgw",
       "gw_rg":   "nomisapi-prod-rg",
