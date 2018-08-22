@@ -37,6 +37,8 @@ parser.add_argument(
 parser.add_argument(
     "-a", "--application-gateway", help="Create a certificate for an Application Gateway.",action='store_true')
 parser.add_argument(
+    "-w", "--wildcard", help="Create a wildcard cert",action='store_true')
+parser.add_argument(
     "-o", "--certificate-only", help="Create a certificate but don't store in vault.",action='store_true')
 parser.add_argument(
     "-x", "--extra-host", help="Create an additional host on the certificate.")
@@ -81,7 +83,7 @@ def get_zone_details(resource_group, zone):
         return False
 
 
-def create_certificate(dns_names, fqdn, resource_group, certbot_location):
+def create_certificate(dns_names, resource_group, certbot_location):
 
     path_to_hook_scripts = azure_account.get_git_root() + '/tools/letsencrypt'
 
@@ -103,6 +105,8 @@ def create_certificate(dns_names, fqdn, resource_group, certbot_location):
         additional_name = '.'.join(dns_names["additional_name"])
         domains_to_renew.extend(["-d", additional_name])
 
+
+
     cmd = ["certbot", "certonly", "--manual",
            "--email", "noms-studio-webops@digital.justice.gov.uk",
            "--preferred-challenges", "dns",
@@ -112,6 +116,7 @@ def create_certificate(dns_names, fqdn, resource_group, certbot_location):
            "--config-dir", certbot_location,
            "--work-dir", certbot_location,
            "--logs-dir", certbot_location,
+           "--server", "https://acme-v02.api.letsencrypt.org/directory",
            "--force-renewal",
            "--agree-tos",
            "--non-interactive"
@@ -416,6 +421,9 @@ if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
 else:
     logging.info("A record or CNAME doesn't exist. No expiry date to check.")
 
+if args.wildcard:
+    hostname = "*"
+
 dns_names = {
    "common_name": [hostname,args.zone]
    }
@@ -424,7 +432,7 @@ if args.extra_zone:
    "additional_name" : [extra_host,args.extra_zone]
    })
 
-saved_cert = create_certificate(dns_names, fqdn, args.resource_group, args.certbot)
+saved_cert = create_certificate(dns_names, args.resource_group, args.certbot)
 
 if not args.certificate_only:
 

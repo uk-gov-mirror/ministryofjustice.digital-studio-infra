@@ -16,25 +16,25 @@ for key,value in dns_names.items():
     host = value[0]
     zone = value[1]
 
-    domain = host + "." + zone
-
-    if os.getenv("CERTBOT_DOMAIN") == domain:
-
+    if host == "*":
+        acme_challenge_name = "_acme-challenge"
+    else:
         acme_challenge_name = "_acme-challenge." + host
-        logging.info("Deleting DNS record for " + acme_challenge_name )
 
-        delete_dns_record = subprocess.run(
-            ["az", "network", "dns", "record-set", "txt", "remove-record",
-             "--record-set-name", acme_challenge_name,
-             "--resource-group", resource_group,
-             "--zone-name", zone,
-             "--value", os.getenv("CERTBOT_VALIDATION")
-             ],
-            stdout=subprocess.PIPE,
-            check=True
-        )
+    logging.info("Deleting DNS record for " + acme_challenge_name )
 
-        if delete_dns_record.returncode == 0:
-            logging.info("Deleted DNS record for %s.%s" % (host, zone))
-        else:
-            logging.warn("Error deleting DNS record for %s.%s" % (host, zone))
+    delete_dns_record = subprocess.run(
+        ["az", "network", "dns", "record-set", "txt", "remove-record",
+         "--record-set-name", acme_challenge_name,
+         "--resource-group", resource_group,
+         "--zone-name", zone,
+         "--value", os.getenv("CERTBOT_VALIDATION")
+         ],
+        stdout=subprocess.PIPE,
+        check=True
+    )
+
+    if delete_dns_record.returncode == 0:
+        logging.info("Deleted DNS record for %s.%s" % (host, zone))
+    else:
+        logging.warn("Error deleting DNS record for %s.%s" % (host, zone))
