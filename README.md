@@ -222,3 +222,37 @@ The SSL certs to be renewed and their parameters are defined in /shared/jenkins_
 Certificates are checked daily and renewed 21 days prior to their expiry.
 
 The scripts cater for single host, wildcard and SAN certificates.
+
+If necessary the scripts can be run manually e.g.
+
+### Create a certificate
+```
+python3 ../../tools/azure-letsencrypt-cli-auth.py \
+  -n notm-dev \
+  -z hmpps.dsd.io \
+  -g webops \
+  -c ~/Development/letsencyrpt/ \
+  -s c27cfedb-f5e9-45e6-9642-0fad1a5c94e7 \
+  -v notm-dev```
+
+then either
+
+### Apply the certificate to an App Service
+
+```
+terraform taint azurerm_template_deployment.<resourcename> # where <resourcename> is the relevant SSL template application
+terraform plan
+terraform apply
+
+```
+
+or
+
+### Apply the certificate to an Application gateway
+
+```
+python3 tools/application_gateway_update.py \
+--resource-group nomisapi-prod-rg \
+--gateway-name nomisapi-prod-appgw \
+--key-vault nomisapi-prod
+```
