@@ -12,6 +12,21 @@ variable "tags" {
   }
 }
 
+variable "pdf-gen-app-name" {
+  type    = "string"
+  default = "licences-pdf-generator-stage"
+}
+
+variable "pdf-gen-tags" {
+  type = "map"
+
+  default {
+    Service     = "licences-pdf-generator"
+    Environment = "stage"
+  }
+}
+
+
 # Instance and Deployment settings
 locals {
   instances = "2"
@@ -33,6 +48,14 @@ locals {
 
 locals {
   allowed-list = [
+    "0.0.0.0/0",
+  ]
+}
+
+locals {
+  pdf-gen-allowed-list = [
+    "${var.ips["health-kick"]}/32",
+    "${var.ips["mojvpn"]}/32",
     "0.0.0.0/0",
   ]
 }
