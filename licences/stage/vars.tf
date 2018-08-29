@@ -56,6 +56,6 @@ locals {
   pdf-gen-allowed-list = [
     "${var.ips["health-kick"]}/32",
     "${var.ips["mojvpn"]}/32",
-    "0.0.0.0/0",
+    "${var.ips["office"]}/32"
   ]
 }
