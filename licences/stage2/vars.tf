@@ -8,7 +8,7 @@ variable "tags" {
 
   default {
     Service     = "Licences"
-    Environment = "Stage2"
+    Environment = "Stage"
   }
 }
 
@@ -21,8 +21,8 @@ variable "pdf-gen-tags" {
   type = "map"
 
   default {
-    Service     = "licences-pdf-generator"
-    Environment = "Stage2"
+    Service     = "licences-pdf-generator-2"
+    Environment = "stage"
   }
 }
 
@@ -37,7 +37,6 @@ locals {
 locals {
   nomis_api_url       = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/api"
   api_client_id       = "licences"
-  pdf_service_host    = "https://licences-pdf-generator-stage2.hmpps.dsd.io"
 }
 
 # Azure config
