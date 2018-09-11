@@ -1,5 +1,5 @@
 resource "aws_vpc" "vpc" {
-  cidr_block           = "192.168.0.0/22"
+  cidr_block           = "192.168.0.0/20"
   instance_tenancy     = "default"
   enable_dns_support   = true
   enable_dns_hostnames = true
@@ -8,28 +8,28 @@ resource "aws_vpc" "vpc" {
 
 resource "aws_subnet" "public-a" {
   vpc_id            = "${aws_vpc.vpc.id}"
-  cidr_block        = "192.168.0.0/26"
+  cidr_block        = "192.168.0.0/24"
   availability_zone = "${var.aws_az_a}"
   tags              = "${merge(var.tags, map("Name", "${var.app-name}-dmz"))}"
 }
 
 resource "aws_subnet" "private-a" {
   vpc_id            = "${aws_vpc.vpc.id}"
-  cidr_block        = "192.168.0.32/26"
+  cidr_block        = "192.168.0.32/24"
   availability_zone = "${var.aws_az_a}"
   tags              = "${merge(var.tags, map("Name", "${var.app-name}-app"))}"
 }
 
 resource "aws_subnet" "db-a" {
   vpc_id            = "${aws_vpc.vpc.id}"
-  cidr_block        = "192.168.0.64/26"
+  cidr_block        = "192.168.0.64/24"
   availability_zone = "${var.aws_az_a}"
   tags              = "${merge(var.tags, map("Name", "${var.app-name}-db-a"))}"
 }
 
 resource "aws_subnet" "db-b" {
   vpc_id            = "${aws_vpc.vpc.id}"
-  cidr_block        = "192.168.0.96/26"
+  cidr_block        = "192.168.0.96/24"
   availability_zone = "${var.aws_az_b}"
   tags              = "${merge(var.tags, map("Name", "${var.app-name}-db-b"))}"
 }

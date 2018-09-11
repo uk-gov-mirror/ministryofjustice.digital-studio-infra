@@ -1,12 +1,8 @@
 
 
 resource "aws_elastic_beanstalk_application" "pdf-gen-app" {
-  name        = "licences-pdf-generator"
-  description = "licences-pdf-generator"
-}
-
-data "aws_acm_certificate" "pdf-gen-cert" {
-  domain = "${var.pdf-gen-app-name}.hmpps.dsd.io"
+  name        = "licences-pdf-generator-2"
+  description = "licences-pdf-generator-2"
 }
 
 resource "aws_security_group" "pdf-gen-elb" {
@@ -17,14 +13,6 @@ resource "aws_security_group" "pdf-gen-elb" {
   ingress {
     from_port   = 80
     to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = "${local.pdf-gen-allowed-list}"
-    security_groups = ["${aws_security_group.ec2.id}"]
-  }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
     protocol    = "tcp"
     cidr_blocks = "${local.pdf-gen-allowed-list}"
     security_groups = ["${aws_security_group.ec2.id}"]
@@ -123,42 +111,6 @@ resource "aws_elastic_beanstalk_environment" "pdf-gen-app-env" {
     namespace = "aws:elb:loadbalancer"
     name      = "SecurityGroups"
     value     = "${aws_security_group.pdf-gen-elb.id}"
-  }
-
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
-    value     = "HTTPS"
-  }
-
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "SSLCertificateId"
-    value     = "${data.aws_acm_certificate.pdf-gen-cert.arn}"
-  }
-
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "InstancePort"
-    value     = "80"
-  }
-
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
-    value     = "HTTPS"
-  }
-
-  setting {
-    namespace = "aws:elb:policies:tlshigh"
-    name      = "LoadBalancerPorts"
-    value     = "443"
-  }
-
-  setting {
-    namespace = "aws:elb:policies:tlshigh"
-    name      = "SSLReferencePolicy"
-    value     = "${local.elb_ssl_policy}"
   }
 
   setting {
@@ -272,36 +224,4 @@ resource "aws_elastic_beanstalk_environment" "pdf-gen-app-env" {
 
   # Begin app-specific config settings
   tags = "${var.pdf-gen-tags}"
-}
-
-locals {
-  pdf-gen-cname = "${replace(var.pdf-gen-app-name,"-prod","")}"
-}
-
-# Allow AWS's ACM to manage the apps FQDN
-
-resource "aws_acm_certificate" "pdf-gen-cert" {
-  domain_name       = "${local.pdf-gen-cname}.${local.azure_dns_zone_name}"
-  validation_method = "DNS"
-  tags              = "${var.pdf-gen-tags}"
-}
-
-resource "azurerm_dns_cname_record" "pdf-gen-cname" {
-  name                = "${local.pdf-gen-cname}"
-  zone_name           = "${local.azure_dns_zone_name}"
-  resource_group_name = "${local.azure_dns_zone_rg}"
-  ttl                 = "60"
-  record              = "${aws_elastic_beanstalk_environment.pdf-gen-app-env.cname}"
-}
-
-locals {
-  pdf-gen-aws_record_name = "${replace(aws_acm_certificate.pdf-gen-cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
-}
-
-resource "azurerm_dns_cname_record" "pdf-gen-acm-verify" {
-  name                = "${substr(local.pdf-gen-aws_record_name, 0, length(local.pdf-gen-aws_record_name)-2)}"
-  zone_name           = "${local.azure_dns_zone_name}"
-  resource_group_name = "${local.azure_dns_zone_rg}"
-  ttl                 = "300"
-  record              = "${aws_acm_certificate.pdf-gen-cert.domain_validation_options.0.resource_record_value}"
 }
