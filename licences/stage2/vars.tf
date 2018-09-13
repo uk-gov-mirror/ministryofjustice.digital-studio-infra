@@ -50,11 +50,3 @@ locals {
     "0.0.0.0/0",
   ]
 }
-
-locals {
-  pdf-gen-allowed-list = [
-    "${var.ips["health-kick"]}/32",
-    "${var.ips["mojvpn"]}/32",
-    "${var.ips["office"]}/32"
-  ]
-}

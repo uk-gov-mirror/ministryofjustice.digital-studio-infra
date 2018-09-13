@@ -17,8 +17,16 @@ resource "aws_subnet" "private-a" {
   vpc_id            = "${aws_vpc.vpc.id}"
   cidr_block        = "192.168.0.32/28"
   availability_zone = "${var.aws_az_a}"
-  tags              = "${merge(var.tags, map("Name", "${var.app-name}-app"))}"
+  tags              = "${merge(var.tags, map("Name", "${var.app-name}-app-a"))}"
 }
+
+resource "aws_subnet" "private-b" {
+  vpc_id            = "${aws_vpc.vpc.id}"
+  cidr_block        = "192.168.0.160/28"
+  availability_zone = "${var.aws_az_b}"
+  tags              = "${merge(var.tags, map("Name", "${var.app-name}-app-b"))}"
+}
+
 
 resource "aws_subnet" "db-a" {
   vpc_id            = "${aws_vpc.vpc.id}"
@@ -69,7 +77,12 @@ resource "aws_route_table" "private" {
   }
 }
 
-resource "aws_route_table_association" "private" {
+resource "aws_route_table_association" "private-a" {
   subnet_id      = "${aws_subnet.private-a.id}"
+  route_table_id = "${aws_route_table.private.id}"
+}
+
+resource "aws_route_table_association" "private-b" {
+  subnet_id      = "${aws_subnet.private-b.id}"
   route_table_id = "${aws_route_table.private.id}"
 }
