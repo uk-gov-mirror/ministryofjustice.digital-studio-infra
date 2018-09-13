@@ -1,5 +1,5 @@
 resource "aws_vpc" "vpc" {
-  cidr_block           = "192.168.0.0/20"
+  cidr_block           = "192.168.0.0/24"
   instance_tenancy     = "default"
   enable_dns_support   = true
   enable_dns_hostnames = true
@@ -8,28 +8,36 @@ resource "aws_vpc" "vpc" {
 
 resource "aws_subnet" "public-a" {
   vpc_id            = "${aws_vpc.vpc.id}"
-  cidr_block        = "192.168.0.0/24"
+  cidr_block        = "192.168.0.0/28"
   availability_zone = "${var.aws_az_a}"
   tags              = "${merge(var.tags, map("Name", "${var.app-name}-dmz"))}"
 }
 
 resource "aws_subnet" "private-a" {
   vpc_id            = "${aws_vpc.vpc.id}"
-  cidr_block        = "192.168.0.32/24"
+  cidr_block        = "192.168.0.32/28"
   availability_zone = "${var.aws_az_a}"
-  tags              = "${merge(var.tags, map("Name", "${var.app-name}-app"))}"
+  tags              = "${merge(var.tags, map("Name", "${var.app-name}-app-a"))}"
 }
+
+resource "aws_subnet" "private-b" {
+  vpc_id            = "${aws_vpc.vpc.id}"
+  cidr_block        = "192.168.0.160/28"
+  availability_zone = "${var.aws_az_b}"
+  tags              = "${merge(var.tags, map("Name", "${var.app-name}-app-b"))}"
+}
+
 
 resource "aws_subnet" "db-a" {
   vpc_id            = "${aws_vpc.vpc.id}"
-  cidr_block        = "192.168.0.64/24"
+  cidr_block        = "192.168.0.64/28"
   availability_zone = "${var.aws_az_a}"
   tags              = "${merge(var.tags, map("Name", "${var.app-name}-db-a"))}"
 }
 
 resource "aws_subnet" "db-b" {
   vpc_id            = "${aws_vpc.vpc.id}"
-  cidr_block        = "192.168.0.96/24"
+  cidr_block        = "192.168.0.96/28"
   availability_zone = "${var.aws_az_b}"
   tags              = "${merge(var.tags, map("Name", "${var.app-name}-db-b"))}"
 }
@@ -69,7 +77,12 @@ resource "aws_route_table" "private" {
   }
 }
 
-resource "aws_route_table_association" "private" {
+resource "aws_route_table_association" "private-a" {
   subnet_id      = "${aws_subnet.private-a.id}"
+  route_table_id = "${aws_route_table.private.id}"
+}
+
+resource "aws_route_table_association" "private-b" {
+  subnet_id      = "${aws_subnet.private-b.id}"
   route_table_id = "${aws_route_table.private.id}"
 }

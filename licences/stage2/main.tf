@@ -318,7 +318,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "PDF_SERVICE_HOST"
-    value     = "${aws_elastic_beanstalk_environment.pdf-gen-app-env.arn}"
+    value     = "http://${aws_elastic_beanstalk_environment.pdf-gen-app-env.cname}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"

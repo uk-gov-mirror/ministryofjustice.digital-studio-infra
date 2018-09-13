@@ -1,75 +1,16 @@
 
 
 resource "aws_elastic_beanstalk_application" "pdf-gen-app" {
-  name        = "licences-pdf-generator-2"
-  description = "licences-pdf-generator-2"
+  name        = "licences-pdf-generator"
+  description = "licences-pdf-generator"
 }
 
-resource "aws_security_group" "pdf-gen-elb" {
-  name        = "${var.pdf-gen-app-name}-elb"
-  vpc_id      = "${aws_vpc.vpc.id}"
-  description = "ELB"
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = "${local.pdf-gen-allowed-list}"
-    security_groups = ["${aws_security_group.ec2.id}"]
-  }
-
-  egress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = "${merge(map("Name", "${var.pdf-gen-app-name}-elb"), var.pdf-gen-tags)}"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-
-resource "aws_security_group" "pdf-gen-ec2" {
-  name        = "${var.pdf-gen-app-name}-ec2"
-  vpc_id      = "${aws_vpc.vpc.id}"
-  description = "Pdf Generator EBS EC2 instances"
-
-  ingress {
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    security_groups = ["${aws_security_group.pdf-gen-elb.id}"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = "${merge(map("Name", "${var.pdf-gen-app-name}-ec2"), var.pdf-gen-tags)}"
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
 
 resource "aws_elastic_beanstalk_environment" "pdf-gen-app-env" {
   name                = "${var.pdf-gen-app-name}"
   application         = "${aws_elastic_beanstalk_application.pdf-gen-app.name}"
   solution_stack_name = "${data.aws_elastic_beanstalk_solution_stack.docker.name}"
   tier                = "WebServer"
-
-  setting {
-    namespace = "aws:autoscaling:launchconfiguration"
-    name      = "SecurityGroups"
-    value     = "${aws_security_group.pdf-gen-ec2.id}"
-  }
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -90,6 +31,11 @@ resource "aws_elastic_beanstalk_environment" "pdf-gen-app-env" {
   }
 
   setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "HealthCheckPath"
+    value     = "/health"
+  }
+  setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "ServiceRole"
     value     = "aws-elasticbeanstalk-service-role"
@@ -99,18 +45,6 @@ resource "aws_elastic_beanstalk_environment" "pdf-gen-app-env" {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "LoadBalancerType"
     value     = "application"
-  }
-
-  setting {
-    namespace = "aws:elb:loadbalancer"
-    name      = "ManagedSecurityGroup"
-    value     = "${aws_security_group.pdf-gen-elb.id}"
-  }
-
-  setting {
-    namespace = "aws:elb:loadbalancer"
-    name      = "SecurityGroups"
-    value     = "${aws_security_group.pdf-gen-elb.id}"
   }
 
   setting {
@@ -128,13 +62,13 @@ resource "aws_elastic_beanstalk_environment" "pdf-gen-app-env" {
   setting {
     namespace = "aws:ec2:vpc"
     name      = "Subnets"
-    value     = "${aws_subnet.private-a.id}"
+    value     = "${aws_subnet.private-a.id},${aws_subnet.private-b.id}"
   }
 
   setting {
     namespace = "aws:ec2:vpc"
     name      = "ELBSubnets"
-    value     = "${aws_subnet.public-a.id}"
+    value     = "${aws_subnet.private-a.id},${aws_subnet.private-b.id}"
   }
 
   setting {
