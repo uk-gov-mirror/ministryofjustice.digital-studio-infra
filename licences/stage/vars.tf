@@ -37,7 +37,6 @@ locals {
 locals {
   nomis_api_url       = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/api"
   api_client_id       = "licences"
-  pdf_service_host    = "https://licences-pdf-generator-stage.hmpps.dsd.io"
 }
 
 # Azure config
@@ -49,13 +48,5 @@ locals {
 locals {
   allowed-list = [
     "0.0.0.0/0",
-  ]
-}
-
-locals {
-  pdf-gen-allowed-list = [
-    "${var.ips["health-kick"]}/32",
-    "${var.ips["mojvpn"]}/32",
-    "${var.ips["office"]}/32"
   ]
 }
