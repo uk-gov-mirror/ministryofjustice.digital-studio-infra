@@ -10,7 +10,14 @@ resource "aws_subnet" "public-a" {
   vpc_id            = "${aws_vpc.vpc.id}"
   cidr_block        = "192.168.0.0/28"
   availability_zone = "${var.aws_az_a}"
-  tags              = "${merge(var.tags, map("Name", "${var.app-name}-dmz"))}"
+  tags              = "${merge(var.tags, map("Name", "${var.app-name}-dmz-a"))}"
+}
+
+resource "aws_subnet" "public-b" {
+  vpc_id            = "${aws_vpc.vpc.id}"
+  cidr_block        = "192.168.0.16/28"
+  availability_zone = "${var.aws_az_b}"
+  tags              = "${merge(var.tags, map("Name", "${var.app-name}-dmz-b"))}"
 }
 
 resource "aws_subnet" "private-a" {
@@ -47,13 +54,23 @@ resource "aws_internet_gateway" "gw" {
   tags   = "${merge(var.tags, map("Name", var.app-name))}"
 }
 
-resource "aws_eip" "nat" {
+resource "aws_eip" "nat-a" {
   vpc = true
 }
 
-resource "aws_nat_gateway" "gw" {
-  allocation_id = "${aws_eip.nat.id}"
+resource "aws_eip" "nat-b" {
+  vpc = true
+}
+
+resource "aws_nat_gateway" "gw-a" {
+  allocation_id = "${aws_eip.nat-a.id}"
   subnet_id     = "${aws_subnet.public-a.id}"
+  depends_on    = ["aws_internet_gateway.gw"]
+}
+
+resource "aws_nat_gateway" "gw-b" {
+  allocation_id = "${aws_eip.nat-b.id}"
+  subnet_id     = "${aws_subnet.public-b.id}"
   depends_on    = ["aws_internet_gateway.gw"]
 }
 
@@ -67,22 +84,32 @@ resource "aws_default_route_table" "default" {
   }
 }
 
-resource "aws_route_table" "private" {
+resource "aws_route_table" "private-a" {
   vpc_id = "${aws_vpc.vpc.id}"
   tags   = "${merge(var.tags, map("Name", "${var.app-name}-private"))}"
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = "${aws_nat_gateway.gw.id}"
+    nat_gateway_id = "${aws_nat_gateway.gw-a.id}"
+  }
+}
+
+resource "aws_route_table" "private-b" {
+  vpc_id = "${aws_vpc.vpc.id}"
+  tags   = "${merge(var.tags, map("Name", "${var.app-name}-private"))}"
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = "${aws_nat_gateway.gw-b.id}"
   }
 }
 
 resource "aws_route_table_association" "private-a" {
   subnet_id      = "${aws_subnet.private-a.id}"
-  route_table_id = "${aws_route_table.private.id}"
+  route_table_id = "${aws_route_table.private-a.id}"
 }
 
 resource "aws_route_table_association" "private-b" {
   subnet_id      = "${aws_subnet.private-b.id}"
-  route_table_id = "${aws_route_table.private.id}"
+  route_table_id = "${aws_route_table.private-b.id}"
 }
