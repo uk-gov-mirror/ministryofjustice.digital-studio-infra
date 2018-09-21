@@ -37,6 +37,9 @@ az role definition update --role-definition jenkins-dev-test-role.json
 az role assignment create --role digital-studio-jenkins \
   --assignee 3ddcc102-7f43-4885-ae16-c872c65584c6 \
   --scope '/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7'
+az role assignment create --role digital-studio-jenkins \
+  --assignee 3ddcc102-7f43-4885-ae16-c872c65584c6 \
+  --scope '/subscriptions/9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb'
 ```
 
 In order to create the az role definition you will need to have owner permissions on the subscription that the role belongs to.

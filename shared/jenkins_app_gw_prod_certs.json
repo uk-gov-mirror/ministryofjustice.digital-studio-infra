@@ -1,0 +1,56 @@
+[
+  {
+    "hostname": "gateway.preprod",
+    "zone": "nomis-api.service.hmpps.dsd.io",
+    "dns_resource_group": "nomisapi-prod-shared-rg",
+    "keyvault": "nomisapi-preprod",
+    "zone_subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+    "gateways": [{
+      "gw_name": "nomisapi-preprod-appgw",
+      "gw_rg":   "nomisapi-preprod-rg",
+      "gw_sub":  "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+      "gw_cert_name": "nomisapi-preprod-appgwSslCert"
+    }]
+  },
+  {
+    "hostname": "gateway.dr",
+    "zone": "nomis-api.service.hmpps.dsd.io",
+    "dns_resource_group": "nomisapi-prod-shared-rg",
+    "keyvault": "nomisapi-dr",
+    "zone_subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+    "gateways": [{
+      "gw_name": "nomisapi-dr-appgw",
+      "gw_rg":   "nomisapi-dr-rg",
+      "gw_sub":  "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+      "gw_cert_name": "nomisapi-dr-appgwSslCert"
+    }]
+  },
+  {
+    "hostname": "gateway",
+    "zone": "nomis-api.service.justice.gov.uk",
+    "dns_resource_group": "nomisapi-prod-shared-rg",
+    "keyvault": "nomisapi-prod",
+    "zone_subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+    "extra_host": "gateway.prod",
+    "extra_zone": "nomis-api.service.hmpps.dsd.io",
+    "gateways": [{
+      "gw_name": "nomisapi-prod-appgw",
+      "gw_rg":   "nomisapi-prod-rg",
+      "gw_sub":  "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+      "gw_cert_name": "nomisapi-prod-appgwSslCert"
+    }]
+  },
+  {
+    "hostname": "o11y",
+    "zone": "service.hmpps.dsd.io",
+    "dns_resource_group": "webops-prod",
+    "keyvault": "o11y-app-gw-prod",
+    "zone_subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+    "gateways": [{
+      "gw_name": "o11y-app-gw-prod",
+      "gw_rg":   "o11y-app-gw-prod",
+      "gw_sub":  "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+      "gw_cert_name": "o11y-app-gw-prodSslCert"
+    }]
+  }
+]
