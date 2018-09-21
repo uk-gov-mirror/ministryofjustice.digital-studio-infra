@@ -31,6 +31,7 @@ variable "pdf-gen-tags" {
 locals {
   instances = "1"
   mininstances = "1"
+  backup_retention_period = "30"
 }
 
 # App settings
