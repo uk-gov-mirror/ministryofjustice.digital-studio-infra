@@ -64,7 +64,7 @@ This script will ask for your MFA code and setup the required AWS environment va
 Manual Steps
 ------------
 retreive the ARN for your MFA device from the IAM service above: "arn:aws:iam::409876543212:mfa/BobSmith"
-run following with aws cli, using token code from your device: 
+run following with aws cli, using token code from your device:
 "aws sts get-session-token --serial-number 'arn:aws:iam::409876543212:mfa/BobSmith' --token-code 123456 --duration-seconds 129600"
 aws will return temporary credentials (expire after "duration-seconds" above):
 AccessKeyId
@@ -175,7 +175,7 @@ e.g. ```$ cd /test-app/dev
      }
 ```
 
-5\. Create an Azure AD group with the name "Digital Studio Dev Team - <app-name>". Add users to the group.
+5\. Create an Azure AD group with the name "Digital Studio Dev Team - `<app-name>`". Add users to the group.
 
 6\. Add an access policy to the azurerm_key_vault resource with the object id for the group created in step 5.
 
@@ -212,3 +212,47 @@ It performs the following tasks:
 6. Creates the required Azure resource group, storage account.
 
 7. Performs terraform init to initialise the Terraform backend.
+
+## SSL Certificates
+
+SSL certificates are renewed via LetsEncrypt by Jenkins jobs. The Jenkins jobs run the /tools/azure-letsencrypt-cli-auth.py script and if installed on an application gateway the /tools/ssl-certs/application_gateway_update.py script.
+
+The SSL certs to be renewed and their parameters are defined in /shared/jenkins_`<product type>`_certs.json.
+
+Certificates are checked daily and renewed 21 days prior to their expiry.
+
+The scripts cater for single host, wildcard and SAN certificates.
+
+If necessary the scripts can be run manually e.g.
+
+### Create a certificate
+```
+python3 ../../tools/azure-letsencrypt-cli-auth.py \
+  -n notm-dev \
+  -z hmpps.dsd.io \
+  -g webops \
+  -c ~/Development/letsencyrpt/ \
+  -s c27cfedb-f5e9-45e6-9642-0fad1a5c94e7 \
+  -v notm-dev```
+
+then either
+
+### Apply the certificate to an App Service
+
+```
+terraform taint azurerm_template_deployment.<resourcename> # where <resourcename> is the relevant SSL template application
+terraform plan
+terraform apply
+
+```
+
+or
+
+### Apply the certificate to an Application gateway
+
+```
+python3 tools/application_gateway_update.py \
+--resource-group nomisapi-prod-rg \
+--gateway-name nomisapi-prod-appgw \
+--key-vault nomisapi-prod
+```
