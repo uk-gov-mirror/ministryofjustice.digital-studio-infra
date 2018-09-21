@@ -16,6 +16,7 @@ variable "tags" {
 locals {
   instances = "1"
   mininstances = "0"
+  backup_retention_period = "0"
 }
 
 locals {
