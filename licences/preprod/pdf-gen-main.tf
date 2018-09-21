@@ -1,4 +1,55 @@
 
+resource "aws_security_group" "internalec2" {
+  name        = "${var.app-name}-internalec2"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "elasticbeanstalk EC2 internal instances"
+
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = ["${aws_security_group.internalelb.id}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-internalec2"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_security_group" "internalelb" {
+  name        = "${var.app-name}-internalelb"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "Internal ELB"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    security_groups = ["${aws_security_group.ec2.id}"]
+  }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["${aws_subnet.private-a.cidr_block}","${aws_subnet.private-b.cidr_block}"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-internalelb"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
 
 resource "aws_elastic_beanstalk_application" "pdf-gen-app" {
   name        = "licences-pdf-generator"
@@ -11,6 +62,12 @@ resource "aws_elastic_beanstalk_environment" "pdf-gen-app-env" {
   application         = "${aws_elastic_beanstalk_application.pdf-gen-app.name}"
   solution_stack_name = "${data.aws_elastic_beanstalk_solution_stack.docker.name}"
   tier                = "WebServer"
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.internalec2.id}"
+  }
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -35,6 +92,7 @@ resource "aws_elastic_beanstalk_environment" "pdf-gen-app-env" {
     name      = "HealthCheckPath"
     value     = "/health"
   }
+
   setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "ServiceRole"
@@ -45,6 +103,18 @@ resource "aws_elastic_beanstalk_environment" "pdf-gen-app-env" {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "LoadBalancerType"
     value     = "application"
+  }
+
+  setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "ManagedSecurityGroup"
+    value     = "${aws_security_group.internalelb.id}"
+  }
+
+  setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.internalelb.id}"
   }
 
   setting {
