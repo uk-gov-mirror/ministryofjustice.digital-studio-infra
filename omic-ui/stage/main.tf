@@ -302,6 +302,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "GOOGLE_ANALYTICS_ID"
     value     = "${local.google_analytics_id}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "MAINTAIN_ROLES_ENABLED"
+    value     = "${local.maintain_roles_enabled}"
+  }
   tags = "${var.tags}"
 }
 
@@ -335,4 +340,4 @@ resource "azurerm_dns_cname_record" "acm-verify" {
   resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "300"
   record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
-}
+}pw
