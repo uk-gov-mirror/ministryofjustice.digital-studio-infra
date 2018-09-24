@@ -53,11 +53,12 @@ resource "aws_db_instance" "db" {
   skip_final_snapshot       = "false"
   final_snapshot_identifier = "${var.app-name}-final"
   storage_encrypted         = "true"
-  multi_az                  = "true"
-  backup_retention_period   = "${local.backup_retention_period}"
+  multi_az                  = "${local.db_multi_az}"
+  backup_retention_period   = "${local.db_backup_retention_period}"
   backup_window             = "01:00-03:00"
-  maintenance_window        = "Sun:03:00-Sun:06:00"
-
+  maintenance_window        = "sun:03:00-sun:06:00"
+  apply_immediately         = "${local.db_apply_immediately}"
+  
   tags = "${var.tags}"
 }
 
