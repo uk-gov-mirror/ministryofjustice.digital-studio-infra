@@ -340,4 +340,4 @@ resource "azurerm_dns_cname_record" "acm-verify" {
   resource_group_name = "${local.azure_dns_zone_rg}"
   ttl                 = "300"
   record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
-}pw
+}
