@@ -126,6 +126,7 @@ resource "azurerm_app_service" "app" {
     APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
     NODE_ENV                       = "production"
     API_ENDPOINT_URL               = "https://gateway.t2.nomis-api.hmpps.dsd.io/elite2api/"
+    OAUTH_ENDPOINT_URL             = "https://gateway.t2.nomis-api.hmpps.dsd.io/auth/"
     KEYWORKER_API_URL              = "https://keyworker-api-stage.hmpps.dsd.io/"
     OMIC_UI_URL                    = "https://omic-stage.hmpps.dsd.io/"
     WHEREABOUTS_UI_URL             = "https://prisonstaffhub-stage.hmpps.dsd.io/"

@@ -254,6 +254,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "OAUTH_ENDPOINT_URL"
+    value     = "${local.oauth_endpoint_url}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "KEYWORKER_API_URL"
     value     = "${local.keyworker_api_url}"
   }

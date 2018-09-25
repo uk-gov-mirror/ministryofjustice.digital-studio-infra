@@ -20,7 +20,9 @@ locals {
 
 # App settings
 locals {
-  api_endpoint_url    = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api/"
+  api_base_endpoint   = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io"
+  api_endpoint_url    = "${local.api_base_endpoint}/elite2api/"
+  oauth_endpoint_url   = "${local.api_base_endpoint}/auth/"
   api_client_id       = "elite2apiclient"
   keyworker_api_url   = "https://keyworker-api-preprod.service.hmpps.dsd.io/"
   nn_endpoint_url     = "https://notm-preprod.service.hmpps.dsd.io/"
