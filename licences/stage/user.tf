@@ -90,12 +90,13 @@ resource "aws_iam_group_policy" "deployers" {
             "Action": [
                 "elasticloadbalancing:DescribeInstanceHealth",
                 "elasticloadbalancing:DescribeLoadBalancers",
+                "elasticloadbalancing:DescribeTargetGroups",
                 "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
                 "elasticloadbalancing:DeregisterInstancesWithLoadBalancer"
             ],
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:elasticloadbalancing:${var.aws_region}:${var.aws_account_id}:loadbalancer/awseb-*"
+                "arn:aws:elasticloadbalancing:${var.aws_region}:${var.aws_account_id}:loadbalancer/*"
             ]
         },
         {
