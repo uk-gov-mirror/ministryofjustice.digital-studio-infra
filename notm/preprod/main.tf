@@ -119,6 +119,7 @@ resource "azurerm_app_service" "app" {
     APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
     NODE_ENV                       = "production"
     API_ENDPOINT_URL               = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api/"
+    OAUTH_ENDPOINT_URL             = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth/"
     USE_API_GATEWAY_AUTH           = "no"
     KEYWORKER_API_URL              = "https://keyworker-api-preprod.service.hmpps.dsd.io/"
     OMIC_UI_URL                    = "https://omic-preprod.service.hmpps.dsd.io/"
