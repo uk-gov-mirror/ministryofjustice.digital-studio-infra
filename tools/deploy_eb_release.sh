@@ -70,7 +70,7 @@ then
   exit 0
 fi
 
-if [[ "$ENV" =~ ^(mock|stage)$ ]]; then
+if [[ "$ENV" =~ ^(dev|mock|stage)$ ]]; then
     echo "Deploying: APP=${APP}, ENV=${ENV}, VERSION=${VERSION}"
     deploy_to_devtest ${VERSION} ${ENV} ${VERSION}
 elif [[ "$ENV" =~ ^(preprod)$ ]]; then
