@@ -17,7 +17,7 @@ deploy_to_devtest() {
   generate_version_json ${APP} ${VERSION}
   echo $APP_VERSION_JSON | aws s3 cp - s3://${DEVTEST_S3_BUCKET}/${APP}/${VERSION}.json 
   aws elasticbeanstalk create-application-version --application-name="${APP}" --version-label="${VERSION}" --source-bundle="{\"S3Bucket\": \"${DEVTEST_S3_BUCKET}\",\"S3Key\": \"${APP}/${VERSION}.json\"}"
-  #aws elasticbeanstalk update-environment --environment-name ${APP}-${ENV} --version-label ${VERSION}
+  aws elasticbeanstalk update-environment --environment-name ${APP}-${ENV} --version-label ${VERSION}
 }
 
 promote_to_preprod() {
