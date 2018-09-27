@@ -72,13 +72,13 @@ fi
 
 if [[ "$ENV" =~ ^(dev|mock|stage)$ ]]; then
     echo "Deploying: APP=${APP}, ENV=${ENV}, VERSION=${VERSION}"
-    deploy_to_devtest ${VERSION} ${ENV} ${VERSION}
+    deploy_to_devtest 
 elif [[ "$ENV" =~ ^(preprod)$ ]]; then
     echo "Deploying: APP=${APP}, ENV=${ENV}, VERSION=${VERSION}"
-    promote_to_preprod ${VERSION} ${ENV} ${VERSION}    
+    promote_to_preprod
 elif [[ "$ENV" =~ ^(prod)$ ]]; then
     echo "Deploying: APP=${APP}, ENV=${ENV}, VERSION=${VERSION}"
-    promote_to_prod ${VERSION} ${ENV} ${VERSION}
+    promote_to_prod
 else
     echo "$ENV is not a valid environment"
 fi
