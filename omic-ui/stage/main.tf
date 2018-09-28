@@ -241,16 +241,15 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   # Begin app-specific config settings
-
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "USE_API_GATEWAY_AUTH"
-    value     = "no"
-  }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_ENDPOINT_URL"
     value     = "${local.api_endpoint_url}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "OAUTH_ENDPOINT_URL"
+    value     = "${local.oauth_endpoint_url}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -301,6 +300,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "GOOGLE_ANALYTICS_ID"
     value     = "${local.google_analytics_id}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "MAINTAIN_ROLES_ENABLED"
+    value     = "${local.maintain_roles_enabled}"
   }
   tags = "${var.tags}"
 }
