@@ -53,6 +53,9 @@ resource "aws_db_instance" "db" {
   skip_final_snapshot       = "false"
   final_snapshot_identifier = "${var.app-name}-final"
   storage_encrypted         = "true"
+  backup_retention_period   = "${local.backup_retention_period}"
+  backup_window             = "01:00-03:00"
+  maintenance_window        = "Sun:03:00-Sun:06:00"
 
   tags = "${var.tags}"
 }

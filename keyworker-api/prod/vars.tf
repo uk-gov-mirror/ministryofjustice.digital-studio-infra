@@ -16,10 +16,13 @@ variable "tags" {
 locals {
   instances = "2"
   mininstances = "1"
+  backup_retention_period = "30"
 }
 
 locals {
-  elite2_uri_root        = "https://gateway.nomis-api.service.justice.gov.uk/elite2api"
+  api_base_endpoint      = "https://gateway.nomis-api.service.justice.gov.uk"
+  elite2_uri_root        = "${local.api_base_endpoint}/elite2api"
+  auth_uri_root          = "${local.api_base_endpoint}/auth"
   omic_clientid          = "omicadmin"
   server_timeout         = "180000"
   azurerm_resource_group = "keyworker-api-prod"

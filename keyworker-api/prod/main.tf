@@ -288,6 +288,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "AUTH_URI_ROOT"
+    value     = "${local.auth_uri_root}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APP_DB_URL"
     value     = "jdbc:postgresql://${aws_db_instance.db.endpoint}/${aws_db_instance.db.name}?sslmode=verify-full"
   }
