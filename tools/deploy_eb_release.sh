@@ -16,7 +16,7 @@ display_usage() {
 }
 
 deploy_to_devtest() {
-  [[ "${LOGGED_IN}" = "${DEVTEST_ACCOUNT_ID}" ]] || echo "You are not logged into the devtest AWS account. Fail :(" && exit 1
+  [[ "${LOGGED_IN}" = "${DEVTEST_ACCOUNT_ID}" ]] || (echo "You are not logged into the devtest AWS account. Fail :(" && exit 1)
   # Build a deployment file
   generate_version_json ${APP} ${VERSION}
   echo $APP_VERSION_JSON | aws s3 cp - s3://${DEVTEST_S3_BUCKET}/${APP}/${VERSION}.json 
@@ -27,7 +27,7 @@ deploy_to_devtest() {
 # This function relies on being able to reach back into the devtest S3 bucket and copy the release artifact into
 # the prod s3 bucket, the bucket access policy in devtest needed to be modified to allow read only access.
 promote_to_preprod() {
-  [[ "${LOGGED_IN}" = "${PROD_ACCOUNT_ID}" ]] || echo "You are not logged into the prod AWS account. Fail :(" && exit 1
+  [[ "${LOGGED_IN}" = "${PROD_ACCOUNT_ID}" ]] || (echo "You are not logged into the prod AWS account. Fail :(" && exit 1)
   echo "Promoting release to preprod"
   aws s3 cp s3://${DEVTEST_S3_BUCKET}/${APP}/${VERSION}.json s3://${PROD_S3_BUCKET}/${APP}/${VERSION}.json
   aws elasticbeanstalk describe-application-versions --application-name ${APP} --query ApplicationVersions[*].[VersionLabel] --output text | grep -q "${VERSION}" || aws elasticbeanstalk create-application-version --application-name="${APP}" --version-label="${VERSION}" --source-bundle="{\"S3Bucket\": \"${DEVTEST_S3_BUCKET}\",\"S3Key\": \"${APP}/${VERSION}.json\"}"
@@ -35,7 +35,7 @@ promote_to_preprod() {
 }
 
 promote_to_prod() {
-  [[ "${LOGGED_IN}" = "${PROD_ACCOUNT_ID}" ]] || echo "You are not logged into the prod AWS account. Fail :(" && exit 1
+  [[ "${LOGGED_IN}" = "${PROD_ACCOUNT_ID}" ]] || (echo "You are not logged into the prod AWS account. Fail :(" && exit 1)
   echo "Promoting release to prod"
   aws elasticbeanstalk describe-application-versions --application-name ${APP} --query ApplicationVersions[*].[VersionLabel] --output text | grep -q "${VERSION}" || echo "No application version found, please make sure the this release has been successfully applied to preprod first." && exit 1
   aws elasticbeanstalk update-environment --environment-name ${APP}-${ENV} --version-label ${VERSION}
