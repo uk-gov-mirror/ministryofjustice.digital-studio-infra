@@ -12,7 +12,7 @@ PROD_S3_BUCKET="elasticbeanstalk-eu-west-2-${PROD_ACCOUNT_ID}"
 LOGGED_IN=$(aws sts get-caller-identity --output text --query 'Account')
 
 display_usage() {
-  echo -e "\nUsage: $0 [mock|stage|preprod|prod] [version]\n"
+  echo -e "\nUsage: $0 [app] [mock|dev|stage|preprod|prod] [version]\n"
 }
 
 deploy_to_devtest() {
