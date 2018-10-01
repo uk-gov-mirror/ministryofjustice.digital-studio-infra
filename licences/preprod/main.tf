@@ -87,10 +87,10 @@ resource "aws_security_group" "ec2" {
   }
 
   egress {
-    from_port   = 443
-    to_port     = 443
+    from_port   = 0
+    to_port     = 65535
     protocol    = "tcp"
-    cidr_blocks = "${local.azure_app_insights_ips}"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = "${merge(map("Name", "${var.app-name}-ec2"), var.tags)}"
