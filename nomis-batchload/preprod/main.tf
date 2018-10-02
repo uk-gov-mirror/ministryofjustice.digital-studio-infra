@@ -16,53 +16,6 @@ resource "azurerm_storage_container" "logs" {
   container_access_type = "private"
 }
 
-resource "azurerm_key_vault" "vault" {
-  name                = "${var.app-name}"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  location            = "${azurerm_resource_group.group.location}"
-
-  sku {
-    name = "standard"
-  }
-
-  tenant_id = "${var.azure_tenant_id}"
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_webops_group_oid}"
-    key_permissions    = []
-    secret_permissions = "${var.azure_secret_permissions_all}"
-  }
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_app_service_oid}"
-    key_permissions    = []
-    secret_permissions = ["get"]
-  }
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_jenkins_sp_oid}"
-    key_permissions    = []
-    secret_permissions = ["set"]
-  }
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_licences_group_oid}"
-    key_permissions    = []
-    secret_permissions = "${var.azure_secret_permissions_all}"
-  }
-
-  enabled_for_deployment          = false
-  enabled_for_disk_encryption     = false
-  enabled_for_template_deployment = true
-
-  tags = "${var.tags}"
-}
-
-
 # This resource is managed in multiple places
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "nomis-batchload"
@@ -345,6 +298,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   # Begin app-specific config settings
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_GATEWAY_ENABLED"
+    value     = "no"
+  }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NOMIS_API_URL"
