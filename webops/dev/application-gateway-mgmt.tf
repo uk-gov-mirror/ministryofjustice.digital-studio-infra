@@ -98,13 +98,14 @@ resource "azurerm_application_gateway" "mgmt-app-gw" {
     cookie_based_affinity = "Disabled"
     port                  = 8080
     protocol              = "Http"
+    probe_name            = "jenkins-probe"
     request_timeout       = 1
   }
 
   probe {
     name                = "jenkins-probe"
     protocol            = "Http"
-    path                = "/"
+    path                = "/login"
     host                = "127.0.0.1"
     interval            = "30"
     timeout             = "30"
