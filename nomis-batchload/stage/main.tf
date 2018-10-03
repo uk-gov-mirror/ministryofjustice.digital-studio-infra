@@ -16,53 +16,6 @@ resource "azurerm_storage_container" "logs" {
   container_access_type = "private"
 }
 
-resource "azurerm_key_vault" "vault" {
-  name                = "${var.app-name}"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  location            = "${azurerm_resource_group.group.location}"
-
-  sku {
-    name = "standard"
-  }
-
-  tenant_id = "${var.azure_tenant_id}"
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_webops_group_oid}"
-    key_permissions    = []
-    secret_permissions = "${var.azure_secret_permissions_all}"
-  }
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_app_service_oid}"
-    key_permissions    = []
-    secret_permissions = ["get"]
-  }
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_jenkins_sp_oid}"
-    key_permissions    = []
-    secret_permissions = ["set"]
-  }
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_licences_group_oid}"
-    key_permissions    = []
-    secret_permissions = "${var.azure_secret_permissions_all}"
-  }
-
-  enabled_for_deployment          = false
-  enabled_for_disk_encryption     = false
-  enabled_for_template_deployment = true
-
-  tags = "${var.tags}"
-}
-
-
 # This resource is managed in multiple places
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "nomis-batchload"
@@ -190,54 +143,36 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "LoadBalancerType"
-    value     = "classic"
+    value     = "application"
   }
 
   setting {
-    namespace = "aws:elb:loadbalancer"
+    namespace = "aws:elbv2:loadbalancer"
     name      = "ManagedSecurityGroup"
     value     = "${aws_security_group.elb.id}"
   }
 
   setting {
-    namespace = "aws:elb:loadbalancer"
+    namespace = "aws:elbv2:loadbalancer"
     name      = "SecurityGroups"
     value     = "${aws_security_group.elb.id}"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
+    namespace = "aws:elbv2:listener:443"
+    name      = "Protocol"
     value     = "HTTPS"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "SSLCertificateId"
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLCertificateArns"
     value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "InstancePort"
-    value     = "80"
-  }
-
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
-    value     = "HTTPS"
-  }
-
-  setting {
-    namespace = "aws:elb:policies:tlshigh"
-    name      = "LoadBalancerPorts"
-    value     = "443"
-  }
-
-  setting {
-    namespace = "aws:elb:policies:tlshigh"
-    name      = "SSLReferencePolicy"
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLPolicy"
     value     = "${local.elb_ssl_policy}"
   }
 
@@ -345,6 +280,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   # Begin app-specific config settings
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_GATEWAY_ENABLED"
+    value     = "no"
+  }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NOMIS_API_URL"
