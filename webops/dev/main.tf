@@ -1,3 +1,7 @@
+locals {
+  env-name = "devtest"
+}
+
 variable "tags" {
   type = "map"
 
