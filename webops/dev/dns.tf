@@ -24,21 +24,7 @@ resource "azurerm_dns_ns_record" "service-hmpps" {
   resource_group_name = "${azurerm_resource_group.group.name}"
   ttl                 = "300"
 
-  record {
-    nsdname = "ns1-06.azure-dns.com."
-  }
-
-  record {
-    nsdname = "ns2-06.azure-dns.net."
-  }
-
-  record {
-    nsdname = "ns3-06.azure-dns.org."
-  }
-
-  record {
-    nsdname = "ns4-06.azure-dns.info."
-  }
+  records = ["ns1-06.azure-dns.com.", "ns2-06.azure-dns.net.", "ns3-06.azure-dns.org.", "ns4-06.azure-dns.info."]
 
   tags {
     Service     = "WebOps"
@@ -52,21 +38,7 @@ resource "azurerm_dns_ns_record" "digital-prisons" {
   resource_group_name = "${azurerm_resource_group.group.name}"
   ttl                 = "300"
 
-  record {
-    nsdname = "ns1-08.azure-dns.com."
-  }
-
-  record {
-    nsdname = "ns2-08.azure-dns.net."
-  }
-
-  record {
-    nsdname = "ns3-08.azure-dns.org."
-  }
-
-  record {
-    nsdname = "ns4-08.azure-dns.info."
-  }
+  records = ["ns1-08.azure-dns.com.", "ns2-08.azure-dns.net.", "ns3-08.azure-dns.org.", "ns4-08.azure-dns.info."]
 
   tags {
     Service     = "WebOps"
@@ -80,21 +52,7 @@ resource "azurerm_dns_ns_record" "wmt" {
   resource_group_name = "${azurerm_resource_group.group.name}"
   ttl                 = "300"
 
-  record {
-    nsdname = "ns1-01.azure-dns.com."
-  }
-
-  record {
-    nsdname = "ns2-01.azure-dns.net."
-  }
-
-  record {
-    nsdname = "ns3-01.azure-dns.org."
-  }
-
-  record {
-    nsdname = "ns4-01.azure-dns.info."
-  }
+  records = ["ns1-01.azure-dns.com.", "ns2-01.azure-dns.net.", "ns3-01.azure-dns.org.", "ns4-01.azure-dns.info."]
 
   tags {
     Service     = "WebOps"
@@ -108,21 +66,7 @@ resource "azurerm_dns_ns_record" "nomis-api" {
   resource_group_name = "${azurerm_resource_group.group.name}"
   ttl                 = "300"
 
-  record {
-    nsdname = "ns1-07.azure-dns.com."
-  }
-
-  record {
-    nsdname = "ns2-07.azure-dns.net."
-  }
-
-  record {
-    nsdname = "ns3-07.azure-dns.org."
-  }
-
-  record {
-    nsdname = "ns4-07.azure-dns.info."
-  }
+  records = ["ns1-07.azure-dns.com.", "ns2-07.azure-dns.net.", "ns3-07.azure-dns.org.", "ns4-07.azure-dns.info."]
 
   tags {
     Service     = "WebOps"
@@ -136,21 +80,7 @@ resource "azurerm_dns_ns_record" "offloc" {
   resource_group_name = "${azurerm_resource_group.group.name}"
   ttl                 = "300"
 
-  record {
-    nsdname = "ns1-03.azure-dns.com."
-  }
-
-  record {
-    nsdname = "ns2-03.azure-dns.net."
-  }
-
-  record {
-    nsdname = "ns3-03.azure-dns.org."
-  }
-
-  record {
-    nsdname = "ns4-03.azure-dns.info."
-  }
+  records = ["ns1-03.azure-dns.com.", "ns2-03.azure-dns.net.", "ns3-03.azure-dns.org.", "ns4-03.azure-dns.info."]
 
   tags {
     Service     = "WebOps"
@@ -164,21 +94,7 @@ resource "azurerm_dns_ns_record" "probation" {
   resource_group_name = "${azurerm_resource_group.group.name}"
   ttl                 = "300"
 
-  record {
-    nsdname = "ns-1247.awsdns-27.org."
-  }
-
-  record {
-    nsdname = "ns-1910.awsdns-46.co.uk."
-  }
-
-  record {
-    nsdname = "ns-244.awsdns-30.com."
-  }
-
-  record {
-    nsdname = "ns-972.awsdns-57.net."
-  }
+  records =["ns-1247.awsdns-27.org.", "ns-1910.awsdns-46.co.uk.", "ns-244.awsdns-30.com.", "ns-972.awsdns-57.net."]
 
   tags {
     Service     = "WebOps"
@@ -192,21 +108,7 @@ resource "azurerm_dns_ns_record" "hwpv" {
   resource_group_name = "${azurerm_resource_group.group.name}"
   ttl                 = "300"
 
-  record {
-    nsdname = "ns1-04.azure-dns.com."
-  }
-
-  record {
-    nsdname = "ns2-04.azure-dns.net."
-  }
-
-  record {
-    nsdname = "ns3-04.azure-dns.org."
-  }
-
-  record {
-    nsdname = "ns4-04.azure-dns.info."
-  }
+  records = ["ns1-04.azure-dns.com.", "ns2-04.azure-dns.net.", "ns3-04.azure-dns.org.", "ns4-04.azure-dns.info."]
 
   tags {
     Service     = "WebOps"
