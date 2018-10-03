@@ -143,54 +143,36 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "LoadBalancerType"
-    value     = "classic"
+    value     = "application"
   }
 
   setting {
-    namespace = "aws:elb:loadbalancer"
+    namespace = "aws:elbv2:loadbalancer"
     name      = "ManagedSecurityGroup"
     value     = "${aws_security_group.elb.id}"
   }
 
   setting {
-    namespace = "aws:elb:loadbalancer"
+    namespace = "aws:elbv2:loadbalancer"
     name      = "SecurityGroups"
     value     = "${aws_security_group.elb.id}"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
+    namespace = "aws:elbv2:listener:443"
+    name      = "Protocol"
     value     = "HTTPS"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "SSLCertificateId"
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLCertificateArns"
     value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "InstancePort"
-    value     = "80"
-  }
-
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
-    value     = "HTTPS"
-  }
-
-  setting {
-    namespace = "aws:elb:policies:tlshigh"
-    name      = "LoadBalancerPorts"
-    value     = "443"
-  }
-
-  setting {
-    namespace = "aws:elb:policies:tlshigh"
-    name      = "SSLReferencePolicy"
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLPolicy"
     value     = "${local.elb_ssl_policy}"
   }
 
