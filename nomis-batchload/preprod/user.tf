@@ -1,18 +1,20 @@
 resource "aws_iam_user" "deployer" {
-    name = "${var.app-name}-deployer"
+  name = "${var.app-name}-deployer"
 }
+
 resource "aws_iam_group_membership" "ci" {
-    name = "${aws_iam_user.deployer.name}"
-    users = ["${aws_iam_user.deployer.name}"]
-    group = "${aws_iam_group.deployers.name}"
+  name  = "${aws_iam_user.deployer.name}"
+  users = ["${aws_iam_user.deployer.name}"]
+  group = "${aws_iam_group.deployers.name}"
 }
 
 resource "aws_iam_user_policy" "deployer" {
-    name = "${var.app-name}-deployer"
-    user = "${aws_iam_user.deployer.name}"
-    # Based on https://gist.github.com/magnetikonline/5034bdbb049181a96ac9
-    # and https://gist.github.com/jakubholynet/0055cf69b5b2a9554af67a11828209a5
-    policy = <<JSON
+  name = "${var.app-name}-deployer"
+  user = "${aws_iam_user.deployer.name}"
+
+  # Based on https://gist.github.com/magnetikonline/5034bdbb049181a96ac9
+  # and https://gist.github.com/jakubholynet/0055cf69b5b2a9554af67a11828209a5
+  policy = <<JSON
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -35,17 +37,18 @@ JSON
 }
 
 resource "aws_iam_group" "deployers" {
-    name = "${var.app-name}-ElasticbeanstalkDeployers"
+  name = "${var.app-name}-ElasticbeanstalkDeployers"
 }
 
 resource "aws_iam_group_policy" "deployers" {
-    name = "elasticbeanstalk-deployment"
-    group = "${aws_iam_group.deployers.name}"
-    # Based on https://gist.github.com/magnetikonline/5034bdbb049181a96ac9
-    # and https://gist.github.com/jakubholynet/0055cf69b5b2a9554af67a11828209a5
-    #
-    # all the bits non-specific to this app bits go in
-    policy = <<JSON
+  name  = "elasticbeanstalk-deployment"
+  group = "${aws_iam_group.deployers.name}"
+
+  # Based on https://gist.github.com/magnetikonline/5034bdbb049181a96ac9
+  # and https://gist.github.com/jakubholynet/0055cf69b5b2a9554af67a11828209a5
+  #
+  # all the bits non-specific to this app bits go in
+  policy = <<JSON
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -135,7 +138,6 @@ resource "aws_iam_group_policy" "deployers" {
 JSON
 }
 
-
 resource "aws_iam_access_key" "deployer" {
-    user = "${aws_iam_user.deployer.name}"
+  user = "${aws_iam_user.deployer.name}"
 }

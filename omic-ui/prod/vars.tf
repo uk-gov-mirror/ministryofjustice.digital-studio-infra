@@ -20,12 +20,15 @@ locals {
 
 # App settings
 locals {
-  api_endpoint_url    = "https://gateway.nomis-api.service.justice.gov.uk/elite2api/"
+  api_base_endpoint   = "https://gateway.nomis-api.service.justice.gov.uk"
+  api_endpoint_url    = "${local.api_base_endpoint}/elite2api/"
+  oauth_endpoint_url   = "${local.api_base_endpoint}/auth/"
   api_client_id       = "elite2apiclient"
   keyworker_api_url   = "https://keyworker-api.service.hmpps.dsd.io/"
   nn_endpoint_url     = "https://notm.service.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-prod"
   google_analytics_id = "UA-106741063-2"
+  maintain_roles_enabled = false
 }
 
 # Azure config
