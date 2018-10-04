@@ -1,6 +1,6 @@
 variable "app-name" {
   type    = "string"
-  default = "licences-stage"
+  default = "licences-preprod"
 }
 
 variable "tags" {
@@ -8,13 +8,13 @@ variable "tags" {
 
   default {
     Service     = "Licences"
-    Environment = "Stage"
+    Environment = "PreProd"
   }
 }
 
 variable "pdf-gen-app-name" {
   type    = "string"
-  default = "licences-pdf-generator-stage"
+  default = "licences-pdf-generator-preprod"
 }
 
 variable "pdf-gen-tags" {
@@ -22,7 +22,7 @@ variable "pdf-gen-tags" {
 
   default {
     Service     = "licences-pdf-generator"
-    Environment = "stage"
+    Environment = "PreProd"
   }
 }
 
@@ -31,26 +31,29 @@ variable "pdf-gen-tags" {
 locals {
   instances = "2"
   mininstances = "1"
-  db_multi_az = "false"
-  db_backup_retention_period = "0"
+  db_multi_az = "true"
+  db_backup_retention_period = "30"
   db_maintenance_window = "Mon:00:00-Sun:11:59"
   db_apply_immediately = "true"
 }
 
 # App settings
 locals {
-  nomis_api_url       = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/api"
+  nomis_api_url       = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api/api"
   api_client_id       = "licences"
 }
 
 # Azure config
 locals {
-  azurerm_resource_group = "licences-stage"
+  azurerm_resource_group = "licences-preprod"
   azure_region           = "ukwest"
 }
 
 locals {
   allowed-list = [
-    "0.0.0.0/0",
+    "${var.ips["office"]}/32",
+    "${var.ips["quantum"]}/32",
+    "${var.ips["health-kick"]}/32",
+    "${var.ips["mojvpn"]}/32",
   ]
 }

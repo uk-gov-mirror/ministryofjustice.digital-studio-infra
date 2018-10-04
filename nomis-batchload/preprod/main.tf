@@ -1,8 +1,27 @@
-# This resource is managed in multiple places (all prisonstaffhub environments)
-resource "aws_elastic_beanstalk_application" "app" {
-  name        = "prisonstaffhub"
-  description = "prisonstaffhub"
+resource "azurerm_storage_account" "storage" {
+  name                     = "${substr(format("%s%s", replace(var.app-name, "-", ""), "storage"),0,24)}"
+  resource_group_name      = "${azurerm_resource_group.group.name}"
+  location                 = "${azurerm_resource_group.group.location}"
+  account_tier             = "Standard"
+  account_replication_type = "RAGRS"
+  enable_blob_encryption   = true
+
+  tags = "${var.tags}"
 }
+
+resource "azurerm_storage_container" "logs" {
+  name                  = "web-logs"
+  resource_group_name   = "${azurerm_resource_group.group.name}"
+  storage_account_name  = "${azurerm_storage_account.storage.name}"
+  container_access_type = "private"
+}
+
+# This resource is managed in multiple places
+resource "aws_elastic_beanstalk_application" "app" {
+  name        = "nomis-batchload"
+  description = "nomis-batchload"
+}
+
 
 resource "random_id" "session-secret" {
   byte_length = 40
@@ -54,6 +73,32 @@ resource "aws_security_group" "elb" {
   }
 }
 
+resource "aws_security_group" "ec2" {
+  name        = "${var.app-name}-ec2"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "elasticbeanstalk EC2 instances"
+
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = ["${aws_security_group.elb.id}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-ec2"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 data "aws_elastic_beanstalk_solution_stack" "docker" {
   most_recent = true
   name_regex  = "^64bit Amazon Linux .* v2.* running Docker *.*$"
@@ -64,6 +109,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   application         = "${aws_elastic_beanstalk_application.app.name}"
   solution_stack_name = "${data.aws_elastic_beanstalk_solution_stack.docker.name}"
   tier                = "WebServer"
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.ec2.id}"
+  }
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -87,6 +138,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "ServiceRole"
     value     = "aws-elasticbeanstalk-service-role"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment"
+    name      = "LoadBalancerType"
+    value     = "classic"
   }
 
   setting {
@@ -196,6 +253,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "StreamLogs"
     value     = "true"
   }
+
   # Rolling updates
   setting {
     namespace = "aws:autoscaling:asg"
@@ -240,49 +298,45 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   # Begin app-specific config settings
+
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_ENDPOINT_URL"
-    value     = "${local.api_endpoint_url}"
+    name      = "API_GATEWAY_ENABLED"
+    value     = "no"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "OAUTH_ENDPOINT_URL"
-    value     = "${local.oauth_endpoint_url}"
+    name      = "NOMIS_API_URL"
+    value     = "${local.nomis_api_url}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "NN_ENDPOINT_URL"
-    value     = "${local.nn_endpoint_url}"
+    name      = "BATCH_USER_ROLE"
+    value     = "NOMIS_BATCHLOAD"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_CLIENT_ID"
-    value     = "${local.api_client_id}"
+    name      = "DB_NAME"
+    value     = "${aws_db_instance.db.name}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "API_CLIENT_SECRET"
-    value     = "${data.aws_ssm_parameter.api-client-secret.value}"
+    name      = "DB_SERVER"
+    value     = "${replace(aws_db_instance.db.endpoint, ":5432", "")}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${azurerm_application_insights.insights.instrumentation_key}"
+    name      = "DB_USER"
+    value     = "${aws_db_instance.db.username}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "HMPPS_COOKIE_NAME"
-    value     = "${local.hmpps_cookie_name}"
+    name      = "DB_PASS"
+    value     = "${aws_db_instance.db.password}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "HMPPS_COOKIE_DOMAIN"
-    value     = "${local.azure_dns_zone_name}"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "SESSION_COOKIE_SECRET"
+    name      = "SESSION_SECRET"
     value     = "${random_id.session-secret.b64}"
   }
   setting {
@@ -292,8 +346,23 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "GOOGLE_ANALYTICS_ID"
-    value     = "${local.google_analytics_id}"
+    name      = "API_CLIENT_SECRET"
+    value     = "${data.aws_ssm_parameter.api-client-secret.value}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "ADMIN_API_CLIENT_ID"
+    value     = "${local.api_client_id}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "ADMIN_API_CLIENT_SECRET"
+    value     = "${data.aws_ssm_parameter.admin-api-client-secret.value}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "PORT"
+    value     = "3000"
   }
   tags = "${var.tags}"
 }
@@ -318,7 +387,6 @@ resource "azurerm_dns_cname_record" "cname" {
   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 }
 
-# Allow AWS's ACM to manage prisonstaffhub-dev.hmpps.dsd.io
 locals {
   aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
 }
