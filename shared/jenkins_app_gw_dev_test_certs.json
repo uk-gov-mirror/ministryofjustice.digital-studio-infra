@@ -38,6 +38,19 @@
       "gw_cert_name": "o11y-app-gw-devtestSslCert"
     }]
   },
+  {
+    "hostname": "mgmt-devtest",
+    "zone": "hmpps.dsd.io",
+    "dns_resource_group": "webops",
+    "keyvault": "mgmt-app-gw-devtest",
+    "zone_subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+    "gateways": [{
+      "gw_name": "mgmt-app-gw-devtest",
+      "gw_rg":   "mgmt-app-gw-devtest",
+      "gw_sub":  "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
+      "gw_cert_name": "mgmt-app-gw-devtestSslCert"
+    }]
+  },
   { 
     "hostname": "dev-external-web",
     "wildcard": "True",
