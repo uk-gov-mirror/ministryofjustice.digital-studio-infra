@@ -63,7 +63,7 @@ resource "aws_security_group" "elb" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${aws_subnet.private-a.cidr_block}","${aws_subnet.private-b.cidr_block}"]
   }
 
   tags = "${merge(map("Name", "${var.app-name}-elb"), var.tags)}"
@@ -143,54 +143,36 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "LoadBalancerType"
-    value     = "classic"
+    value     = "application"
   }
 
   setting {
-    namespace = "aws:elb:loadbalancer"
+    namespace = "aws:elbv2:loadbalancer"
     name      = "ManagedSecurityGroup"
     value     = "${aws_security_group.elb.id}"
   }
 
   setting {
-    namespace = "aws:elb:loadbalancer"
+    namespace = "aws:elbv2:loadbalancer"
     name      = "SecurityGroups"
     value     = "${aws_security_group.elb.id}"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
+    namespace = "aws:elbv2:listener:443"
+    name      = "Protocol"
     value     = "HTTPS"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "SSLCertificateId"
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLCertificateArns"
     value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "InstancePort"
-    value     = "80"
-  }
-
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
-    value     = "HTTPS"
-  }
-
-  setting {
-    namespace = "aws:elb:policies:tlshigh"
-    name      = "LoadBalancerPorts"
-    value     = "443"
-  }
-
-  setting {
-    namespace = "aws:elb:policies:tlshigh"
-    name      = "SSLReferencePolicy"
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLPolicy"
     value     = "${local.elb_ssl_policy}"
   }
 
@@ -203,13 +185,13 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:ec2:vpc"
     name      = "Subnets"
-    value     = "${aws_subnet.private-a.id}"
+    value     = "${aws_subnet.private-a.id},${aws_subnet.private-b.id}"
   }
 
   setting {
     namespace = "aws:ec2:vpc"
     name      = "ELBSubnets"
-    value     = "${aws_subnet.public-a.id}"
+    value     = "${aws_subnet.public-a.id},${aws_subnet.public-b.id}"
   }
 
   setting {
@@ -365,6 +347,32 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "3000"
   }
   tags = "${var.tags}"
+}
+
+# Because Elastic Beanstalk does not yet support configuring a redirect action
+# we have to do it this way.  Find the arn of the ALB and listener, and
+# then setup the listener rule:
+data "aws_lb_listener" "listener" {
+  load_balancer_arn = "${aws_elastic_beanstalk_environment.app-env.load_balancers[0]}"
+  port = 80
+}
+
+resource "aws_lb_listener_rule" "redirect_http_to_https" {
+  listener_arn = "${data.aws_lb_listener.listener.arn}"
+
+  action {
+   type = "redirect"
+    redirect {
+      port = "443"
+      protocol = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+
+  condition {
+    field  = "path-pattern"
+    values = ["/*"]
+  }
 }
 
 locals {
