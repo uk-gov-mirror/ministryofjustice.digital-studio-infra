@@ -304,6 +304,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NOMIS_AUTH_URL"
+    value     = "${local.nomis_auth_url}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "PDF_SERVICE_HOST"
     value     = "http://${aws_elastic_beanstalk_environment.pdf-gen-app-env.cname}"
   }
