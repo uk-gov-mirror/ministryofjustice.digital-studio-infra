@@ -27,6 +27,7 @@ locals {
   nomis_api_url       = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/elite2api/api"
   nomis_auth_url      = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth"
   api_client_id       = "batchadmin"
+  domain              = "https://licences-preprod.hmpps.dsd.io"
 }
 
 # Azure config
