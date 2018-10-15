@@ -122,7 +122,7 @@ resource "azurerm_app_service" "app" {
     OAUTH_ENDPOINT_URL             = "https://gateway.nomis-api.service.justice.gov.uk/auth/"
     KEYWORKER_API_URL              = "https://keyworker-api.service.hmpps.dsd.io/"
     OMIC_UI_URL                    = "https://omic.service.hmpps.dsd.io/"
-    WHEREABOUTS_UI_URL             = "https://prisonstaffhub.service.hmpps.dsd.io/"
+    WHEREABOUTS_UI_URL             = "https://prisonstaffhub.service.hmpps.dsd.io/whereaboutssearch"
     ESTABLISHMENT_ROLLCHECK_URL    = "https://prisonstaffhub.service.hmpps.dsd.io/establishmentroll"
     API_CLIENT_ID                  = "elite2apiclient"
     API_CLIENT_SECRET              = "${data.external.vault.result.api_client_secret}"
