@@ -28,7 +28,8 @@ locals {
   nn_endpoint_url     = "https://notm-stage.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-stage"
   google_analytics_id = ""
-  maintain_roles_enabled = true
+  maintain_roles_enabled = "true"
+  keyworker_profile_stats_enabled = "true"
 }
 
 # Azure config
