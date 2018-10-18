@@ -42,5 +42,10 @@ locals {
     "${var.ips["quantum"]}/32",
     "${var.ips["health-kick"]}/32",
     "${var.ips["mojvpn"]}/32",
+    "${var.ips["digitalprisons1"]}/32",
+    "${var.ips["digitalprisons2"]}/32",
+    "${var.ips["j5-phones-1"]}/32",
+    "${var.ips["j5-phones-2"]}/32",
+    "${var.ips["sodexo-northumberland"]}/32",
   ]
 }
