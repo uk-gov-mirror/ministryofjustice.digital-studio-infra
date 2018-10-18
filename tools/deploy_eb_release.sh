@@ -38,7 +38,7 @@ deploy_to_devtest() {
   fi
 
   # Deploy app version to eb environment.
-  aws elasticbeanstalk update-environment --environment-name ${APP}-${ENV} --version-label ${VERSION}
+  aws elasticbeanstalk update-environment --environment-name $(generate_app_environment) --version-label ${VERSION}
 
 }
 
@@ -55,7 +55,7 @@ promote_to_preprod() {
   fi
 
   # Deploy the app version to the preprod environment
-  aws elasticbeanstalk update-environment --environment-name ${APP}-${ENV} --version-label ${VERSION}
+  aws elasticbeanstalk update-environment --environment-name $(generate_app_environment) --version-label ${VERSION}
 
 }
 
@@ -66,7 +66,7 @@ promote_to_prod() {
     echo "No application version found, please make sure the this release has been successfully applied to preprod first."
     exit 1
   fi
-  aws elasticbeanstalk update-environment --environment-name ${APP}-${ENV} --version-label ${VERSION}
+  aws elasticbeanstalk update-environment --environment-name $(generate_app_environment) --version-label ${VERSION}
 }
 
 generate_version_json() {
@@ -94,6 +94,14 @@ generate_version_json() {
 "
  echo "Generated app version json:"
  echo $APP_VERSION_JSON
+}
+
+generate_app_environment() {
+    if [[ ${APP} != "omic-ui" ]]; then
+        echo "${APP}-${ENV}"
+    else
+        echo "omic-${ENV}"
+    fi
 }
 
 # if less than three arguments supplied, display usage
