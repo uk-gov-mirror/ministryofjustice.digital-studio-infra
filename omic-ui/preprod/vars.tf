@@ -28,7 +28,8 @@ locals {
   nn_endpoint_url     = "https://notm-preprod.service.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-preprod"
   google_analytics_id = ""
-  maintain_roles_enabled = false
+  maintain_roles_enabled = "false"
+  keyworker_profile_stats_enabled = "false"
 }
 
 # Azure config
