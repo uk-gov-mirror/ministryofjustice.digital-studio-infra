@@ -306,6 +306,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "MAINTAIN_ROLES_ENABLED"
     value     = "${local.maintain_roles_enabled}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "KEYWORKER_PROFILE_STATS_ENABLED"
+    value     = "${local.keyworker_profile_stats_enabled}"
+  }
   tags = "${var.tags}"
 }
 
