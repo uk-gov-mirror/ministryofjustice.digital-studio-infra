@@ -124,6 +124,7 @@ resource "azurerm_app_service" "app" {
     OMIC_UI_URL                    = "https://omic.service.hmpps.dsd.io/"
     WHEREABOUTS_UI_URL             = "https://prisonstaffhub.service.hmpps.dsd.io/whereaboutssearch"
     ESTABLISHMENT_ROLLCHECK_URL    = "https://prisonstaffhub.service.hmpps.dsd.io/establishmentroll"
+    PRISON_STAFF_HUB_UI_URL        = "https://prisonstaffhub.service.hmpps.dsd.io/"
     API_CLIENT_ID                  = "elite2apiclient"
     API_CLIENT_SECRET              = "${data.external.vault.result.api_client_secret}"
     GOOGLE_ANALYTICS_ID            = "${data.external.vault.result.google_analytics_id}"
