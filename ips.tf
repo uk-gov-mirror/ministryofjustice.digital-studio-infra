@@ -12,6 +12,7 @@ variable "ips" {
     j5-phones-1           = "35.177.125.252"
     j5-phones-2           = "35.177.137.160"
     sodexo-northumberland = "88.98.48.10"
+    durham-tees-valley    = "51.179.193.241"
   }
 }
 
