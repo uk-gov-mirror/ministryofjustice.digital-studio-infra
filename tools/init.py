@@ -14,9 +14,6 @@ from python_modules import storage_creation
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-# Default is to not use an sp for auth
-use_sp = False
-
 def create_config_file():
 
     git_root = azure_account.get_git_root()
