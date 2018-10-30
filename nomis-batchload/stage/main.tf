@@ -333,7 +333,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   # Begin app-specific config settings
-
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "DOMAIN"
+    value     = "${local.domain}"
+  }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_GATEWAY_ENABLED"
@@ -343,6 +347,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NOMIS_API_URL"
     value     = "${local.nomis_api_url}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NOMIS_AUTH_URL"
+    value     = "${local.nomis_auth_url}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
