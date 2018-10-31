@@ -72,7 +72,7 @@ resource "aws_elastic_beanstalk_environment" "pdf-gen-app-env" {
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "InstanceType"
-    value     = "t2.micro"
+    value     = "${local.instance_size}"
   }
 
   setting {
