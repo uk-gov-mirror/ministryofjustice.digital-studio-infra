@@ -24,10 +24,14 @@ locals {
 
 # App settings
 locals {
-  nomis_api_url       = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/api"
-  nomis_auth_url      = "https://gateway.t3.nomis-api.hmpps.dsd.io/auth"
-  api_client_id       = "batchadmin"
-  domain              = "https://licences-stage.hmpps.dsd.io"
+  nomis_api_url                 = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/api"
+  nomis_auth_url                = "https://gateway.t3.nomis-api.hmpps.dsd.io/auth"
+  api_client_id                 = "batchadmin"
+  domain                        = "https://licences-stage.hmpps.dsd.io"
+  findnomisid_interval_millis   = "500"
+  sendrelation_interval_millis  = "200"
+  response_timeout              = "30000"
+  deadline_timeout              = "45000"
 }
 
 # Azure config
