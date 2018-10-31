@@ -1,3 +1,7 @@
+locals {
+  env-name = "prod"
+}
+
 variable "tags" {
     type = "map"
     default {
