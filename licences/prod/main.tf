@@ -357,6 +357,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "ADMIN_API_CLIENT_SECRET"
     value     = "${data.aws_ssm_parameter.admin-api-client-secret.value}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "TAG_MANAGER_KEY"
+    value     = "${data.aws_ssm_parameter.tag-manager-api-client-secret.value}"
+  }
 
   tags = "${var.tags}"
 }
