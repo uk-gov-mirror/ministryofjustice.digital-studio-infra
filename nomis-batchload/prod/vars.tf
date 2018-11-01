@@ -14,8 +14,9 @@ variable "tags" {
 
 # Instance and Deployment settings
 locals {
-  instances = "1"
-  mininstances = "1"
+  instance_size = "t2.medium"
+  instances = "3"
+  mininstances = "2"
   db_multi_az = "false"
   db_backup_retention_period = "0"
   db_maintenance_window = "Mon:00:00-Sun:11:59"
