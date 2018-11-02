@@ -28,6 +28,7 @@ locals {
 locals {
   instances = "2"
   mininstances = "1"
+  instance_size = "t2.micro"
 }
 
 # Azure config

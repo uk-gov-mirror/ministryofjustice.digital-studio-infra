@@ -15,7 +15,8 @@ variable "tags" {
 # Instance and Deployment settings
 locals {
   instances = "1"
-  mininstances = "0"
+  mininstances = "1"
+  instance_size = "t2.micro"
 }
 
 # App settings

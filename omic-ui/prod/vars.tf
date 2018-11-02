@@ -14,8 +14,9 @@ variable "tags" {
 
 # Instance and Deployment settings
 locals {
-  instances = "2"
-  mininstances = "1"
+  instances = "3"
+  mininstances = "3"
+  instance_size = "t2.medium"
 }
 
 # App settings
@@ -28,7 +29,7 @@ locals {
   nn_endpoint_url     = "https://notm.service.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-prod"
   google_analytics_id = "UA-106741063-2"
-  maintain_roles_enabled = "false"
+  maintain_roles_enabled = "true"
   keyworker_profile_stats_enabled = "false"
 }
 
