@@ -26,8 +26,9 @@ locals {
 
 # Instance and Deployment settings
 locals {
-  instances = "2"
-  mininstances = "1"
+  instances = "3"
+  mininstances = "3"
+  instance_size = "t2.medium"
 }
 
 # Azure config
