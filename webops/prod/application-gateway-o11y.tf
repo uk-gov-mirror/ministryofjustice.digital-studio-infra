@@ -1,7 +1,3 @@
-locals {
-  env-name = "prod"
-}
-
 variable "o11y-tags" {
     type = "map"
     default {
