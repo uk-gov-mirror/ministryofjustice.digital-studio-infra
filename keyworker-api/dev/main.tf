@@ -96,7 +96,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "InstanceType"
-    value     = "t2.micro"
+    value     = "${local.instance_size}"
   }
 
   setting {
@@ -235,7 +235,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MinSize"
-    value     = "${local.instances}"
+    value     = "${local.mininstances}"
   }
 
   setting {
