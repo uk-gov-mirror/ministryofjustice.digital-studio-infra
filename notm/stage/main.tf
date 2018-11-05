@@ -97,7 +97,7 @@ data "external" "vault" {
 
   query {
     vault                   = "${azurerm_key_vault.vault.name}"
-    google_analytics_id     = "google-analytics-id"
+    google_tag_manager_id   = "google-tag-manager-id"
     api_client_secret       = "api-client-secret"
   }
 }
@@ -134,7 +134,7 @@ resource "azurerm_app_service" "app" {
     PRISON_STAFF_HUB_UI_URL        = "https://prisonstaffhub-stage.hmpps.dsd.io/"
     API_CLIENT_ID                  = "elite2apiclient"
     API_CLIENT_SECRET              = "${data.external.vault.result.api_client_secret}"
-    GOOGLE_ANALYTICS_ID            = "${data.external.vault.result.google_analytics_id}"
+    GOOGLE_TAG_MANAGER_ID          = "${data.external.vault.result.google_tag_manager_id}"
     HMPPS_COOKIE_NAME              = "hmpps-session-stage"
     HMPPS_COOKIE_DOMAIN            = "hmpps.dsd.io"
     SESSION_COOKIE_SECRET          = "${random_id.session-secret.b64}"
