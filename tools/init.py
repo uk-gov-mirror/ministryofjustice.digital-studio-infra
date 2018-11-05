@@ -94,8 +94,8 @@ def check_first_time_terraform_init():
                 check=True
             ).stdout.decode()
         except:
-            logging.warn("There is a problem with .terraform")
-            logging.warn("You may need to delete .terraform before running this script. Exiting.")
+            logging.warning("There is a problem with .terraform")
+            logging.warning("You may need to delete .terraform before running this script. Exiting.")
             sys.exit()
 
         if "No state" in state_exists:
@@ -109,9 +109,8 @@ def check_first_time_terraform_init():
         return False
 
 
-
 if len(fnmatch.filter(os.listdir('.'), '*.tf')) < 1:
-    logging.warn("There are no terraform config files. Exiting.")
+    logging.warning("There are no terraform config files. Exiting.")
     sys.exit(1)
 
 if check_first_time_terraform_init():
@@ -123,6 +122,7 @@ create_config_file()
 config = json.load(open("./config.tf.json"))
 
 subscription_id = config["provider"]["azurerm"]["subscription_id"]
+tenant_id = config["provider"]["azurerm"]["tenant_id"]
 resource_group = config["terraform"]["backend"]["azurerm"]["resource_group_name"]
 storage_account = config["terraform"]["backend"]["azurerm"]["storage_account_name"]
 
@@ -133,19 +133,30 @@ azure_account.azure_set_subscription(subscription_id)
 
 storage_creation.create_storage_account(resource_group, storage_account)
 
-key = subprocess.run(
-    ["az", "storage", "account", "keys", "list",
-        "--resource-group", resource_group,
-        "--account-name", storage_account,
-        "--query", "[0].value",
-        "--output", "tsv",
-     ],
-    stdout=subprocess.PIPE,
-    check=True
-).stdout.decode()
-
-logging.info("Running terraform init")
-subprocess.run(
-    ["terraform", "init", "-backend-config", "access_key=%s" % key],
-    check=True
-)
+if ("ARM_CLIENT_ID" in os.environ) and ("ARM_CLIENT_SECRET" in os.environ):
+    logging.info("Running terraform init with a Service Principal")
+    subprocess.run(
+        ["terraform", "init", 
+            "-backend-config=arm_client_id=%s" % os.environ.get('ARM_CLIENT_ID'), 
+            "-backend-config=arm_client_secret=%s" % os.environ.get('ARM_CLIENT_SECRET'),
+            "-backend-config=arm_tenant_id=%s" % tenant_id,
+            "-backend-config=arm_subscription_id=%s" % subscription_id],
+        check=True
+    )
+else:
+    logging.info("Running terraform init with Az cli auth and storage access key")
+    key = subprocess.run(
+        ["az", "storage", "account", "keys", "list",
+            "--resource-group", resource_group,
+            "--account-name", storage_account,
+            "--query", "[0].value",
+            "--output", "tsv",
+         ],
+        stdout=subprocess.PIPE,
+        check=True
+    ).stdout.decode()
+    
+    subprocess.run(
+        ["terraform", "init", "-backend-config", "access_key=%s" % key],
+        check=True
+    )

@@ -52,5 +52,18 @@
       "gw_sub":  "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
       "gw_cert_name": "o11y-app-gw-prodSslCert"
     }]
+  },
+  {
+    "hostname": "mgmt",
+    "zone": "service.hmpps.dsd.io",
+    "dns_resource_group": "webops-prod",
+    "keyvault": "mgmt-app-gw-prod",
+    "zone_subscription": "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+    "gateways": [{
+      "gw_name": "mgmt-app-gw-prod",
+      "gw_rg":   "mgmt-app-gw-prod",
+      "gw_sub":  "a5ddf257-3b21-4ba9-a28c-ab30f751b383",
+      "gw_cert_name": "mgmt-app-gw-prodSslCert"
+    }]
   }
 ]
