@@ -14,8 +14,9 @@ variable "tags" {
 
 # Instance and Deployment settings
 locals {
-  instances = "2"
-  mininstances = "1"
+  instance_size = "t2.medium"
+  instances = "3"
+  mininstances = "3"
   backup_retention_period = "30"
 }
 
