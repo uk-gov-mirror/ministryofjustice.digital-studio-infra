@@ -36,15 +36,6 @@
   "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
 },
 {
-  "azure_app": "webops-jenkins-dev",
-  "hostname": "webops-jenkins-dev",
-  "zone": "hmpps.dsd.io",
-  "dns_resource_group": "webops",
-  "resource_group": "webops-jenkins-dev",
-  "keyvault": "webops-jenkins-dev",
-  "subscription": "c27cfedb-f5e9-45e6-9642-0fad1a5c94e7"
-},
-{
   "azure_app": "offloc-stage",
   "hostname": "offloc-stage",
   "zone": "hmpps.dsd.io",
