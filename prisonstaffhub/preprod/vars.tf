@@ -29,6 +29,7 @@ locals {
   instances = "3"
   mininstances = "2"
   instance_size = "t2.medium"
+
 }
 
 

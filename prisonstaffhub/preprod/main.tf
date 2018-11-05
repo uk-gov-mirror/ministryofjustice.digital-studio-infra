@@ -196,6 +196,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "StreamLogs"
     value     = "true"
   }
+  
   # Rolling updates
   setting {
     namespace = "aws:autoscaling:asg"

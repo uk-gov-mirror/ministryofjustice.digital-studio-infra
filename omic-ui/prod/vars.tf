@@ -15,7 +15,7 @@ variable "tags" {
 # Instance and Deployment settings
 locals {
   instances = "3"
-  mininstances = "3"
+  mininstances = "2"
   instance_size = "t2.medium"
 }
 
