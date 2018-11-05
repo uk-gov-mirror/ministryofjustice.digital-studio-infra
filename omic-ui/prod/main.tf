@@ -68,7 +68,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "InstanceType"
-    value     = "${local.instance_size}
+    value     = "${local.instance_size}"
   }
 
   setting {

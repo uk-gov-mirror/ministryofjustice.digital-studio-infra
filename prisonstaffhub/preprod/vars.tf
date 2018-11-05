@@ -26,9 +26,10 @@ locals {
 
 # Instance and Deployment settings
 locals {
-  instance_size = "t2.medium"
   instances = "3"
   mininstances = "2"
+  instance_size = "t2.medium"
+
 }
 
 
