@@ -110,7 +110,7 @@ resource "aws_security_group" "elb" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${aws_subnet.private-a.cidr_block}","${aws_subnet.private-b.cidr_block}"]
   }
 
   tags = "${merge(map("Name", "${var.app-name}-elb"), var.tags)}"
@@ -238,13 +238,13 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:ec2:vpc"
     name      = "Subnets"
-    value     = "${aws_subnet.private-a.id}"
+    value     = "${aws_subnet.private-a.id},${aws_subnet.private-b.id}"
   }
 
   setting {
     namespace = "aws:ec2:vpc"
     name      = "ELBSubnets"
-    value     = "${aws_subnet.public-a.id}"
+    value     = "${aws_subnet.public-a.id},${aws_subnet.public-b.id}"
   }
 
   setting {
