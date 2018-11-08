@@ -26,12 +26,6 @@ pip install pymssql
 
 ### Environment initialization
 
-Install dependencies from npm using yarn from (package.json):
-
-```
-yarn install
-```
-
 Some environments might interact with the github api, you'll need to go get an API key from the admin UI to make that work.
 
 ```
