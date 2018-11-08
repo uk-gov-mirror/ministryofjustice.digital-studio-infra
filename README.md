@@ -233,7 +233,8 @@ python3 ../../tools/azure-letsencrypt-cli-auth.py \
   -g webops \
   -c ~/Development/letsencyrpt/ \
   -s c27cfedb-f5e9-45e6-9642-0fad1a5c94e7 \
-  -v notm-dev```
+  -v notm-dev
+ ```
 
 then either
 
@@ -255,4 +256,28 @@ python3 tools/application_gateway_update.py \
 --resource-group nomisapi-prod-rg \
 --gateway-name nomisapi-prod-appgw \
 --key-vault nomisapi-prod
+```
+
+## App Gateway TLS Versions
+
+Until [supported by terraform](https://github.com/terraform-providers/terraform-provider-azurerm/issues/1576), if you 
+wish to change the SSL Profile of your app gateways, you will need to do so using the Azure CLI.  This is a one-time 
+manual step for now and has intentionally been kept clear of the `null_resource`/`local_exec` features of terraform as 
+it doesn't cause a changed state when run and subsequent terraform changes will not undo this!  
+
+In order to change the profile of all your app gateways within a state, do the following from the root of your 
+terraform directory:
+
+```bash
+gateways="$(terraform state list | grep azurerm_application_gateway.)"
+for gateway in ${gateways}; do
+  name="$(terraform state show ${gateway} | egrep "^name     " | tr -s ' ' |  cut -d' '  -f3)"
+  rg_name="$(terraform state show ${gateway} | egrep "^resource_group_name     " | tr -s ' ' |  cut -d' '  -f3)"
+
+  az network application-gateway ssl-policy set \
+    --gateway-name "${name}" \
+    --resource-group "${rg_name}" \
+    --name "AppGwSslPolicy20170401S" \
+    --policy-type "Predefined"
+done
 ```
