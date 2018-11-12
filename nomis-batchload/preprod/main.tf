@@ -249,16 +249,18 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "${local.mininstances}"
   }
 
+  # Hard coded to a MaxSize of 1 as greater values aren't supported by this application
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MaxSize"
-    value     = "${local.instances + (local.instances == local.mininstances ? 1 : 0)}"
+    value     = "${local.instances}"
   }
 
+  # Hardcoded while application doesn't support more than one instance
   setting {
     namespace = "aws:autoscaling:updatepolicy:rollingupdate"
     name      = "RollingUpdateEnabled"
-    value     = "${local.mininstances == "0" ? "false" : "true"}"
+    value     = "false"
   }
 
   setting {
@@ -273,10 +275,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "${local.mininstances}"
   }
 
+  # Hardcoded while application doesn't support more than one instance
   setting {
     namespace = "aws:elasticbeanstalk:command"
     name      = "DeploymentPolicy"
-    value     = "${local.instances == local.mininstances ? "RollingWithAdditionalBatch" : "Rolling"}"
+    value     = "Rolling"
   }
 
   setting {
