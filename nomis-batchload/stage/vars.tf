@@ -14,7 +14,7 @@ variable "tags" {
 
 # Instance and Deployment settings
 locals {
-  instances = "2"
+  instances = "1"
   mininstances = "1"
   db_multi_az = "false"
   db_backup_retention_period = "0"
