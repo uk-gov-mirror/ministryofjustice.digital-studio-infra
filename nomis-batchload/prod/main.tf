@@ -355,6 +355,26 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "PORT"
     value     = "3000"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "FINDNOMISID_INTERVAL_MILLIS"
+    value     = "${local.findnomisid_interval_millis}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SENDRELATION_INTERVAL_MILLIS"
+    value     = "${local.sendrelation_interval_millis}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "RESPONSE_TIMEOUT"
+    value     = "${local.response_timeout}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "DEADLINE_TIMEOUT"
+    value     = "${local.deadline_timeout}"
+  }
   tags = "${var.tags}"
 }
 

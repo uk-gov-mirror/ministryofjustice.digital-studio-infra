@@ -29,6 +29,10 @@ locals {
   nomis_auth_url      = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth"
   api_client_id       = "batchadmin"
   domain              = "https://licences-preprod.hmpps.dsd.io"
+  findnomisid_interval_millis   = "200"
+  sendrelation_interval_millis  = "200"
+  response_timeout              = "35000"
+  deadline_timeout              = "45000"
 }
 
 # Azure config
