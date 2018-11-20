@@ -28,9 +28,9 @@ locals {
   nomis_auth_url                = "https://gateway.t3.nomis-api.hmpps.dsd.io/auth"
   api_client_id                 = "batchadmin"
   domain                        = "https://licences-stage.hmpps.dsd.io"
-  findnomisid_interval_millis   = "500"
+  findnomisid_interval_millis   = "200"
   sendrelation_interval_millis  = "200"
-  response_timeout              = "30000"
+  response_timeout              = "35000"
   deadline_timeout              = "45000"
 }
 
