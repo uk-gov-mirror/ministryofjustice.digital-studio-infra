@@ -27,6 +27,10 @@ locals {
 locals {
   nomis_api_url       = "https://gateway.prod.nomis-api.service.hmpps.dsd.io/elite2api/api"
   api_client_id       = "batchadmin"
+  findnomisid_interval_millis   = "200"
+  sendrelation_interval_millis  = "200"
+  response_timeout              = "35000"
+  deadline_timeout              = "45000"
 }
 
 # Azure config
