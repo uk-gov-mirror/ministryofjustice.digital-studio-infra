@@ -15,8 +15,8 @@ variable "tags" {
 # Instance and Deployment settings
 locals {
   instance_size = "t2.medium"
-  instances = "3"
-  mininstances = "2"
+  instances = "1"
+  mininstances = "1"
   db_multi_az = "false"
   db_backup_retention_period = "0"
   db_maintenance_window = "Mon:00:00-Sun:11:59"
@@ -29,6 +29,10 @@ locals {
   nomis_auth_url      = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io/auth"
   api_client_id       = "batchadmin"
   domain              = "https://licences-preprod.hmpps.dsd.io"
+  findnomisid_interval_millis   = "200"
+  sendrelation_interval_millis  = "200"
+  response_timeout              = "35000"
+  deadline_timeout              = "45000"
 }
 
 # Azure config

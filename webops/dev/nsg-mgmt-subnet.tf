@@ -14,7 +14,7 @@ resource "azurerm_network_security_group" "mgmt-app-gw" {
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "TCP"
-    source_address_prefixes      = ["${local.studio_ip}", "${local.moj_vpn_ip}", "${local.health_kick_ip}"]
+    source_address_prefixes      = ["${local.studio_ip}", "${local.moj_vpn_ip}", "${local.health_kick_ip}", "${local.dev_forti_ip}"]
     source_port_range          = "*"
     destination_address_prefix = "*"
     destination_port_ranges    = ["443"]
