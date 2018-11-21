@@ -311,6 +311,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "KEYWORKER_PROFILE_STATS_ENABLED"
     value     = "${local.keyworker_profile_stats_enabled}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "KEYWORKER_DASHBOARD_STATS_ENABLED"
+    value     = "${local.keyworker_dashboard_stats_enabled}"
+  }
   tags = "${var.tags}"
 }
 
