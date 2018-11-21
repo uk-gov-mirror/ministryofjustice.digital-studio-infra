@@ -362,6 +362,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "TAG_MANAGER_KEY"
     value     = "${data.aws_ssm_parameter.tag-manager-api-client-secret.value}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "AUTH_STRATEGY"
+    value     = "${local.authStrategy}"
+  }
 
   tags = "${var.tags}"
 }

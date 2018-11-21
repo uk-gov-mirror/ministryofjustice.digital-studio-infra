@@ -25,6 +25,7 @@ locals {
   api_client_id       = "licences"
   pdf_service_host    = "https://licences-nomis-mocks.herokuapp.com"
   domain              = "https://licences-mock.hmpps.dsd.io"
+  authStrategy        = "local"
 }
 
 # Azure config
