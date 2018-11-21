@@ -14,7 +14,7 @@ variable "tags" {
 
 # Instance and Deployment settings
 locals {
-  instances = "2"
+  instances = "1"
   mininstances = "1"
   db_multi_az = "false"
   db_backup_retention_period = "0"
@@ -28,9 +28,9 @@ locals {
   nomis_auth_url                = "https://gateway.t3.nomis-api.hmpps.dsd.io/auth"
   api_client_id                 = "batchadmin"
   domain                        = "https://licences-stage.hmpps.dsd.io"
-  findnomisid_interval_millis   = "500"
+  findnomisid_interval_millis   = "200"
   sendrelation_interval_millis  = "200"
-  response_timeout              = "30000"
+  response_timeout              = "35000"
   deadline_timeout              = "45000"
 }
 

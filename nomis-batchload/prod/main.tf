@@ -249,16 +249,18 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "${local.mininstances}"
   }
 
+  # Hard coded to a MaxSize of 1 as greater values aren't supported by this application
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MaxSize"
-    value     = "${local.instances + (local.instances == local.mininstances ? 1 : 0)}"
+    value     = "${local.instances}"
   }
 
+  # Hardcoded while application doesn't support more than one instance
   setting {
     namespace = "aws:autoscaling:updatepolicy:rollingupdate"
     name      = "RollingUpdateEnabled"
-    value     = "${local.mininstances == "0" ? "false" : "true"}"
+    value     = "false"
   }
 
   setting {
@@ -273,10 +275,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "${local.mininstances}"
   }
 
+  # Hardcoded while application doesn't support more than one instance
   setting {
     namespace = "aws:elasticbeanstalk:command"
     name      = "DeploymentPolicy"
-    value     = "${local.instances == local.mininstances ? "RollingWithAdditionalBatch" : "Rolling"}"
+    value     = "Rolling"
   }
 
   setting {
@@ -351,6 +354,26 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "PORT"
     value     = "3000"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "FINDNOMISID_INTERVAL_MILLIS"
+    value     = "${local.findnomisid_interval_millis}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SENDRELATION_INTERVAL_MILLIS"
+    value     = "${local.sendrelation_interval_millis}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "RESPONSE_TIMEOUT"
+    value     = "${local.response_timeout}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "DEADLINE_TIMEOUT"
+    value     = "${local.deadline_timeout}"
   }
   tags = "${var.tags}"
 }
