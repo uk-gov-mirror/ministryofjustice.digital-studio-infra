@@ -30,7 +30,8 @@ locals {
   hmpps_cookie_name   = "hmpps-session-prod"
   google_analytics_id = "UA-106741063-2"
   maintain_roles_enabled = "true"
-  keyworker_profile_stats_enabled = "false"
+  keyworker_profile_stats_enabled = "true"
+  keyworker_dashboard_stats_enabled = "false"
 }
 
 # Azure config

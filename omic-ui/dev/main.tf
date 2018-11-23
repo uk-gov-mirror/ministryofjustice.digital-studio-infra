@@ -44,10 +44,36 @@ resource "aws_security_group" "elb" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${aws_subnet.private-a.cidr_block}","${aws_subnet.private-b.cidr_block}"]
   }
 
   tags = "${merge(map("Name", "${var.app-name}-elb"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_security_group" "ec2" {
+  name        = "${var.app-name}-ec2"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "elasticbeanstalk EC2 instances"
+
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = ["${aws_security_group.elb.id}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-ec2"), var.tags)}"
 
   lifecycle {
     create_before_destroy = true
@@ -64,6 +90,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   application         = "${aws_elastic_beanstalk_application.app.name}"
   solution_stack_name = "${data.aws_elastic_beanstalk_solution_stack.docker.name}"
   tier                = "WebServer"
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.ec2.id}"
+  }
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -84,56 +116,50 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "HealthCheckPath"
+    value     = "/health"
+  }
+
+  setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "ServiceRole"
     value     = "aws-elasticbeanstalk-service-role"
   }
 
   setting {
-    namespace = "aws:elb:loadbalancer"
+    namespace = "aws:elasticbeanstalk:environment"
+    name      = "LoadBalancerType"
+    value     = "application"
+  }
+
+  setting {
+    namespace = "aws:elbv2:loadbalancer"
     name      = "ManagedSecurityGroup"
     value     = "${aws_security_group.elb.id}"
   }
 
   setting {
-    namespace = "aws:elb:loadbalancer"
+    namespace = "aws:elbv2:loadbalancer"
     name      = "SecurityGroups"
     value     = "${aws_security_group.elb.id}"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
+    namespace = "aws:elbv2:listener:443"
+    name      = "Protocol"
     value     = "HTTPS"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "SSLCertificateId"
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLCertificateArns"
     value     = "${aws_acm_certificate.cert.arn}"
   }
 
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "InstancePort"
-    value     = "80"
-  }
-
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
-    value     = "HTTPS"
-  }
-
-  setting {
-    namespace = "aws:elb:policies:tlshigh"
-    name      = "LoadBalancerPorts"
-    value     = "443"
-  }
-
-  setting {
-    namespace = "aws:elb:policies:tlshigh"
-    name      = "SSLReferencePolicy"
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLPolicy"
     value     = "${local.elb_ssl_policy}"
   }
 
@@ -146,13 +172,13 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:ec2:vpc"
     name      = "Subnets"
-    value     = "${aws_subnet.private-a.id}"
+    value     = "${aws_subnet.private-a.id},${aws_subnet.private-b.id}"
   }
 
   setting {
     namespace = "aws:ec2:vpc"
     name      = "ELBSubnets"
-    value     = "${aws_subnet.public-a.id}"
+    value     = "${aws_subnet.public-a.id},${aws_subnet.public-b.id}"
   }
 
   setting {
@@ -310,6 +336,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "KEYWORKER_PROFILE_STATS_ENABLED"
     value     = "${local.keyworker_profile_stats_enabled}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "KEYWORKER_DASHBOARD_STATS_ENABLED"
+    value     = "${local.keyworker_dashboard_stats_enabled}"
   }
   tags = "${var.tags}"
 }
