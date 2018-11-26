@@ -14,10 +14,10 @@ variable "ips" {
     sodexo-northumberland = "88.98.48.10"
     durham-tees-valley    = "51.179.193.241"
     ark-nps-hmcts-ttp1    = "195.59.75.0"
-    ark-nps-hmcts-ttp2    = "195.33.192.0"
-    ark-nps-hmcts-ttp3    = "195.33.193.0"
-    ark-nps-hmcts-ttp4    = "195.33.196.0"
-    ark-nps-hmcts-ttp5    = "195.33.197.0"
+    ark-nps-hmcts-ttp2    = "194.33.192.0"
+    ark-nps-hmcts-ttp3    = "194.33.193.0"
+    ark-nps-hmcts-ttp4    = "194.33.196.0"
+    ark-nps-hmcts-ttp5    = "194.33.197.0"
   }
 }
 
