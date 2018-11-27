@@ -284,7 +284,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SESSION_COOKIE_SECRET"
-    value     = "${data.aws_ssm_parameter.session-cookie-secret}"
+    value     = "${data.aws_ssm_parameter.session-cookie-secret.value}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
