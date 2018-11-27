@@ -12,10 +12,6 @@ variable "tags" {
   }
 }
 
-resource "random_id" "session-secret" {
-  byte_length = 40
-}
-
 resource "azurerm_resource_group" "group" {
   name     = "${var.app-name}"
   location = "ukwest"
@@ -92,6 +88,7 @@ data "external" "vault" {
     vault                   = "${azurerm_key_vault.vault.name}"
     google_tag_manager_id   = "google-tag-manager-id"
     api_client_secret       = "api-client-secret"
+    session_cookie_secret   = "session-cookie-secret"
   }
 }
 
@@ -121,6 +118,7 @@ resource "azurerm_app_service" "app" {
     API_ENDPOINT_URL               = "https://gateway.nomis-api.service.justice.gov.uk/elite2api/"
     OAUTH_ENDPOINT_URL             = "https://gateway.nomis-api.service.justice.gov.uk/auth/"
     KEYWORKER_API_URL              = "https://keyworker-api.service.hmpps.dsd.io/"
+    NN_ENDPOINT_URL                = "https://notm.service.hmpps.dsd.io/"
     OMIC_UI_URL                    = "https://omic.service.hmpps.dsd.io/"
     WHEREABOUTS_UI_URL             = "https://prisonstaffhub.service.hmpps.dsd.io/whereaboutssearch"
     ESTABLISHMENT_ROLLCHECK_URL    = "https://prisonstaffhub.service.hmpps.dsd.io/establishmentroll"
@@ -130,7 +128,7 @@ resource "azurerm_app_service" "app" {
     GOOGLE_TAG_MANAGER_ID          = "${data.external.vault.result.google_tag_manager_id}"
     HMPPS_COOKIE_NAME              = "hmpps-session-prod"
     HMPPS_COOKIE_DOMAIN            = "service.hmpps.dsd.io"
-    SESSION_COOKIE_SECRET          = "${random_id.session-secret.b64}"
+    SESSION_COOKIE_SECRET          = "${data.external.vault.result.session_cookie_secret}"
     WEBSITE_NODE_DEFAULT_VERSION   = "8.10.0"
   }
 

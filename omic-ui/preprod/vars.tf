@@ -27,6 +27,7 @@ locals {
   api_client_id       = "elite2apiclient"
   keyworker_api_url   = "https://keyworker-api-preprod.service.hmpps.dsd.io/"
   nn_endpoint_url     = "https://notm-preprod.service.hmpps.dsd.io/"
+  omic_ui_url         = "https://omic-preprod.service.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-preprod"
   google_analytics_id = ""
   maintain_roles_enabled = "true"

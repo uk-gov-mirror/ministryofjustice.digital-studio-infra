@@ -4,10 +4,6 @@ resource "aws_elastic_beanstalk_application" "app" {
   description = "omic-ui"
 }
 
-resource "random_id" "session-secret" {
-  byte_length = 40
-}
-
 resource "azurerm_resource_group" "group" {
   name     = "${local.azurerm_resource_group}"
   location = "${local.azure_region}"
@@ -263,6 +259,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "OMIC_UI_URL"
+    value     = "${local.omic_ui_url}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_ID"
     value     = "${local.api_client_id}"
   }
@@ -289,7 +290,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SESSION_COOKIE_SECRET"
-    value     = "${random_id.session-secret.b64}"
+    value     = "${data.aws_ssm_parameter.session-cookie-secret.value}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
