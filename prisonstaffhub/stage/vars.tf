@@ -20,6 +20,7 @@ locals {
   api_client_id       = "elite2apiclient"
   keyworker_api_url   = "https://keyworker-api-stage.hmpps.dsd.io/"
   nn_endpoint_url     = "https://notm-stage.hmpps.dsd.io/"
+  prison_staff_hub_ui_url = "https://prisonstaffhub-stage.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-stage"
   google_analytics_id = ""
 }
