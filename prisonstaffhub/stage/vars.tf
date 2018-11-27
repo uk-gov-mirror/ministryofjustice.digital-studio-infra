@@ -23,6 +23,7 @@ locals {
   prison_staff_hub_ui_url = "https://prisonstaffhub-stage.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-stage"
   google_analytics_id = ""
+  remote_auth_strategy = "true"
 }
 
 # Instance and Deployment settings
