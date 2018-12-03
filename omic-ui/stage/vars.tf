@@ -27,11 +27,13 @@ locals {
   api_client_id       = "elite2apiclient"
   keyworker_api_url   = "https://keyworker-api-stage.hmpps.dsd.io/"
   nn_endpoint_url     = "https://notm-stage.hmpps.dsd.io/"
+  omic_ui_url         = "https://omic-stage.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-stage"
   google_analytics_id = ""
   maintain_roles_enabled = "true"
   keyworker_profile_stats_enabled = "true"
   keyworker_dashboard_stats_enabled = "true"
+  remote_auth_strategy = "true"
 }
 
 # Azure config

@@ -4,10 +4,6 @@ resource "aws_elastic_beanstalk_application" "app" {
   description = "prisonstaffhub"
 }
 
-resource "random_id" "session-secret" {
-  byte_length = 40
-}
-
 resource "azurerm_resource_group" "group" {
   name     = "${local.azurerm_resource_group}"
   location = "${local.azure_region}"
@@ -257,6 +253,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "PRISON_STAFF_HUB_UI_URL"
+    value     = "${local.prison_staff_hub_ui_url}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_ID"
     value     = "${local.api_client_id}"
   }
@@ -283,7 +284,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SESSION_COOKIE_SECRET"
-    value     = "${random_id.session-secret.b64}"
+    value     = "${data.aws_ssm_parameter.session-cookie-secret.value}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -294,6 +295,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "GOOGLE_ANALYTICS_ID"
     value     = "${local.google_analytics_id}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "REMOTE_AUTH_STRATEGY"
+    value     = "${local.remote_auth_strategy}"
   }
   tags = "${var.tags}"
 }
