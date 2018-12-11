@@ -64,5 +64,12 @@ locals {
     "${var.ips["j5-phones-1"]}/32",
     "${var.ips["j5-phones-2"]}/32",
     "${var.ips["sodexo-northumberland"]}/32",
+    "${var.ips["sodexo-northumberland"]}/32",
+    "${var.ips["durham-tees-valley"]}/32",
+    "${var.ips["ark-nps-hmcts-ttp1"]}/24",
+    "${var.ips["ark-nps-hmcts-ttp2"]}/25",
+    "${var.ips["ark-nps-hmcts-ttp3"]}/25",
+    "${var.ips["ark-nps-hmcts-ttp4"]}/25",
+    "${var.ips["ark-nps-hmcts-ttp5"]}/25",
   ]
 }
