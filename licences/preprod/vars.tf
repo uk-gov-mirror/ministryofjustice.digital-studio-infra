@@ -29,9 +29,9 @@ variable "pdf-gen-tags" {
 
 # Instance and Deployment settings
 locals {
-  instance_size = "t2.medium"
   instances = "3"
   mininstances = "2"
+  instance_size = "t2.medium"
   db_multi_az = "true"
   db_backup_retention_period = "30"
   db_maintenance_window = "Mon:00:00-Sun:11:59"
