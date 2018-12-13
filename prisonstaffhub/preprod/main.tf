@@ -269,6 +269,16 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_SYSTEM_CLIENT_ID"
+    value     = "${local.api_system_client_id}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_SYSTEM_CLIENT_SECRET"
+    value     = "${data.aws_ssm_parameter.api-system-client-secret.value}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
     value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
