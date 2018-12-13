@@ -14,15 +14,16 @@ variable "tags" {
 
 # App settings
 locals {
-  api_base_endpoint   = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io"
-  api_endpoint_url    = "${local.api_base_endpoint}/elite2api/"
-  oauth_endpoint_url  = "${local.api_base_endpoint}/auth/"
-  api_client_id       = "elite2apiclient"
-  keyworker_api_url   = "https://keyworker-api-preprod.service.hmpps.dsd.io/"
-  nn_endpoint_url     = "https://notm-preprod.service.hmpps.dsd.io/"
+  api_base_endpoint       = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io"
+  api_endpoint_url        = "${local.api_base_endpoint}/elite2api/"
+  oauth_endpoint_url      = "${local.api_base_endpoint}/auth/"
+  api_client_id           = "elite2apiclient"
+  api_system_client_id    = "prisonstaffhubclient"
+  keyworker_api_url       = "https://keyworker-api-preprod.service.hmpps.dsd.io/"
+  nn_endpoint_url         = "https://notm-preprod.service.hmpps.dsd.io/"
   prison_staff_hub_ui_url = "https://prisonstaffhub-preprod.service.hmpps.dsd.io/"
-  hmpps_cookie_name   = "hmpps-session-preprod"
-  google_analytics_id = ""
+  hmpps_cookie_name       = "hmpps-session-preprod"
+  google_analytics_id     = ""
 }
 
 # Instance and Deployment settings
@@ -30,9 +31,7 @@ locals {
   instances = "3"
   mininstances = "2"
   instance_size = "t2.medium"
-
 }
-
 
 # Azure config
 locals {
