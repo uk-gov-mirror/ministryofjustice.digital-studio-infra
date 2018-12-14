@@ -192,6 +192,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "StreamLogs"
     value     = "true"
   }
+
   # Rolling updates
   setting {
     namespace = "aws:autoscaling:asg"
@@ -265,6 +266,16 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_SECRET"
     value     = "${data.aws_ssm_parameter.api-client-secret.value}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_SYSTEM_CLIENT_ID"
+    value     = "${local.api_system_client_id}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_SYSTEM_CLIENT_SECRET"
+    value     = "${data.aws_ssm_parameter.api-system-client-secret.value}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
