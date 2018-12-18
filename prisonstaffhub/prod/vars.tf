@@ -50,5 +50,6 @@ locals {
     "${var.ips["j5-phones-1"]}/32",
     "${var.ips["j5-phones-2"]}/32",
     "${var.ips["sodexo-northumberland"]}/32",
+    "${var.ips["thameside-private-prison"]}/32",
   ]
 }
