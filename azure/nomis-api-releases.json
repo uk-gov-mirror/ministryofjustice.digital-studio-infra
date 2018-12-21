@@ -7,6 +7,7 @@
     "Microsoft.ContainerRegistry/registries/*/write",
     "Microsoft.ContainerRegistry/registries/*/read",
     "Microsoft.ContainerRegistry/registries/listCredentials/*",
+    "Microsoft.Network/applicationGateways/backendhealth/action",
     "*/read"
   ],
   "NotActions": [
