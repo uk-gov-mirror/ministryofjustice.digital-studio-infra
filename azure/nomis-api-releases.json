@@ -6,7 +6,8 @@
     "Microsoft.KeyVault/vaults/*",
     "Microsoft.ContainerRegistry/registries/*/write",
     "Microsoft.ContainerRegistry/registries/*/read",
-    "Microsoft.ContainerRegistry/registries/listCredentials/*"
+    "Microsoft.ContainerRegistry/registries/listCredentials/*",
+    "*/read"
   ],
   "NotActions": [
     "Microsoft.KeyVault/vaults/accessPolicies/write",
