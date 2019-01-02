@@ -22,6 +22,10 @@ resource "random_id" "session-secret" {
   byte_length = 20
 }
 
+resource "random_id" "sql-mwhitfield-password" {
+  byte_length = 16
+}
+
 resource "random_id" "sql-iisuser-password" {
   byte_length = 16
 }
@@ -118,6 +122,7 @@ module "sql" {
 
   db_users {
     iisuser = "${random_id.sql-iisuser-password.b64}"
+    mwhitfield = "${random_id.sql-mwhitfield-password.b64}"
   }
 
   setup_queries = [
