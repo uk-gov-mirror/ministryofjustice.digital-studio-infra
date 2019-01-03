@@ -137,6 +137,7 @@ resource "azurerm_app_service" "app" {
     HMPPS_COOKIE_DOMAIN            = "hmpps.dsd.io"
     SESSION_COOKIE_SECRET          = "${data.external.vault.result.session_cookie_secret}"
     WEBSITE_NODE_DEFAULT_VERSION   = "8.10.0"
+    REMOTE_AUTH_STRATEGY           = "true"
   }
 
   tags = "${var.tags}"
