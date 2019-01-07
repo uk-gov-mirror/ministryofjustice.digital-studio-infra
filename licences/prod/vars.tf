@@ -44,7 +44,7 @@ locals {
   nomis_auth_url      = "https://gateway.prod.nomis-api.service.hmpps.dsd.io/auth"
   api_client_id       = "licences"
   domain              = "https://licences.service.hmpps.dsd.io"
-  authStrategy        = "local"
+  authStrategy        = "oauth"
 }
 
 # Azure config
