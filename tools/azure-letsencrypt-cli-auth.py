@@ -405,7 +405,7 @@ def certificate_renewal_due(fqdn):
             sys.exit()
     else:
         logging.info("Couldn't check certificate.")
-        sys.exit()
+        sys.exit(1)
 
 
 
