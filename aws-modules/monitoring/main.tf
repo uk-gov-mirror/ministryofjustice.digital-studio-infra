@@ -187,7 +187,7 @@ data "template_file" "monitoring_ec2_instance_user_data" {
 resource "aws_instance" "monitoring_ec2_instance" {
   ami                  = "${data.aws_ami.monitoring_ec2_default_ami.id}"
   instance_type        = "${local.default_ec2_instance_size}"
-  ebs_optimized        = true
+  ebs_optimized        = false
   iam_instance_profile = "${aws_iam_instance_profile.monitoring_iam_instance_profile.name}"
   key_name             = "${local.default_ec2_instance_key_pair}"
   user_data = "${data.template_file.monitoring_ec2_instance_user_data.rendered}"
