@@ -13,7 +13,7 @@ resource "aws_subnet" "monitoring_public_subnet" {
   depends_on = ["aws_internet_gateway.monitoring_igw"]
 }
 
-resorrce "aws_network_acl" "monitoring_default_nacl" {
+resource "aws_network_acl" "monitoring_default_nacl" {
     vpc_id = "${aws_vpc.monitoring_vpc.id}"
 }
 
