@@ -46,8 +46,8 @@ resource "aws_network_acl_rule" "monitoring_nacl_rule_all_out" {
     protocol       = "tcp"
     rule_action    = "allow"
     cidr_block     = "0.0.0.0/0"
-    from_port      = "*"
-    to_port        = "*"
+    from_port      = -1
+    to_port        = -1
 }
 
 resource "aws_internet_gateway" "monitoring_igw" {
