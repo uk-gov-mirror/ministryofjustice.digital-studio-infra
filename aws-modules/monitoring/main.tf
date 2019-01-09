@@ -9,7 +9,7 @@ resource "aws_vpc" "monitoring_vpc" {
 resource "aws_subnet" "monitoring_public_subnet" {
   vpc_id            = "${aws_vpc.monitoring_vpc.id}"
   cidr_block        = "${local.default_subnet_ip_range}"
-  availability_zone = "eu-west-2a"
+  availability_zone = "${local.default_availability_zone}"
 
   depends_on = ["aws_internet_gateway.monitoring_igw"]
 }
@@ -188,7 +188,7 @@ data "template_file" "monitoring_ec2_instance_user_data" {
 resource "aws_instance" "monitoring_ec2_instance" {
   ami                  = "${data.aws_ami.monitoring_ec2_default_ami.id}"
   instance_type        = "${local.default_ec2_instance_size}"
-  availability_zone    = "eu-west-2a"
+  availability_zone    = "${local.default_availability_zone}"
   ebs_optimized        = false
   iam_instance_profile = "${aws_iam_instance_profile.monitoring_iam_instance_profile.name}"
   key_name             = "${local.default_ec2_instance_key_pair}"
