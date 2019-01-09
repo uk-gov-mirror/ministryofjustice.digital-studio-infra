@@ -205,7 +205,7 @@ resource "aws_network_interface" "monitoring_ec2_nic" {
 resource "aws_network_interface_attachment" "test" {
   instance_id          = "${aws_instance.monitoring_ec2_instance.id}"
   network_interface_id = "${aws_network_interface.monitoring_ec2_nic.id}"
-  device_index         = 0
+  device_index         = 1
 }
 
 resource "aws_eip" "monitoring_eip" {
