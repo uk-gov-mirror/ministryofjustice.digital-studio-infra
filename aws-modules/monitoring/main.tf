@@ -204,7 +204,7 @@ resource "aws_instance" "monitoring_ec2_instance" {
 }
 
 resource "aws_network_interface" "monitoring_ec2_nic" {
-  subnet_id       = "${aws_subnet.public_a.id}"
+  subnet_id       = "${aws_subnet.monitoring_public_subnet.id}"
   private_ips     = ["${local.default_ec2_instance_private_ips}"]
   security_groups = ["${aws_security_group.monitoring_ec2_sg.id}"]
 
