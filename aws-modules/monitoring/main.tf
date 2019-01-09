@@ -115,8 +115,7 @@ resource "aws_iam_role" "monitoring_iam_role" {
                 "cloudwatch:GetMetricStatistics",
                 "cloudwatch:GetMetricData",
                 "cloudwatch:ListMetrics"
-            ],
-            "Resource": "*"
+            ]
         }
     ]
 }
