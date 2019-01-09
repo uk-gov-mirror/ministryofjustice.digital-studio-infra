@@ -43,11 +43,9 @@ resource "aws_network_acl_rule" "monitoring_nacl_rule_all_out" {
     network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
     rule_number    = 230
     egress         = true
-    protocol       = "tcp"
+    protocol       = "-1"
     rule_action    = "allow"
     cidr_block     = "0.0.0.0/0"
-    from_port      = -1
-    to_port        = -1
 }
 
 resource "aws_internet_gateway" "monitoring_igw" {
