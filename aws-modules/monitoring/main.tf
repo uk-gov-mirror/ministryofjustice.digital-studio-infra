@@ -199,13 +199,13 @@ resource "aws_network_interface" "monitoring_ec2_nic" {
   subnet_id       = "${aws_subnet.monitoring_public_subnet.id}"
   private_ips     = ["${local.default_ec2_instance_private_ips}"]
   security_groups = ["${aws_security_group.monitoring_ec2_sg.id}"]
-
-  attachment {
-    instance     = "${aws_instance.monitoring_ec2_instance.id}"
-    device_index = 1
-  }
-
   depends_on = ["aws_subnet.monitoring_public_subnet"]
+}
+
+resource "aws_network_interface_attachment" "test" {
+  instance_id          = "${aws_instance.monitoring_ec2_instance.id}"
+  network_interface_id = "${aws_network_interface.monitoring_ec2_nic.id}"
+  device_index         = 0
 }
 
 resource "aws_eip" "monitoring_eip" {
