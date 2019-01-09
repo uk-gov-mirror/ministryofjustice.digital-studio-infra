@@ -100,26 +100,20 @@ resource "aws_security_group_rule" "monitoring_sgrule_ssh_in" {
 
 ###### IAM CONFIGURATION ######
 
-resource "aws_iam_role" "monitoring_iam_role" {
-  name = "${local.default_iam_resource_name_root}-role"
+data "aws_iam_policy_document" "monitoring_iam_assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
 
-  assume_role_policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "1",
-            "Effect": "Allow",
-            "Action": [
-                "cloudwatch:PutMetricData",
-                "cloudwatch:GetMetricStatistics",
-                "cloudwatch:GetMetricData",
-                "cloudwatch:ListMetrics"
-            ]
-        }
-    ]
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
 }
-EOF
+
+resource "aws_iam_role" "monitoring_iam_role" {
+  name               = "${local.default_iam_resource_name_root}-role"
+  assume_role_policy = "${data.aws_iam_policy_document.monitoring_iam_assume_role_policy.json}"
 }
 
 resource "aws_iam_policy" "monitoring_iam_policy" {
