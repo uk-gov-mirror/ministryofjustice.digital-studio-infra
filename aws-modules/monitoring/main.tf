@@ -193,6 +193,11 @@ resource "aws_instance" "monitoring_ec2_instance" {
   iam_instance_profile = "${aws_iam_instance_profile.monitoring_iam_instance_profile.name}"
   key_name             = "${local.default_ec2_instance_key_pair}"
   user_data = "${data.template_file.monitoring_ec2_instance_user_data.rendered}"
+  
+  network_interface {
+    network_interface_id = "${aws_network_interface.monitoring_ec2_nic.id}"
+    device_index         = 0
+  } 
 }
 
 resource "aws_network_interface" "monitoring_ec2_nic" {
@@ -200,12 +205,6 @@ resource "aws_network_interface" "monitoring_ec2_nic" {
   private_ips     = ["${local.default_ec2_instance_private_ips}"]
   security_groups = ["${aws_security_group.monitoring_ec2_sg.id}"]
   depends_on = ["aws_subnet.monitoring_public_subnet"]
-}
-
-resource "aws_network_interface_attachment" "test" {
-  instance_id          = "${aws_instance.monitoring_ec2_instance.id}"
-  network_interface_id = "${aws_network_interface.monitoring_ec2_nic.id}"
-  device_index         = 1
 }
 
 resource "aws_eip" "monitoring_eip" {
