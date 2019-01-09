@@ -4,5 +4,5 @@ variable "environment-name" {
 }
 
 variable "key-pair-name" {
-   default =   "aj_dev"
+   default =   "cw_dev"
 }
