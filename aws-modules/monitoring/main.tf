@@ -65,7 +65,7 @@ resource "aws_default_route_table" "default_monitoring_rt" {
 
 resource "aws_route_table_association" "monitoring_rt_assoc" {
   subnet_id      = "${aws_subnet.monitoring_public_subnet.id}"
-  route_table_id = "${aws_route_table.default_monitoring_rt.id}"
+  route_table_id = "${aws_default_route_table.default_monitoring_rt.id}"
 }
 
 resource "aws_security_group" "monitoring_ec2_sg" {
