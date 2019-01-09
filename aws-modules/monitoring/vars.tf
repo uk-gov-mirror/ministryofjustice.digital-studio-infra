@@ -5,7 +5,7 @@ variable "key-pair-name" { type = "string" }
 # Instance and Deployment settings
 locals {
   default_environment_name = "${var.environment-name}"
-  default_iam_resource_name_root = "dso-${local.default_environment_name}-cloudwatch-"
+  default_iam_resource_name_root = "dso-${local.default_environment_name}-cloudwatch"
   default_vpc_ip_range = "192.168.0.0/24"
   default_subnet_ip_range = "192.168.0.0/28"
   allowed_inbound_ip = "217.33.148.210/32"
