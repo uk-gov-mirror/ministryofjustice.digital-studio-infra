@@ -63,6 +63,17 @@ resource "aws_network_acl_rule" "monitoring_nacl_rule_all_unpriv_in" {
     to_port        = "65535"
 }
 
+resource "aws_network_acl_rule" "monitoring_default_nacl_ssh_in" {
+    network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
+    rule_number    = 270
+    egress         = false
+    protocol       = "tcp"
+    rule_action    = "allow"
+    cidr_block     = "${local.allowed_inbound_ip}"
+    from_port      = "22"
+    to_port        = "22"
+}
+
 resource "aws_network_acl_rule" "monitoring_default_nacl_grafana_in" {
     network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
     rule_number    = 220
