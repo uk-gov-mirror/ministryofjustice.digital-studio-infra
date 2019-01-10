@@ -5,6 +5,5 @@ sudo service grafana-server start
 /sbin/chkconfig --add grafana-server
 # install required grafana plugins
 sudo grafana-cli plugins install smartmakers-trafficlight-panel
-sudo grafana-cli plugins install snuids-trafficlights-panel
 sudo grafana-cli plugins install michaeldmoore-annunciator-panel
 sudo grafana-cli plugins install vonage-status-panel
