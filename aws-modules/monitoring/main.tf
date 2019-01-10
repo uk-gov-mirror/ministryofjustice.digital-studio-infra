@@ -51,26 +51,16 @@ resource "aws_network_acl_rule" "monitoring_nacl_rule_https_all_in" {
     to_port        = "443"
 }
 
-resource "aws_network_acl_rule" "monitoring_nacl_rule_https_all_out" {
-    network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
-    rule_number    = 260
-    egress         = true
-    protocol       = "tcp"
-    rule_action    = "allow"
-    cidr_block     = "0.0.0.0/0"
-    from_port      = "443"
-    to_port        = "443"
-}
 
-resource "aws_network_acl_rule" "monitoring_nacl_rule_ssh_in" {
+resource "aws_network_acl_rule" "monitoring_nacl_rule_all_unpriv_in" {
     network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
     rule_number    = 210
     egress         = false
     protocol       = "tcp"
     rule_action    = "allow"
-    cidr_block     = "${local.allowed_inbound_ip}"
-    from_port      = "22"
-    to_port        = "22"
+    cidr_block     = "0.0.0.0/0"
+    from_port      = "1024"
+    to_port        = "65535"
 }
 
 resource "aws_network_acl_rule" "monitoring_default_nacl_grafana_in" {
