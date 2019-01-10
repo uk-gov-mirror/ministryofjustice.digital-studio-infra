@@ -28,8 +28,8 @@ resource "aws_subnet" "monitoring_public_subnet" {
   depends_on = ["aws_internet_gateway.monitoring_igw"]
 }
 
-resource "aws_network_acl" "monitoring_default_nacl" {
-    vpc_id = "${aws_vpc.monitoring_vpc.id}"
+resource "aws_default_network_acl" "monitoring_default_nacl" {
+    default_network_acl_id = "${aws_vpc.monitoring_vpc.default_network_acl_id}"
     
     tags = {
       Name = "${local.default_resource_name_root}-default-nacl"
