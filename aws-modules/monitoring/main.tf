@@ -54,7 +54,7 @@ resource "aws_network_acl_rule" "monitoring_nacl_rule_https_all_in" {
 
 resource "aws_network_acl_rule" "monitoring_nacl_rule_all_unpriv_in" {
     network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
-    rule_number    = 220
+    rule_number    = 230
     egress         = false
     protocol       = "tcp"
     rule_action    = "allow"
