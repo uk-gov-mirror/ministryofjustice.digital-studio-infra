@@ -9,6 +9,7 @@ variable "application-name" { type = "string" }
 locals {
   default_application_name = "${var.application-name}"
   default_environment_name = "${var.environment-name}"
+  default_resource_name_root = "${local.default_application_name}-${local.default_environment_name}"
   default_iam_resource_name_root = "dso-${local.default_environment_name}-cloudwatch"
   default_vpc_ip_range = "192.168.0.0/24"
   default_subnet_ip_range = "192.168.0.0/28"
