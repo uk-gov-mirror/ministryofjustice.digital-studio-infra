@@ -29,7 +29,7 @@ resource "aws_subnet" "monitoring_public_subnet" {
 }
 
 resource "aws_network_acl" "monitoring_default_nacl" {
-    default_network_acl_id = "${aws_vpc.monitoring_vpc.default_network_acl_id}"
+    vpc_id = "${aws_vpc.monitoring_vpc.id}"
     subnet_ids = ["${aws_subnet.monitoring_public_subnet.id}"]
     
     tags = {
