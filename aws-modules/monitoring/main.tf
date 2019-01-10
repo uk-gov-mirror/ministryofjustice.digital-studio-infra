@@ -4,18 +4,39 @@ resource "aws_vpc" "monitoring_vpc" {
   instance_tenancy     = "default"
   enable_dns_support   = true
   enable_dns_hostnames = true
+
+  tags = {
+    Name = "${local.default_resource_name_root}-vpc"
+    Environment = "${local.default_environment_name}"
+    Application = "${local.default_application_name}"
+    Owner = "DSO"
+  }
 }
 
 resource "aws_subnet" "monitoring_public_subnet" {
   vpc_id            = "${aws_vpc.monitoring_vpc.id}"
   cidr_block        = "${local.default_subnet_ip_range}"
   availability_zone = "${local.default_availability_zone}"
+  
+  tags = {
+    Name = "${local.default_resource_name_root}-subnet"
+    Environment = "${local.default_environment_name}"
+    Application = "${local.default_application_name}"
+    Owner = "DSO"
+  }
 
   depends_on = ["aws_internet_gateway.monitoring_igw"]
 }
 
 resource "aws_network_acl" "monitoring_default_nacl" {
     vpc_id = "${aws_vpc.monitoring_vpc.id}"
+    
+    tags = {
+      Name = "${local.default_resource_name_root}-default-nacl"
+      Environment = "${local.default_environment_name}"
+      Application = "${local.default_application_name}"
+      Owner = "DSO"
+    }
 }
 
 resource "aws_network_acl_rule" "monitoring_nacl_rule_ssh_in" {
@@ -51,10 +72,24 @@ resource "aws_network_acl_rule" "monitoring_nacl_rule_all_out" {
 
 resource "aws_internet_gateway" "monitoring_igw" {
   vpc_id = "${aws_vpc.monitoring_vpc.id}"
+
+  tags = {
+    Name = "${local.default_resource_name_root}-igw"
+    Environment = "${local.default_environment_name}"
+    Application = "${local.default_application_name}"
+    Owner = "DSO"
+  }
 }
 
 resource "aws_default_route_table" "default_monitoring_rt" {
   default_route_table_id = "${aws_vpc.monitoring_vpc.default_route_table_id}"
+
+  tags = {
+    Name = "${local.default_resource_name_root}-default-rt"
+    Environment = "${local.default_environment_name}"
+    Application = "${local.default_application_name}"
+    Owner = "DSO"
+  }
 
   route {
     cidr_block = "0.0.0.0/0"
@@ -70,6 +105,13 @@ resource "aws_route_table_association" "monitoring_rt_assoc" {
 resource "aws_security_group" "monitoring_ec2_sg" {
   name        = "${local.default_environment_name}_monitoring_sg"
   vpc_id      = "${aws_vpc.monitoring_vpc.id}"
+
+  tags = {
+    Name = "${local.default_resource_name_root}-default-sg"
+    Environment = "${local.default_environment_name}"
+    Application = "${local.default_application_name}"
+    Owner = "DSO"
+  }
 }
 
 resource "aws_security_group_rule" "monitoring_sgrule_allow_all_out" {
@@ -115,6 +157,13 @@ data "aws_iam_policy_document" "monitoring_iam_assume_role_policy" {
 resource "aws_iam_role" "monitoring_iam_role" {
   name               = "${local.default_iam_resource_name_root}-role"
   assume_role_policy = "${data.aws_iam_policy_document.monitoring_iam_assume_role_policy.json}"
+
+  tags = {
+    Name = "${local.default_iam_resource_name_root}-role"
+    Environment = "${local.default_environment_name}"
+    Application = "${local.default_application_name}"
+    Owner = "DSO"
+  }
 }
 
 resource "aws_iam_policy" "monitoring_iam_policy" {
@@ -153,6 +202,13 @@ resource "aws_iam_instance_profile" "monitoring_iam_instance_profile" {
 resource "aws_iam_user" "monitoring_iam_user" {
   name = "${local.default_iam_resource_name_root}-user"
   path = "/system/"
+
+  tags = {
+    Name = "${local.default_iam_resource_name_root}-user"
+    Environment = "${local.default_environment_name}"
+    Application = "${local.default_application_name}"
+    Owner = "DSO"
+  }
 }
 
 resource "aws_iam_access_key" "monitoring_iam_access_key" {
@@ -193,6 +249,13 @@ resource "aws_instance" "monitoring_ec2_instance" {
   iam_instance_profile = "${aws_iam_instance_profile.monitoring_iam_instance_profile.name}"
   key_name             = "${local.default_ec2_instance_key_pair}"
   user_data = "${data.template_file.monitoring_ec2_instance_user_data.rendered}"
+
+  tags = {
+    Name = "${local.default_resource_name_root}"
+    Environment = "${local.default_environment_name}"
+    Application = "${local.default_application_name}"
+    Owner = "DSO"
+  }
   
   network_interface {
     network_interface_id = "${aws_network_interface.monitoring_ec2_nic.id}"
@@ -204,10 +267,25 @@ resource "aws_network_interface" "monitoring_ec2_nic" {
   subnet_id       = "${aws_subnet.monitoring_public_subnet.id}"
   private_ips     = ["${local.default_ec2_instance_private_ips}"]
   security_groups = ["${aws_security_group.monitoring_ec2_sg.id}"]
+
+  tags = {
+    Name = "${local.default_resource_name_root}-nic"
+    Environment = "${local.default_environment_name}"
+    Application = "${local.default_application_name}"
+    Owner = "DSO"
+  }
+
   depends_on = ["aws_subnet.monitoring_public_subnet"]
 }
 
 resource "aws_eip" "monitoring_eip" {
   instance = "${aws_instance.monitoring_ec2_instance.id}"
   vpc      = true
+
+  tags = {
+    Name = "${local.default_resource_name_root}-eip"
+    Environment = "${local.default_environment_name}"
+    Application = "${local.default_application_name}"
+    Owner = "DSO"
+  }
 }
