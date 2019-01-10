@@ -40,7 +40,7 @@ resource "aws_default_network_acl" "monitoring_default_nacl" {
 }
 
 resource "aws_network_acl_rule" "monitoring_nacl_rule_ssh_in" {
-    network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
+    network_acl_id = "${aws_default_network_acl.monitoring_default_nacl.id}"
     rule_number    = 210
     egress         = false
     protocol       = "tcp"
@@ -51,7 +51,7 @@ resource "aws_network_acl_rule" "monitoring_nacl_rule_ssh_in" {
 }
 
 resource "aws_network_acl_rule" "monitoring_default_nacl_grafana_in" {
-    network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
+    network_acl_id = "${aws_default_network_acl.monitoring_default_nacl.id}"
     rule_number    = 220
     egress         = false
     protocol       = "tcp"
@@ -62,7 +62,7 @@ resource "aws_network_acl_rule" "monitoring_default_nacl_grafana_in" {
 }
 
 resource "aws_network_acl_rule" "monitoring_nacl_rule_all_out" {
-    network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
+    network_acl_id = "${aws_default_network_acl.monitoring_default_nacl.id}"
     rule_number    = 230
     egress         = true
     protocol       = "-1"
