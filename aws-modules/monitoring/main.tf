@@ -40,6 +40,28 @@ resource "aws_network_acl" "monitoring_default_nacl" {
     }
 }
 
+resource "aws_network_acl_rule" "monitoring_nacl_rule_https_all_in" {
+    network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
+    rule_number    = 250
+    egress         = false
+    protocol       = "tcp"
+    rule_action    = "allow"
+    cidr_block     = "0.0.0.0/0"
+    from_port      = "443"
+    to_port        = "443"
+}
+
+resource "aws_network_acl_rule" "monitoring_nacl_rule_https_all_out" {
+    network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
+    rule_number    = 260
+    egress         = true
+    protocol       = "tcp"
+    rule_action    = "allow"
+    cidr_block     = "0.0.0.0/0"
+    from_port      = "443"
+    to_port        = "443"
+}
+
 resource "aws_network_acl_rule" "monitoring_nacl_rule_ssh_in" {
     network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
     rule_number    = 210
