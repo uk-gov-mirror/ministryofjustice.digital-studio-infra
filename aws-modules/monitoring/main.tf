@@ -190,8 +190,10 @@ resource "aws_iam_policy" "monitoring_iam_policy" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "monitoring_iam_policy_attachment" {
-  role       = "${aws_iam_role.monitoring_iam_role.name}"
+resource "aws_iam_policy_attachment" "monitoring_iam_policy_attachment" {
+  name       = "${local.default_iam_resource_name_root}-policy-attachment"
+  users      = ["${aws_iam_user.monitoring_iam_user.name}"]
+  roles      = "${aws_iam_role.monitoring_iam_role.name}"
   policy_arn = "${aws_iam_policy.monitoring_iam_policy.arn}"
 }
 
