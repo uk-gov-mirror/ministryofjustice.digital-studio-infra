@@ -42,7 +42,7 @@ resource "aws_network_acl" "monitoring_default_nacl" {
 
 resource "aws_network_acl_rule" "monitoring_nacl_rule_https_all_in" {
     network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
-    rule_number    = 250
+    rule_number    = 210
     egress         = false
     protocol       = "tcp"
     rule_action    = "allow"
@@ -54,7 +54,7 @@ resource "aws_network_acl_rule" "monitoring_nacl_rule_https_all_in" {
 
 resource "aws_network_acl_rule" "monitoring_nacl_rule_all_unpriv_in" {
     network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
-    rule_number    = 210
+    rule_number    = 220
     egress         = false
     protocol       = "tcp"
     rule_action    = "allow"
@@ -76,7 +76,7 @@ resource "aws_network_acl_rule" "monitoring_default_nacl_grafana_in" {
 
 resource "aws_network_acl_rule" "monitoring_nacl_rule_all_out" {
     network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
-    rule_number    = 230
+    rule_number    = 210
     egress         = true
     protocol       = "-1"
     rule_action    = "allow"
