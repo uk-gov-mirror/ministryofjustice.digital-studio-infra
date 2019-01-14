@@ -74,6 +74,17 @@ resource "aws_network_acl_rule" "monitoring_default_nacl_ssh_in" {
     to_port        = "22"
 }
 
+resource "aws_network_acl_rule" "monitoring_default_nacl_ssh_vpn_in" {
+    network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
+    rule_number    = 270
+    egress         = false
+    protocol       = "tcp"
+    rule_action    = "allow"
+    cidr_block     = "${local.allowed_inbound_vpn_ip}"
+    from_port      = "22"
+    to_port        = "22"
+}
+
 resource "aws_network_acl_rule" "monitoring_default_nacl_grafana_in" {
     network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
     rule_number    = 220
@@ -81,6 +92,17 @@ resource "aws_network_acl_rule" "monitoring_default_nacl_grafana_in" {
     protocol       = "tcp"
     rule_action    = "allow"
     cidr_block     = "${local.allowed_inbound_ip}"
+    from_port      = "3000"
+    to_port        = "3000"
+}
+
+resource "aws_network_acl_rule" "monitoring_default_nacl_grafana_vpn_in" {
+    network_acl_id = "${aws_network_acl.monitoring_default_nacl.id}"
+    rule_number    = 220
+    egress         = false
+    protocol       = "tcp"
+    rule_action    = "allow"
+    cidr_block     = "${local.allowed_inbound_vpn_ip}"
     from_port      = "3000"
     to_port        = "3000"
 }
@@ -156,6 +178,15 @@ resource "aws_security_group_rule" "monitoring_sgrule_grafana_in" {
   security_group_id = "${aws_security_group.monitoring_ec2_sg.id}"
 }
 
+resource "aws_security_group_rule" "monitoring_sgrule_grafana_vpn_in" {
+  type            = "ingress"
+  from_port       = 3000
+  to_port         = 3000
+  protocol        = "tcp"
+  cidr_blocks     = ["${local.allowed_inbound_vpn_ip}"]
+  security_group_id = "${aws_security_group.monitoring_ec2_sg.id}"
+}
+
 resource "aws_security_group_rule" "monitoring_sgrule_https_in" {
   type            = "ingress"
   from_port       = 443
@@ -171,6 +202,15 @@ resource "aws_security_group_rule" "monitoring_sgrule_ssh_in" {
   to_port         = 22
   protocol        = "tcp"
   cidr_blocks     = ["${local.allowed_inbound_ip}"]
+  security_group_id = "${aws_security_group.monitoring_ec2_sg.id}"
+}
+
+resource "aws_security_group_rule" "monitoring_sgrule_ssh_vpn_in" {
+  type            = "ingress"
+  from_port       = 22
+  to_port         = 22
+  protocol        = "tcp"
+  cidr_blocks     = ["${local.allowed_inbound_vpn_ip}"]
   security_group_id = "${aws_security_group.monitoring_ec2_sg.id}"
 }
 
