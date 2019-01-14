@@ -149,7 +149,7 @@ resource "aws_route_table_association" "monitoring_rt_assoc" {
 }
 
 resource "aws_security_group" "monitoring_ec2_sg" {
-  name        = "${local.default_environment_name}_monitoring_sg"
+  name        = "${local.default_environment_name}-monitoring-sg"
   vpc_id      = "${aws_vpc.monitoring_vpc.id}"
 
   tags = {
