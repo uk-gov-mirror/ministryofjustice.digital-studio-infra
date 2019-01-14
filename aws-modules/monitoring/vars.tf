@@ -13,6 +13,7 @@ locals {
   default_iam_resource_name_root = "dso-${local.default_environment_name}-cloudwatch"
   default_vpc_ip_range = "192.168.0.0/24"
   default_subnet_ip_range = "192.168.0.0/28"
+  allowed_inbound_vpn_ip = "81.134.202.29/32"
   allowed_inbound_ip = "217.33.148.210/32"
   default_ec2_instance_size = "t2.small"
   default_availability_zone = "eu-west-2a"
