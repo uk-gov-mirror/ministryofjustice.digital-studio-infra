@@ -30,6 +30,7 @@ locals {
   omic_ui_url         = "https://omic-dev.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-dev"
   google_analytics_id = "UA-106741063-1"
+  google_tag_manager_id = "GTM-5RS6PLB"
   maintain_roles_enabled = "true"
   keyworker_profile_stats_enabled = "true"
   keyworker_dashboard_stats_enabled = "true"
