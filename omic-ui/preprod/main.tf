@@ -304,6 +304,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "GOOGLE_TAG_MANAGER_ID"
+    value     = "${local.google_tag_manager_id}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "MAINTAIN_ROLES_ENABLED"
     value     = "${local.maintain_roles_enabled}"
   }
