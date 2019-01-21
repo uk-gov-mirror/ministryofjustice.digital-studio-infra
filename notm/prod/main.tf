@@ -115,8 +115,8 @@ resource "azurerm_app_service" "app" {
   app_settings {
     APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
     NODE_ENV                       = "production"
-    API_ENDPOINT_URL               = "https://gateway.nomis-api.service.justice.gov.uk/elite2api/"
-    OAUTH_ENDPOINT_URL             = "https://gateway.nomis-api.service.justice.gov.uk/auth/"
+    API_ENDPOINT_URL               = "https://gateway.prod.nomis-api.service.hmpps.dsd.io/elite2api/"
+    OAUTH_ENDPOINT_URL             = "https://gateway.prod.nomis-api.service.hmpps.dsd.io/auth/"
     KEYWORKER_API_URL              = "https://keyworker-api.service.hmpps.dsd.io/"
     NN_ENDPOINT_URL                = "https://notm.service.hmpps.dsd.io/"
     OMIC_UI_URL                    = "https://omic.service.hmpps.dsd.io/"
