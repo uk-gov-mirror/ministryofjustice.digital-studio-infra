@@ -21,7 +21,7 @@ locals {
 
 # App settings
 locals {
-  api_base_endpoint   = "https://gateway.nomis-api.service.justice.gov.uk"
+  api_base_endpoint   = "https://gateway.prod.nomis-api.service.hmpps.dsd.io"
   api_endpoint_url    = "${local.api_base_endpoint}/elite2api/"
   oauth_endpoint_url   = "${local.api_base_endpoint}/auth/"
   api_client_id       = "elite2apiclient"
