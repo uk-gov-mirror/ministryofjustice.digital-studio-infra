@@ -21,7 +21,7 @@ locals {
 }
 
 locals {
-  api_base_endpoint      = "https://gateway.nomis-api.service.justice.gov.uk"
+  api_base_endpoint      = "https://gateway.prod.nomis-api.service.hmpps.dsd.io"
   elite2_uri_root        = "${local.api_base_endpoint}/elite2api"
   auth_uri_root          = "${local.api_base_endpoint}/auth"
   omic_clientid          = "omicadmin"
