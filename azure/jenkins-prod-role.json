@@ -11,7 +11,8 @@
     "Microsoft.KeyVault/vaults/*",
     "Microsoft.Web/serverfarms/*",
     "Microsoft.Network/applicationGateways/read",
-    "Microsoft.Network/applicationGateways/write"
+    "Microsoft.Network/applicationGateways/write",
+    "Microsoft.Storage/storageAccounts/listKeys/action"
   ],
   "NotActions": [
     "Microsoft.KeyVault/vaults/accessPolicies/write",
