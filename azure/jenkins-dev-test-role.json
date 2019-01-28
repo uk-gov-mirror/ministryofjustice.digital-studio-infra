@@ -1,5 +1,5 @@
 {
-  "Name": "digital-studio-jenkins",
+  "Name": "digital-studio-jenkins-dev",
   "IsCustom": true,
   "Description": "All permissions needed for jenkins jobs",
   "Actions": [
@@ -11,7 +11,8 @@
     "Microsoft.KeyVault/vaults/*",
     "Microsoft.Web/serverfarms/*",
     "Microsoft.Network/applicationGateways/read",
-    "Microsoft.Network/applicationGateways/write"
+    "Microsoft.Network/applicationGateways/write",
+    "Microsoft.Storage/storageAccounts/listKeys/action"
   ],
   "NotActions": [
     "Microsoft.KeyVault/vaults/accessPolicies/write",
@@ -19,6 +20,6 @@
   ],
   "AssignableScopes": [
     "/subscriptions/c27cfedb-f5e9-45e6-9642-0fad1a5c94e7",
-    "/subscriptions/9a1c1490-f6f1-4aca-aa75-17be8d7dd5fb"
+    "/subscriptions/b1f3cebb-4988-4ff9-9259-f02ad7744fcb"
   ]
 }
