@@ -105,6 +105,41 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "aws-elasticbeanstalk-ec2-role"
   }
 
+    #>>> HEALTH MONITORING
+
+  setting {
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs"
+    name      = "StreamLogs"
+    value     = "true"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs"
+    name      = "RetentionInDays"
+    value     = "7"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:healthreporting:system"
+    name      = "SystemType"
+    value     = "enhanced"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:healthreporting:system"
+    name      = "ConfigDocument"
+    value     = "${file("../../shared/aws_eb_health_config.json")}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs:health"
+    name      = "HealthStreamingEnabled"
+    value     = "true"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs:health"
+    name      = "RetentionInDays"
+    value     = "7"
+  }
+
+  #<<< HEALTH MONITORING
+
   setting {
     namespace = "aws:elasticbeanstalk:application"
     name      = "Application Healthcheck URL"
