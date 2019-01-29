@@ -53,4 +53,5 @@ locals {
   studio_ip      = "217.33.148.210"
   health_kick_ip = "35.177.252.195"
   moj_vpn_ip      = "81.134.202.29"
+  prod_forti_ip  = "51.141.55.2"
 }
