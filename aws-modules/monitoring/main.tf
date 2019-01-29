@@ -169,15 +169,6 @@ resource "aws_security_group_rule" "monitoring_sgrule_allow_all_out" {
   security_group_id = "${aws_security_group.monitoring_ec2_sg.id}"
 }
 
-resource "aws_security_group_rule" "monitoring_sgrule_deny_all_in" {
-  type            = "ingress"
-  from_port       = 0
-  to_port         = 65535
-  protocol        = "tcp"
-  cidr_blocks     = ["0.0.0.0/0"]
-  security_group_id = "${aws_security_group.monitoring_ec2_sg.id}"
-}
-
 resource "aws_security_group_rule" "monitoring_sgrule_grafana_in" {
   type            = "ingress"
   from_port       = 3000
