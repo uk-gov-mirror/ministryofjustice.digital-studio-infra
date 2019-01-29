@@ -176,7 +176,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:healthreporting:system"
     name      = "ConfigDocument"
-    value     = "${file("health_config.json")}"
+    value     = "${file("../../shared/aws_eb_health_config.json")}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:cloudwatch:logs:health"
