@@ -21,6 +21,7 @@ locals {
   api_system_client_id    = "prisonstaffhubclient"
   keyworker_api_url       = "https://keyworker-api.service.hmpps.dsd.io/"
   nn_endpoint_url         = "https://notm.service.hmpps.dsd.io/"
+  licences_endpoint_url   = "https://licences.service.hmpps.dsd.io/"
   prison_staff_hub_ui_url = "https://prisonstaffhub.service.hmpps.dsd.io/"
   hmpps_cookie_name       = "hmpps-session-prod"
   google_analytics_id     = "UA-106741063-2"
