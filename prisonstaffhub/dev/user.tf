@@ -84,21 +84,6 @@ resource "aws_iam_group_policy" "deployers" {
             ]
         },
         {
-            "Effect": "Allow",
-            "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:GetLogEvents",
-                "logs:PutLogEvents",
-                "logs:DescribeLogGroups",
-                "logs:DescribeLogStreams",
-                "logs:PutRetentionPolicy"
-            ],
-            "Resource": [
-                "arn:aws:logs:${var.aws_region}:${var.aws_account_id}:*"
-            ]
-        },
-        {
             "Action": [
                 "elasticloadbalancing:DescribeInstanceHealth",
                 "elasticloadbalancing:DescribeLoadBalancers",
