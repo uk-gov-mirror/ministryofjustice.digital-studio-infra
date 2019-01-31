@@ -20,12 +20,13 @@ locals {
 
 # App settings
 locals {
-  nomis_api_url       = "https://licences-demo-mocks.herokuapp.com/elite2api"
-  nomis_auth_url      = "https://licences-demo-mocks.herokuapp.com/elite2api"
+  nomis_api_url       = "https://licences-demo-mocks.herokuapp.com/elite2api/api"
+  nomis_auth_url      = "https://licences-demo-mocks.herokuapp.com/elite2api/api"
   api_client_id       = "licences"
   pdf_service_host    = "https://licences-nomis-mocks.herokuapp.com"
   domain              = "https://licences-mock.hmpps.dsd.io"
   authStrategy        = "local"
+  global_search_url   = "https://prisonstaffhub-dev.hmpps.dsd.io/global-search"
 }
 
 # Azure config
