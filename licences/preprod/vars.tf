@@ -45,6 +45,7 @@ locals {
   api_client_id       = "licences"
   domain              = "https://licences-preprod.service.hmpps.dsd.io"
   authStrategy        = "oauth"
+  global_search_url   = "https://prisonstaffhub-preprod.service.hmpps.dsd.io/global-search"
 }
 
 # Azure config
