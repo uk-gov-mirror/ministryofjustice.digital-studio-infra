@@ -251,7 +251,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MinSize"
-    value     = "${local.mininstances == "0" ? 1 : local.mininstances}}"
+    value     = "${local.mininstances == "0" ? 1 : local.mininstances}"
   }
 
   setting {
