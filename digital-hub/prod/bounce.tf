@@ -145,7 +145,7 @@ resource "azurerm_virtual_machine" "hub-bounce-prod-vm" {
   location              = "uksouth"
   resource_group_name   = "${azurerm_resource_group.hub-bounce-prod.name}"
   network_interface_ids = ["${azurerm_network_interface.hub-bounce-prod-ni.id}"]
-  vm_size               = "Basic_A0"
+  vm_size               = "Standard_B1ms"
 
   storage_image_reference {
     publisher = "Canonical"
