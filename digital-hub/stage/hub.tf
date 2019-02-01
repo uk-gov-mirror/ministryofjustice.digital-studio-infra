@@ -131,7 +131,7 @@ resource "azurerm_virtual_machine" "hub" {
   location              = "uksouth"
   resource_group_name   = "${azurerm_resource_group.group.name}"
   network_interface_ids = ["${azurerm_network_interface.hub.id}"]
-  vm_size               = "Standard_A2_v2"
+  vm_size               = "Standard_B1ms"
 
   boot_diagnostics {
     enabled     = true
