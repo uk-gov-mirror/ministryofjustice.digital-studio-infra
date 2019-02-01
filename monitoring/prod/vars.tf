@@ -3,6 +3,10 @@ variable "environment-name" {
     default = "prod"
 }
 
+variable "application-name" {
+  default = "monitoring"
+}
+
 variable "key-pair-name" {
-   default =   "aj_dev"
+   default =   "cw_prod"
 }
