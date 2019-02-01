@@ -368,3 +368,15 @@ resource "aws_eip" "monitoring_eip" {
     Owner = "DSO"
   }
 }
+
+#### DOMAIN NAME RESOLUTION ####
+
+resource "azurerm_dns_a_record" "monitoring_dns_a_record" {
+  name                = "dso-${local.default_application_name}-${local.default_environment_name}"
+  zone_name           = "${azurerm_dns_zone.hmpps.name}"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  ttl                 = 300
+  records             = ["${aws_eip.monitoring_eip.public_ip}"]
+
+  depends_on = ["aws_eip.monitoring_eip"]
+}
