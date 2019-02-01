@@ -380,3 +380,13 @@ resource "azurerm_dns_a_record" "monitoring_dns_a_record" {
 
   depends_on = ["aws_eip.monitoring_eip"]
 }
+
+resource "azurerm_dns_cname_record" "monitoring_dns_cname_record" {
+  name                = "dso-${local.default_application_name}-${local.default_environment_name}"
+  zone_name           = "${azurerm_dns_zone.hmpps.name}"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+  ttl                 = 300
+  records             = ["${aws_instance.monitoring_ec2_instance.public_dns}"]
+
+  depends_on = ["aws_instance.monitoring_ec2_instance"]
+}
