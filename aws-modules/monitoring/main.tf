@@ -1,4 +1,4 @@
-###### VPC (networking) CONFIGURATION ######
+#### VPC (NETWORKING) CONFIGURATION ####
 resource "aws_vpc" "monitoring_vpc" {
   cidr_block           = "${local.default_vpc_ip_range}"
   instance_tenancy     = "default"
@@ -27,6 +27,8 @@ resource "aws_subnet" "monitoring_public_subnet" {
 
   depends_on = ["aws_internet_gateway.monitoring_igw"]
 }
+
+#### VPC (SECURITY) CONFIGURATION #### 
 
 resource "aws_network_acl" "monitoring_default_nacl" {
     vpc_id = "${aws_vpc.monitoring_vpc.id}"
@@ -290,7 +292,7 @@ resource "aws_iam_access_key" "monitoring_iam_access_key" {
   user    = "${aws_iam_user.monitoring_iam_user.name}"
 }
 
-###### EC2 CONFIGURATION ######
+##### EC2 CONFIGURATION #####
 
 data "aws_ami" "monitoring_ec2_default_ami" {
   owners      = ["679593333241"]
@@ -337,6 +339,8 @@ resource "aws_instance" "monitoring_ec2_instance" {
     device_index         = 0
   } 
 }
+
+#### INSTANCE NETWORKING ####
 
 resource "aws_network_interface" "monitoring_ec2_nic" {
   subnet_id       = "${aws_subnet.monitoring_public_subnet.id}"
