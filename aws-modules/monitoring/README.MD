@@ -51,6 +51,11 @@ The values of following local variables can be overriden:
 ``` default_ec2_instance_size ``` -- size of an instance to be deployed **(t2.small recommended)**
 ```default_availability_zone``` -- the AZ for the instance to be deplyed into
 
+### Module outputs
+To simplify management the following outputs have been introduced: 
+- ```monitoring_ip``` - IP of an EC2 instance that can be used for management/Grafana access
+- ```monitoring_dns_urls``` - URL of a DNS CNAME record and a public instance DNS name
+
 ### Current limitations, known issues and TODOs
 The following issues and limitations have been found so far: 
 - automated delivery of Grafana dashboards to an EC2 instance
