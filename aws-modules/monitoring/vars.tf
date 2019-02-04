@@ -4,9 +4,15 @@ variable "key-pair-name" { type = "string" }
 
 variable "application-name" { type = "string" }
 
+variable "dns-zone-name" {type = "string"}
+
+variable "dns-zone-rg" {type = "string"}
+
 
 # Instance and Deployment settings
 locals {
+  default_dns_zone = "${var.dns-zone-name}"
+  default_dns_resource_group = "${var.dns-zone-rg}"
   default_application_name = "${var.application-name}"
   default_environment_name = "${var.environment-name}"
   default_resource_name_root = "${local.default_application_name}-${local.default_environment_name}"

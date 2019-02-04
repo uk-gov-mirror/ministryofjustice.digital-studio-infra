@@ -10,3 +10,11 @@ variable "application-name" {
 variable "key-pair-name" {
    default =   "cw_dev"
 }
+
+variable "dns-zone-name" {
+  default = "hmpps.dsd.io"
+}
+
+variable "dns-zone-rg" {
+  default = "webops"
+ }
