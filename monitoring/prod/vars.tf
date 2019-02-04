@@ -1,6 +1,6 @@
 variable "environment-name" {
     type = "string"
-    default = "prod"
+    default = "dev"
 }
 
 variable "application-name" {
@@ -8,5 +8,13 @@ variable "application-name" {
 }
 
 variable "key-pair-name" {
-   default =   "cw_prod"
+   default =   "cw_dev"
 }
+
+variable "dns-zone-name" {
+  default = "service.hmpps.dsd.io"
+}
+
+variable "dns-zone-rg" {
+  default = "webops-prod"
+ }
