@@ -1,11 +1,7 @@
-output "ec2_instance_ip" {
-  value = "${module.monitoring.ec2_instance_ip}"
+output "monitoring_ip" {
+  value = "${module.monitoring.monitoring_ip}"
 }
 
-output "ec2_instance_dns" {
-  value = "${module.monitoring.ec2_instance_dns}"
-}
-
-output "ec2_instance_secret" {
-  value = "${module.monitoring.ec2_instance_secret}"
+output "monitoring_dns" {
+  value = "${module.monitoring.monitoring_dns_urls}"
 }

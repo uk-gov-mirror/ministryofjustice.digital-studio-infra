@@ -1,4 +1,4 @@
-###### VPC (networking) CONFIGURATION ######
+#### VPC (NETWORKING) CONFIGURATION ####
 resource "aws_vpc" "monitoring_vpc" {
   cidr_block           = "${local.default_vpc_ip_range}"
   instance_tenancy     = "default"
@@ -27,6 +27,8 @@ resource "aws_subnet" "monitoring_public_subnet" {
 
   depends_on = ["aws_internet_gateway.monitoring_igw"]
 }
+
+#### VPC (SECURITY) CONFIGURATION #### 
 
 resource "aws_network_acl" "monitoring_default_nacl" {
     vpc_id = "${aws_vpc.monitoring_vpc.id}"
@@ -290,7 +292,7 @@ resource "aws_iam_access_key" "monitoring_iam_access_key" {
   user    = "${aws_iam_user.monitoring_iam_user.name}"
 }
 
-###### EC2 CONFIGURATION ######
+##### EC2 CONFIGURATION #####
 
 data "aws_ami" "monitoring_ec2_default_ami" {
   owners      = ["679593333241"]
@@ -338,6 +340,8 @@ resource "aws_instance" "monitoring_ec2_instance" {
   } 
 }
 
+#### INSTANCE NETWORKING ####
+
 resource "aws_network_interface" "monitoring_ec2_nic" {
   subnet_id       = "${aws_subnet.monitoring_public_subnet.id}"
   private_ips     = ["${local.default_ec2_instance_private_ips}"]
@@ -363,4 +367,26 @@ resource "aws_eip" "monitoring_eip" {
     Application = "${local.default_application_name}"
     Owner = "DSO"
   }
+}
+
+#### DOMAIN NAME RESOLUTION ####
+
+resource "azurerm_dns_a_record" "monitoring_dns_a_record" {
+  name                = "dso-${local.default_application_name}-${local.default_environment_name}"
+  zone_name           = "${local.default_dns_zone}"
+  resource_group_name = "${local.default_dns_resource_group}"
+  ttl                 = 300
+  records             = ["${aws_eip.monitoring_eip.public_ip}"]
+
+  depends_on = ["aws_eip.monitoring_eip"]
+}
+
+resource "azurerm_dns_cname_record" "monitoring_dns_cname_record" {
+  name                = "dso-${local.default_application_name}-${local.default_environment_name}"
+  zone_name           = "${local.default_dns_zone}"
+  resource_group_name = "${local.default_dns_resource_group}"
+  ttl                 = 300
+  record             = "${aws_instance.monitoring_ec2_instance.public_dns}"
+
+  depends_on = ["aws_instance.monitoring_ec2_instance"]
 }
