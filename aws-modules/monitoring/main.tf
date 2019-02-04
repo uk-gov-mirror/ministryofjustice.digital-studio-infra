@@ -386,7 +386,7 @@ resource "azurerm_dns_cname_record" "monitoring_dns_cname_record" {
   zone_name           = "${local.default_dns_zone}"
   resource_group_name = "${local.default_dns_resource_group}"
   ttl                 = 300
-  records             = ["${aws_instance.monitoring_ec2_instance.public_dns}"]
+  record             = "${aws_instance.monitoring_ec2_instance.public_dns}"
 
   depends_on = ["aws_instance.monitoring_ec2_instance"]
 }
