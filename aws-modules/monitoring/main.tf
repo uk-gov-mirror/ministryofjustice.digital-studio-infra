@@ -372,7 +372,7 @@ resource "aws_eip" "monitoring_eip" {
 #### DOMAIN NAME RESOLUTION ####
 
 resource "azurerm_dns_a_record" "monitoring_dns_a_record" {
-  name                = "dso-${local.default_application_name}-${local.default_environment_name}"
+  name                = "dso-${local.default_application_name}-${local.default_environment_name}-a"
   zone_name           = "${local.default_dns_zone}"
   resource_group_name = "${local.default_dns_resource_group}"
   ttl                 = 300
@@ -382,7 +382,7 @@ resource "azurerm_dns_a_record" "monitoring_dns_a_record" {
 }
 
 resource "azurerm_dns_cname_record" "monitoring_dns_cname_record" {
-  name                = "dso-${local.default_application_name}-${local.default_environment_name}"
+  name                = "dso-${local.default_application_name}-${local.default_environment_name}-cname"
   zone_name           = "${local.default_dns_zone}"
   resource_group_name = "${local.default_dns_resource_group}"
   ttl                 = 300
