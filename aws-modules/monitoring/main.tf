@@ -373,8 +373,8 @@ resource "aws_eip" "monitoring_eip" {
 
 resource "azurerm_dns_a_record" "monitoring_dns_a_record" {
   name                = "dso-${local.default_application_name}-${local.default_environment_name}"
-  zone_name           = "${local.dns_zone_name}"
-  resource_group_name = "${local.dns_zone_rg}"
+  zone_name           = "${local.default_dns_zone}"
+  resource_group_name = "${local.default_dns_resource_group}"
   ttl                 = 300
   records             = ["${aws_eip.monitoring_eip.public_ip}"]
 
@@ -383,8 +383,8 @@ resource "azurerm_dns_a_record" "monitoring_dns_a_record" {
 
 resource "azurerm_dns_cname_record" "monitoring_dns_cname_record" {
   name                = "dso-${local.default_application_name}-${local.default_environment_name}"
-  zone_name           = "${local.dns_zone_name}"
-  resource_group_name = "${local.dns_zone_rg}"
+  zone_name           = "${local.default_dns_zone}"
+  resource_group_name = "${local.default_dns_resource_group}"
   ttl                 = 300
   records             = ["${aws_instance.monitoring_ec2_instance.public_dns}"]
 
