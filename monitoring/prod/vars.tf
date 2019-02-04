@@ -8,7 +8,7 @@ variable "application-name" {
 }
 
 variable "key-pair-name" {
-   default =   "cw_dev"
+   default =   "cw_prod"
 }
 
 variable "dns-zone-name" {
