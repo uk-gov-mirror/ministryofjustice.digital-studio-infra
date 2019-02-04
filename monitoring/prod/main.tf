@@ -12,5 +12,5 @@ locals {
   key_pair_name = "${var.key-pair-name}"
   application_name = "${var.application-name}"
   dns_zone_name = "${var.dns-zone-name}"
-  dns_zone_rg = "${var.dns-zone-name}"
+  dns_zone_rg = "${var.dns-zone-rg}"
 }
