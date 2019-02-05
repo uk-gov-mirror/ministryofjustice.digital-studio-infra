@@ -72,5 +72,8 @@ locals {
     "${var.ips["ark-nps-hmcts-ttp4"]}/25",
     "${var.ips["ark-nps-hmcts-ttp5"]}/25",
     "${var.ips["interservfls"]}/32",
+    "${var.ips["sodexo1"]}/32",
+    "${var.ips["sodexo2"]}/32",
+    "${var.ips["sodexo3"]}/32",
   ]
 }
