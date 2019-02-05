@@ -20,6 +20,9 @@ variable "ips" {
     ark-nps-hmcts-ttp5          = "194.33.197.0"
     thameside-private-prison    = "217.22.14.151"
     interservfls                = "51.179.196.131"
+    sodexo1                     = "80.86.46.16"
+    sodexo2                     = "80.86.46.17"
+    sodexo3                     = "80.86.46.18"
   }
 }
 
