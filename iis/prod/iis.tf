@@ -135,6 +135,7 @@ module "sql" {
     "GRANT SELECT ON SCHEMA::HPA TO iisuser",
     "GRANT SELECT ON SCHEMA::IIS TO iisuser",
     "GRANT SELECT, INSERT, DELETE ON SCHEMA::NON_IIS TO iisuser",
+    "ALTER ROLE db_datareader ADD MEMBER sgandalwar",
   ]
 }
 
