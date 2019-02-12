@@ -28,6 +28,9 @@ resource "random_id" "sql-atodd-password" {
 resource "random_id" "sql-mwhitfield-password" {
     byte_length = 16
 }
+resource "random_id" "sql-sgandalwar-password" {
+  byte_length = 16
+}
 
 resource "azurerm_storage_account" "storage" {
     name = "${replace(var.app-name, "-", "")}storage"
@@ -118,6 +121,7 @@ module "sql" {
         iisuser = "${random_id.sql-iisuser-password.b64}"
         atodd = "${random_id.sql-atodd-password.b64}"
         mwhitfield = "${random_id.sql-mwhitfield-password.b64}"
+        sgandalwar = "${random_id.sql-sgandalwar-password.b64}"
     }
 
     setup_queries = [
