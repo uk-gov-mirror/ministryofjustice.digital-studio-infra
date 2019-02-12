@@ -194,7 +194,12 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
     ip7  = "${var.ips["j5-phones-1"]}"
     ip8  = "${var.ips["j5-phones-2"]}"
     ip9  = "${var.ips["sodexo-northumberland"]}"
-    ip10 = "${var.ips["thameside-private-prison"]}",
+    ip10 = "${var.ips["thameside-private-prison"]}"
+    ip11 = "${var.ips["ark-nps-hmcts-ttp1"]}/24"
+    ip12 = "${var.ips["ark-nps-hmcts-ttp2"]}/25"
+    ip13 = "${var.ips["ark-nps-hmcts-ttp3"]}/25"
+    ip14 = "${var.ips["ark-nps-hmcts-ttp4"]}/25"
+    ip15 = "${var.ips["ark-nps-hmcts-ttp5"]}/25",
   }
 }
 
