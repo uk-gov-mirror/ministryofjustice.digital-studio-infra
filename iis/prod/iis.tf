@@ -123,7 +123,6 @@ module "sql" {
   db_users {
     iisuser = "${random_id.sql-iisuser-password.b64}"
     mwhitfield = "${random_id.sql-mwhitfield-password.b64}"
-    sgandalwar = "${random_id.sql-sgandalwar-password.b64}"
   }
 
   setup_queries = [
