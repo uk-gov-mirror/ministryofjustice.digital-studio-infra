@@ -30,10 +30,6 @@ resource "random_id" "sql-iisuser-password" {
   byte_length = 16
 }
 
-resource "random_id" "sql-sgandalwar-password" {
-  byte_length = 16
-}
-
 resource "azurerm_storage_account" "storage" {
   name                     = "${replace(var.app-name, "-", "")}storage"
   resource_group_name      = "${azurerm_resource_group.group.name}"
@@ -135,7 +131,6 @@ module "sql" {
     "GRANT SELECT ON SCHEMA::HPA TO iisuser",
     "GRANT SELECT ON SCHEMA::IIS TO iisuser",
     "GRANT SELECT, INSERT, DELETE ON SCHEMA::NON_IIS TO iisuser",
-    "ALTER ROLE db_datareader ADD MEMBER sgandalwar",
   ]
 }
 
