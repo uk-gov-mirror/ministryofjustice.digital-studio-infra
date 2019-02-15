@@ -28,6 +28,7 @@ locals {
   keyworker_api_url   = "https://keyworker-api-preprod.service.hmpps.dsd.io/"
   nn_endpoint_url     = "https://notm-preprod.service.hmpps.dsd.io/"
   omic_ui_url         = "https://omic-preprod.service.hmpps.dsd.io/"
+  prison_staff_hub_ui_url = "https://prisonstaffhub-preprod.service.hmpps.dsd.io/"
   hmpps_cookie_name   = "hmpps-session-preprod"
   google_analytics_id = ""
   google_tag_manager_id = "GTM-5RS6PLB"
