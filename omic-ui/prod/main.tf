@@ -279,6 +279,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "PRISON_STAFF_HUB_UI_URL"
+    value     = "${local.prison_staff_hub_ui_url}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_ID"
     value     = "${local.api_client_id}"
   }
