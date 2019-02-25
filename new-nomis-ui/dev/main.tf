@@ -4,13 +4,16 @@ resource "aws_elastic_beanstalk_application" "app" {
   description = "notm"
 }
 
+# TODO: required? (this is in OMIC too)
 resource "azurerm_resource_group" "group" {
   name     = "${local.azurerm_resource_group}"
   location = "${local.azure_region}"
   tags     = "${var.tags}"
 }
 
+# TODO: Required?  (this is in OMIC too)
 resource "azurerm_application_insights" "insights" {
+
   name                = "${var.app-name}"
   location            = "North Europe"
   resource_group_name = "${azurerm_resource_group.group.name}"
@@ -18,6 +21,7 @@ resource "azurerm_application_insights" "insights" {
 }
 
 resource "aws_security_group" "elb" {
+
   name        = "${var.app-name}-elb"
   vpc_id      = "${aws_vpc.vpc.id}"
   description = "ELB"
@@ -82,6 +86,7 @@ data "aws_elastic_beanstalk_solution_stack" "docker" {
 }
 
 resource "aws_elastic_beanstalk_environment" "app-env" {
+
   name                = "${var.app-name}"
   application         = "${aws_elastic_beanstalk_application.app.name}"
   solution_stack_name = "${data.aws_elastic_beanstalk_solution_stack.docker.name}"
@@ -278,102 +283,122 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "1"
   }
 
+  #
   # Begin app-specific config settings
+  #
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_ENDPOINT_URL"
     value     = "${local.api_endpoint_url}"
   }
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "OAUTH_ENDPOINT_URL"
     value     = "${local.oauth_endpoint_url}"
   }
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "KEYWORKER_API_URL"
     value     = "${local.keyworker_api_url}"
   }
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NN_ENDPOINT_URL"
     value     = "${local.nn_endpoint_url}"
   }
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "OMIC_UI_URL"
     value     = "${local.omic_ui_url}"
   }
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "PRISON_STAFF_HUB_UI_URL"
     value     = "${local.prison_staff_hub_ui_url}"
   }
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_ID"
     value     = "${local.api_client_id}"
   }
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "API_CLIENT_SECRET"
     value     = "${data.aws_ssm_parameter.api-client-secret.value}"
   }
+
+  # TODO: Azure insights - required?
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
     value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_NAME"
     value     = "${local.hmpps_cookie_name}"
   }
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "HMPPS_COOKIE_DOMAIN"
     value     = "${local.azure_dns_zone_name}"
   }
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "SESSION_COOKIE_SECRET"
     value     = "${data.aws_ssm_parameter.session-cookie-secret.value}"
   }
+
+  # TODO: uestion this !
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NODE_ENV"
     value     = "production"
   }
+
+  # TODO: What is the correct value for this?
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "GOOGLE_ANALYTICS_ID"
     value     = "${local.google_analytics_id}"
   }
+
+  # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "GOOGLE_TAG_MANAGER_ID"
     value     = "${local.google_tag_manager_id}"
   }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "MAINTAIN_ROLES_ENABLED"
-    value     = "${local.maintain_roles_enabled}"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "KEYWORKER_PROFILE_STATS_ENABLED"
-    value     = "${local.keyworker_profile_stats_enabled}"
-  }
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "KEYWORKER_DASHBOARD_STATS_ENABLED"
-    value     = "${local.keyworker_dashboard_stats_enabled}"
-  }
+
+  # Checke
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "REMOTE_AUTH_STRATEGY"
     value     = "${local.remote_auth_strategy}"
   }
+
   tags = "${var.tags}"
 }
 
@@ -389,6 +414,7 @@ resource "aws_acm_certificate" "cert" {
   tags              = "${var.tags}"
 }
 
+# Azure - required?
 resource "azurerm_dns_cname_record" "cname" {
   name                = "${local.cname}"
   zone_name           = "${local.azure_dns_zone_name}"
@@ -401,6 +427,7 @@ locals {
   aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
 }
 
+# Azure - required?
 resource "azurerm_dns_cname_record" "acm-verify" {
   name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
   zone_name           = "${local.azure_dns_zone_name}"
