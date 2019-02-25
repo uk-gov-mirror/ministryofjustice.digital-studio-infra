@@ -1,3 +1,8 @@
+
+# TODO: Quick discussion about this would be useful?
+#  Q. Are all applications allocated the same CIDR blocks internally?
+#  Q. What configuration is required in the Application Gateway to address this service?
+
 resource "aws_vpc" "vpc" {
   cidr_block                       = "192.168.0.0/24"
   instance_tenancy                 = "default"
