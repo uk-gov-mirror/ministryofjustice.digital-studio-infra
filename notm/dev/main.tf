@@ -1,175 +1,17 @@
-variable "app-name" {
-  type    = "string"
-  default = "notm-dev"
+# This resource is managed in multiple places (all notm environments)
+resource "aws_elastic_beanstalk_application" "app" {
+  name        = "notm"
+  description = "notm"
 }
 
-variable "tags" {
-  type = "map"
-
-  default {
-    Service     = "NOTM"
-    Environment = "Dev"
-  }
-}
-
+# TODO: Required?
 resource "azurerm_resource_group" "group" {
   name     = "${var.app-name}"
   location = "ukwest"
   tags     = "${var.tags}"
 }
 
-resource "azurerm_storage_account" "storage" {
-  name                     = "${replace(var.app-name, "-", "")}storage"
-  resource_group_name      = "${azurerm_resource_group.group.name}"
-  location                 = "${azurerm_resource_group.group.location}"
-  account_tier             = "Standard"
-  account_replication_type = "RAGRS"
-  enable_blob_encryption   = true
-
-  tags = "${var.tags}"
-}
-
-variable "log-containers" {
-  type    = "list"
-  default = ["web-logs"]
-}
-
-resource "azurerm_storage_container" "logs" {
-  count                 = "${length(var.log-containers)}"
-  name                  = "${var.log-containers[count.index]}"
-  resource_group_name   = "${azurerm_resource_group.group.name}"
-  storage_account_name  = "${azurerm_storage_account.storage.name}"
-  container_access_type = "private"
-}
-
-resource "azurerm_key_vault" "vault" {
-  name                = "${var.app-name}"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  location            = "${azurerm_resource_group.group.location}"
-
-  sku {
-    name = "standard"
-  }
-
-  tenant_id = "${var.azure_tenant_id}"
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_webops_group_oid}"
-    key_permissions    = []
-    secret_permissions = "${var.azure_secret_permissions_all}"
-  }
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_app_service_oid}"
-    key_permissions    = []
-    secret_permissions = ["get"]
-  }
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_jenkins_sp_oid}"
-    key_permissions    = []
-    secret_permissions = ["set"]
-  }
-
-  access_policy {
-    tenant_id          = "${var.azure_tenant_id}"
-    object_id          = "${var.azure_notm_group_oid}"
-    key_permissions    = []
-    secret_permissions = "${var.azure_secret_permissions_all}"
-  }
-
-  enabled_for_deployment          = false
-  enabled_for_disk_encryption     = false
-  enabled_for_template_deployment = true
-
-  tags = "${var.tags}"
-}
-
-data "external" "vault" {
-  program = ["python3", "../../tools/keyvault-data-cli-auth.py"]
-
-  query {
-    vault                   = "${azurerm_key_vault.vault.name}"
-    google_tag_manager_id   = "google-tag-manager-id"
-    api_client_secret       = "api-client-secret"
-    session_cookie_secret   = "session-cookie-secret"
-  }
-}
-
-resource "azurerm_app_service_plan" "app" {
-  name                = "${var.app-name}"
-  location            = "${azurerm_resource_group.group.location}"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-
-  sku {
-    tier     = "Standard"
-    size     = "S1"
-    capacity = 1
-  }
-
-  tags = "${var.tags}"
-}
-
-resource "azurerm_app_service" "app" {
-  name                = "${var.app-name}"
-  location            = "${azurerm_resource_group.group.location}"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  app_service_plan_id = "${azurerm_app_service_plan.app.id}"
-
-  app_settings {
-    APPINSIGHTS_INSTRUMENTATIONKEY = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
-    NODE_ENV                       = "production"
-    API_ENDPOINT_URL               = "https://gateway.t3.nomis-api.hmpps.dsd.io/elite2api/"
-    OAUTH_ENDPOINT_URL             = "https://gateway.t3.nomis-api.hmpps.dsd.io/auth/"
-    KEYWORKER_API_URL              = "https://keyworker-api-dev.hmpps.dsd.io/"
-    NN_ENDPOINT_URL                = "https://notm-dev.hmpps.dsd.io/"
-    OMIC_UI_URL                    = "https://omic-dev.hmpps.dsd.io/"
-    WHEREABOUTS_UI_URL             = "https://prisonstaffhub-dev.hmpps.dsd.io/whereaboutssearch"
-    ESTABLISHMENT_ROLLCHECK_URL    = "https://prisonstaffhub-dev.hmpps.dsd.io/establishmentroll"
-    PRISON_STAFF_HUB_UI_URL        = "https://prisonstaffhub-dev.hmpps.dsd.io/"
-    API_CLIENT_ID                  = "elite2apiclient"
-    API_CLIENT_SECRET              = "${data.external.vault.result.api_client_secret}"
-    GOOGLE_TAG_MANAGER_ID          = "${data.external.vault.result.google_tag_manager_id}"
-    HMPPS_COOKIE_NAME              = "hmpps-session-dev"
-    HMPPS_COOKIE_DOMAIN            = "hmpps.dsd.io"
-    SESSION_COOKIE_SECRET          = "${data.external.vault.result.session_cookie_secret}"
-    WEBSITE_NODE_DEFAULT_VERSION   = "8.10.0"
-    REMOTE_AUTH_STRATEGY           = "true"
-  }
-
-  tags = "${var.tags}"
-}
-
-data "external" "sas-url" {
-  program = ["python3", "../../tools/container-sas-url-cli-auth.py"]
-
-  query {
-    subscription_id = "${var.azure_subscription_id}"
-    tenant_id       = "${var.azure_tenant_id}"
-    resource_group  = "${azurerm_resource_group.group.name}"
-    storage_account = "${azurerm_storage_account.storage.name}"
-    container       = "web-logs"
-    permissions     = "rwdl"
-    start_date      = "2017-05-15T00:00:00Z"
-    end_date        = "2217-05-15T00:00:00Z"
-  }
-}
-
-resource "azurerm_template_deployment" "webapp-weblogs" {
-  name                = "webapp-weblogs"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/appservice-weblogs.template.json")}"
-
-  parameters {
-    name       = "${azurerm_app_service.app.name}"
-    storageSAS = "${data.external.sas-url.result["url"]}"
-  }
-}
-
+# TODO: Required?
 resource "azurerm_template_deployment" "insights" {
   name                = "${var.app-name}"
   resource_group_name = "${azurerm_resource_group.group.name}"
@@ -184,33 +26,399 @@ resource "azurerm_template_deployment" "insights" {
   }
 }
 
-resource "azurerm_template_deployment" "webapp-ssl" {
-  name                = "webapp-ssl"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/appservice-ssl.template.json")}"
+resource "aws_security_group" "elb" {
 
-  parameters {
-    name             = "${azurerm_app_service.app.name}"
-    hostname         = "${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}"
-    keyVaultId       = "${azurerm_key_vault.vault.id}"
-    keyVaultCertName = "${replace("${azurerm_dns_cname_record.cname.name}.${azurerm_dns_cname_record.cname.zone_name}", ".", "DOT")}"
-    service          = "${var.tags["Service"]}"
-    environment      = "${var.tags["Environment"]}"
+  name        = "${var.app-name}-elb"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "ELB"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = "${local.allowed-list}"
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = "${local.allowed-list}"
+  }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["${aws_subnet.private-a.cidr_block}","${aws_subnet.private-b.cidr_block}"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-elb"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
-module "slackhook" {
-  source   = "../../shared/modules/slackhook"
-  app_name = "${azurerm_app_service.app.name}"
-  channels = ["nomisonthemove"]
+resource "aws_security_group" "ec2" {
+  name        = "${var.app-name}-ec2"
+  vpc_id      = "${aws_vpc.vpc.id}"
+  description = "elasticbeanstalk EC2 instances"
+
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = ["${aws_security_group.elb.id}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 65535
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = "${merge(map("Name", "${var.app-name}-ec2"), var.tags)}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
-resource "azurerm_dns_cname_record" "cname" {
-  name                = "notm-dev"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
-  ttl                 = "300"
-  record              = "${var.app-name}.azurewebsites.net"
-  tags                = "${var.tags}"
+data "aws_elastic_beanstalk_solution_stack" "docker" {
+  most_recent = true
+  name_regex  = "^64bit Amazon Linux .* v2.* running Docker *.*$"
 }
+
+resource "aws_elastic_beanstalk_environment" "app-env" {
+
+  name                = "${var.app-name}"
+  application         = "${aws_elastic_beanstalk_application.app.name}"
+  solution_stack_name = "${data.aws_elastic_beanstalk_solution_stack.docker.name}"
+  tier                = "WebServer"
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.ec2.id}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "InstanceType"
+    value     = "${local.instance_size}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "IamInstanceProfile"
+    value     = "aws-elasticbeanstalk-ec2-role"
+  }
+
+  #>>> HEALTH MONITORING
+
+  setting {
+    namespace = "aws:elasticbeanstalk:healthreporting:system"
+    name      = "SystemType"
+    value     = "enhanced"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:healthreporting:system"
+    name      = "ConfigDocument"
+    value     = "${file("../../shared/aws_eb_health_config.json")}"
+  }
+
+  #<<< HEALTH MONITORING
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application"
+    name      = "Application Healthcheck URL"
+    value     = "/health"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "HealthCheckPath"
+    value     = "/health"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment"
+    name      = "ServiceRole"
+    value     = "aws-elasticbeanstalk-service-role"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment"
+    name      = "LoadBalancerType"
+    value     = "application"
+  }
+
+  setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "ManagedSecurityGroup"
+    value     = "${aws_security_group.elb.id}"
+  }
+
+  setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "SecurityGroups"
+    value     = "${aws_security_group.elb.id}"
+  }
+
+  setting {
+    namespace = "aws:elbv2:listener:443"
+    name      = "Protocol"
+    value     = "HTTPS"
+  }
+
+  setting {
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLCertificateArns"
+    value     = "${aws_acm_certificate.cert.arn}"
+  }
+
+  setting {
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLPolicy"
+    value     = "${local.elb_ssl_policy}"
+  }
+
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "VPCId"
+    value     = "${aws_vpc.vpc.id}"
+  }
+
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "Subnets"
+    value     = "${aws_subnet.private-a.id},${aws_subnet.private-b.id}"
+  }
+
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "ELBSubnets"
+    value     = "${aws_subnet.public-a.id},${aws_subnet.public-b.id}"
+  }
+
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "AssociatePublicIpAddress"
+    value     = "false"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:healthreporting:system"
+    name      = "SystemType"
+    value     = "enhanced"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:managedactions"
+    name      = "ManagedActionsEnabled"
+    value     = "true"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:managedactions"
+    name      = "PreferredStartTime"
+    value     = "Fri:10:00"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:managedactions:platformupdate"
+    name      = "UpdateLevel"
+    value     = "minor"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:managedactions:platformupdate"
+    name      = "InstanceRefreshEnabled"
+    value     = "true"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs"
+    name      = "StreamLogs"
+    value     = "true"
+  }
+
+  #
+  # Rolling updates
+  #
+
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MinSize"
+    value     = "${local.mininstances == "0" ? 1 : local.mininstances}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MaxSize"
+    value     = "${local.instances + (local.instances == local.mininstances ? 1 : 0)}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateEnabled"
+    value     = "${local.mininstances == "0" ? "false" : "true"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "RollingUpdateType"
+    value     = "Health"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MinInstancesInService"
+    value     = "${local.mininstances}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:command"
+    name      = "DeploymentPolicy"
+    value     = "${local.instances == local.mininstances ? "RollingWithAdditionalBatch" : "Rolling"}"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+    name      = "MaxBatchSize"
+    value     = "1"
+  }
+
+  #
+  # Begin app-specific config settings
+  #
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_ENDPOINT_URL"
+    value     = "${local.api_endpoint_url}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "OAUTH_ENDPOINT_URL"
+    value     = "${local.oauth_endpoint_url}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "KEYWORKER_API_URL"
+    value     = "${local.keyworker_api_url}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NN_ENDPOINT_URL"
+    value     = "${local.nn_endpoint_url}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "OMIC_UI_URL"
+    value     = "${local.omic_ui_url}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "PRISON_STAFF_HUB_UI_URL"
+    value     = "${local.prison_staff_hub_ui_url}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_CLIENT_ID"
+    value     = "${local.api_client_id}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_CLIENT_SECRET"
+    value     = "${data.aws_ssm_parameter.api-client-secret.value}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
+    value     = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "HMPPS_COOKIE_NAME"
+    value     = "${local.hmpps_cookie_name}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "HMPPS_COOKIE_DOMAIN"
+    value     = "${local.azure_dns_zone_name}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SESSION_COOKIE_SECRET"
+    value     = "${data.aws_ssm_parameter.session-cookie-secret.value}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NODE_ENV"
+    value     = "production"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "GOOGLE_TAG_MANAGER_ID"
+    value     = "${data.aws_ssm_parameter.google-tag-manager-id.value}"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "REMOTE_AUTH_STRATEGY"
+    value     = "${local.remote_auth_strategy}"
+  }
+
+  tags = "${var.tags}"
+}
+
+locals {
+  cname = "${replace(var.app-name,"-prod","")}"
+}
+
+# TODO: Required? Allow AWS's ACM to manage the apps FQDN
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
+  validation_method = "DNS"
+  tags              = "${var.tags}"
+}
+
+# TODO: Required?
+resource "azurerm_dns_cname_record" "cname" {
+  name                = "${local.cname}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
+  ttl                 = "60"
+  record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
+}
+
+locals {
+  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
+}
+
+# TODO: Azure - required?
+resource "azurerm_dns_cname_record" "acm-verify" {
+  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
+  ttl                 = "300"
+  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
+}
+
