@@ -1,22 +1,3 @@
-variable "app-name" {
-  type    = "string"
-  default = "notm-stage"
-}
-
-variable "tags" {
-  type = "map"
-
-  default {
-    Service     = "NOTM"
-    Environment = "Stage"
-  }
-}
-
-resource "azurerm_resource_group" "group" {
-  name     = "${var.app-name}"
-  location = "ukwest"
-  tags     = "${var.tags}"
-}
 
 resource "azurerm_storage_account" "storage" {
   name                     = "${replace(var.app-name, "-", "")}storage"
@@ -170,19 +151,6 @@ resource "azurerm_template_deployment" "webapp-weblogs" {
   }
 }
 
-resource "azurerm_template_deployment" "insights" {
-  name                = "${var.app-name}"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/insights.template.json")}"
-
-  parameters {
-    name        = "${var.app-name}"
-    location    = "northeurope"                // Not in UK yet
-    service     = "${var.tags["Service"]}"
-    environment = "${var.tags["Environment"]}"
-  }
-}
 
 resource "azurerm_template_deployment" "webapp-ssl" {
   name                = "webapp-ssl"
