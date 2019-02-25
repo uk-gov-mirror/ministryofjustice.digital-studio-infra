@@ -1,7 +1,7 @@
-# This resource is managed in multiple places (all omic-ui environments)
+# This resource is managed in multiple places (all notm environments)
 resource "aws_elastic_beanstalk_application" "app" {
-  name        = "omic-ui"
-  description = "omic-ui"
+  name        = "notm"
+  description = "notm"
 }
 
 resource "azurerm_resource_group" "group" {
