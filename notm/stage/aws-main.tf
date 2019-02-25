@@ -410,7 +410,6 @@ resource "aws_acm_certificate" "cert" {
   tags              = "${var.tags}"
 }
 
-# Azure - required?
 resource "azurerm_dns_cname_record" "cname" {
   name                = "${local.cname}"
   zone_name           = "${local.azure_dns_zone_name}"

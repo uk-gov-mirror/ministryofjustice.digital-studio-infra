@@ -7,7 +7,7 @@ variable "tags" {
   type = "map"
 
   default {
-    Service     = "notm"
+    Service     = "NOTM"
     Environment = "Stage"
   }
 }

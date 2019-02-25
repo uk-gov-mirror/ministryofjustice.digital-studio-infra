@@ -174,11 +174,3 @@ module "slackhook" {
   channels = ["nomisonthemove"]
 }
 
-resource "azurerm_dns_cname_record" "cname" {
-  name                = "notm-stage"
-  zone_name           = "hmpps.dsd.io"
-  resource_group_name = "webops"
-  ttl                 = "300"
-  record              = "${var.app-name}.azurewebsites.net"
-  tags                = "${var.tags}"
-}
