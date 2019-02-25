@@ -4,20 +4,25 @@ resource "aws_elastic_beanstalk_application" "app" {
   description = "notm"
 }
 
-# TODO: required? (this is in OMIC too)
+
 resource "azurerm_resource_group" "group" {
-  name     = "${local.azurerm_resource_group}"
-  location = "${local.azure_region}"
+  name     = "${var.app-name}"
+  location = "ukwest"
   tags     = "${var.tags}"
 }
 
-# TODO: Required?  (this is in OMIC too)
-resource "azurerm_application_insights" "insights" {
-
+resource "azurerm_template_deployment" "insights" {
   name                = "${var.app-name}"
-  location            = "North Europe"
   resource_group_name = "${azurerm_resource_group.group.name}"
-  application_type    = "Web"
+  deployment_mode     = "Incremental"
+  template_body       = "${file("../../shared/insights.template.json")}"
+
+  parameters {
+    name        = "${var.app-name}"
+    location    = "northeurope"                // Not in UK yet
+    service     = "${var.tags["Service"]}"
+    environment = "${var.tags["Environment"]}"
+  }
 }
 
 resource "aws_security_group" "elb" {
@@ -343,11 +348,10 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "${data.aws_ssm_parameter.api-client-secret.value}"
   }
 
-  # TODO: Azure insights - required?
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${azurerm_application_insights.insights.instrumentation_key}"
+    value     = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
   }
 
   # Checked
@@ -371,25 +375,17 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "${data.aws_ssm_parameter.session-cookie-secret.value}"
   }
 
-  # TODO: uestion this !
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "NODE_ENV"
     value     = "production"
   }
 
-  # TODO: What is the correct value for this?
-  setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "GOOGLE_ANALYTICS_ID"
-    value     = "${local.google_analytics_id}"
-  }
-
   # Checked
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "GOOGLE_TAG_MANAGER_ID"
-    value     = "${local.google_tag_manager_id}"
+    value     = "${data.aws_ssm_parameter.google-tag-manager-id.value}"
   }
 
   # Checke
