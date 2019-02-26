@@ -411,14 +411,13 @@ resource "aws_acm_certificate" "cert" {
   tags              = "${var.tags}"
 }
 
-# TODO: Required?
-//resource "azurerm_dns_cname_record" "cname" {
-//  name                = "${local.cname}"
-//  zone_name           = "${local.azure_dns_zone_name}"
-//  resource_group_name = "${local.azure_dns_zone_rg}"
-//  ttl                 = "60"
-//  record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
-//}
+resource "azurerm_dns_cname_record" "cname" {
+  name                = "${local.cname}"
+  zone_name           = "${local.azure_dns_zone_name}"
+  resource_group_name = "${local.azure_dns_zone_rg}"
+  ttl                 = "60"
+  record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
+}
 
 locals {
   aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
