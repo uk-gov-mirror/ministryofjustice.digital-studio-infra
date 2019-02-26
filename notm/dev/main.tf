@@ -4,6 +4,17 @@ resource "aws_elastic_beanstalk_application" "app" {
   description = "notm"
 }
 
+resource "azurerm_storage_account" "storage" {
+  name                     = "${replace(var.app-name, "-", "")}storage"
+  resource_group_name      = "${azurerm_resource_group.group.name}"
+  location                 = "${azurerm_resource_group.group.location}"
+  account_tier             = "Standard"
+  account_replication_type = "RAGRS"
+  enable_blob_encryption   = true
+
+  tags = "${var.tags}"
+}
+
 # TODO: Required?
 resource "azurerm_resource_group" "group" {
   name     = "${var.app-name}"
@@ -401,13 +412,13 @@ resource "aws_acm_certificate" "cert" {
 }
 
 # TODO: Required?
-resource "azurerm_dns_cname_record" "cname" {
-  name                = "${local.cname}"
-  zone_name           = "${local.azure_dns_zone_name}"
-  resource_group_name = "${local.azure_dns_zone_rg}"
-  ttl                 = "60"
-  record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
-}
+//resource "azurerm_dns_cname_record" "cname" {
+//  name                = "${local.cname}"
+//  zone_name           = "${local.azure_dns_zone_name}"
+//  resource_group_name = "${local.azure_dns_zone_rg}"
+//  ttl                 = "60"
+//  record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
+//}
 
 locals {
   aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
