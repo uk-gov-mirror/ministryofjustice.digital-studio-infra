@@ -12,7 +12,7 @@ PROD_S3_BUCKET="elasticbeanstalk-eu-west-2-${PROD_ACCOUNT_ID}"
 LOGGED_IN=$(aws sts get-caller-identity --output text --query 'Account')
 
 display_usage() {
-  echo -e "\nUsage: $0 [app] [mock|dev|stage|preprod|prod] [version]\n"
+  echo -e "\nUsage: $0 [app] [dev|stage|preprod|prod] [version]\n"
 }
 
 check_app_exists() {
@@ -77,8 +77,7 @@ generate_version_json() {
   case "$APP" in
     ("keyworker-api") containerport="8080" ;;
     ("licences-pdf") containerport="8080" ;;
-    ("prisonstaffhub") containerimage="whereabouts" ;;
-  esac  
+  esac
 
   APP_VERSION_JSON="
 {
@@ -123,7 +122,7 @@ if !(check_app_exists); then
   exit 1
 fi
 
-if [[ "$ENV" =~ ^(dev|mock|stage)$ ]]; then
+if [[ "$ENV" =~ ^(dev|stage)$ ]]; then
     echo "Deploying: APP=${APP}, ENV=${ENV}, VERSION=${VERSION}"
     deploy_to_devtest 
 elif [[ "$ENV" =~ ^(preprod)$ ]]; then
