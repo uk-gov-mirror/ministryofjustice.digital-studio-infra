@@ -75,6 +75,7 @@ generate_version_json() {
   containerport="3000"
   containerimage=$APP
   case "$APP" in
+    ("notm") containerimage="new-nomis-ui" ;;
     ("keyworker-api") containerport="8080" ;;
     ("licences-pdf") containerport="8080" ;;
   esac
