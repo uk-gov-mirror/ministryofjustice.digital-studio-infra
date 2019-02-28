@@ -41,6 +41,10 @@ locals {
 }
 
 # Allow list of network IPS to access this service
+# the /32 subnets are specific host IP addresses
+# The /24 subnets allow access from of upto 255 IP addresses
+# The /25 subnets allow access from a CIDR block of upto 127 IP addresses
+
 locals {
   allowed-list = [
     "${var.ips["office"]}/32",
@@ -49,6 +53,15 @@ locals {
     "${var.ips["digitalprisons1"]}/32",
     "${var.ips["digitalprisons2"]}/32",
     "${var.ips["mojvpn"]}/32",
+    "${var.ips["j5-phones-1"]}/32",
+    "${var.ips["j5-phones-2"]}/32",
+    "${var.ips["sodexo-northumberland"]}/32",
+    "${var.ips["thameside-private-prison"]}/32",
+    "${var.ips["ark-nps-hmcts-ttp1"]}/32",
+    "${var.ips["ark-nps-hmcts-ttp2"]}/24",
+    "${var.ips["ark-nps-hmcts-ttp3"]}/25",
+    "${var.ips["ark-nps-hmcts-ttp4"]}/25",
+    "${var.ips["ark-nps-hmcts-ttp5"]}/25",
   ]
 }
 
