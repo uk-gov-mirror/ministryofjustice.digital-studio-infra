@@ -172,11 +172,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "HTTPS"
   }
 
-//  setting {
-//    namespace = "aws:elbv2:listener:443"
-//    name      = "SSLCertificateArns"
-//    value     = "${aws_acm_certificate.cert.arn}"
-//  }
+  setting {
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLCertificateArns"
+    value     = "${aws_acm_certificate.cert.arn}"
+  }
 
   setting {
     namespace = "aws:elbv2:listener:443"
@@ -414,16 +414,16 @@ resource "aws_lb_listener_rule" "redirect_http_to_https" {
 }
 
 
-# locals {
-#   cname = "${replace(var.app-name,"-prod","")}"
-# }
-# 
-# # Allow AWS's ACM to manage the apps FQDN
-# resource "aws_acm_certificate" "cert" {
-#   domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
-#   validation_method = "DNS"
-#   tags              = "${var.tags}"
-# }
+locals {
+  cname = "${replace(var.app-name,"-prod","")}"
+}
+
+# Allow AWS's ACM to manage the apps FQDN
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
+  validation_method = "DNS"
+  tags              = "${var.tags}"
+}
 # 
 # resource "azurerm_dns_cname_record" "cname" {
 #   name                = "${local.cname}"
