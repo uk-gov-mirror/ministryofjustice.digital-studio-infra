@@ -10,18 +10,11 @@ resource "azurerm_resource_group" "group" {
   tags     = "${var.tags}"
 }
 
-resource "azurerm_template_deployment" "insights" {
+resource "azurerm_application_insights" "insights" {
   name                = "${var.app-name}"
+  location            = "North Europe"
   resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/insights.template.json")}"
-
-  parameters {
-    name        = "${var.app-name}"
-    location    = "northeurope"                // Not in UK yet
-    service     = "${var.tags["Service"]}"
-    environment = "${var.tags["Environment"]}"
-  }
+  application_type    = "Web"
 }
 
 resource "aws_security_group" "elb" {
@@ -166,23 +159,23 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "${aws_security_group.elb.id}"
   }
 
-  setting {
-    namespace = "aws:elbv2:listener:443"
-    name      = "Protocol"
-    value     = "HTTPS"
-  }
-
-  setting {
-    namespace = "aws:elbv2:listener:443"
-    name      = "SSLCertificateArns"
-    value     = "${aws_acm_certificate.cert.arn}"
-  }
-
-  setting {
-    namespace = "aws:elbv2:listener:443"
-    name      = "SSLPolicy"
-    value     = "${local.elb_ssl_policy}"
-  }
+//  setting {
+//    namespace = "aws:elbv2:listener:443"
+//    name      = "Protocol"
+//    value     = "HTTPS"
+//  }
+//
+//  setting {
+//    namespace = "aws:elbv2:listener:443"
+//    name      = "SSLCertificateArns"
+//    value     = "${aws_acm_certificate.cert.arn}"
+//  }
+//
+//  setting {
+//    namespace = "aws:elbv2:listener:443"
+//    name      = "SSLPolicy"
+//    value     = "${local.elb_ssl_policy}"
+//  }
 
   setting {
     namespace = "aws:ec2:vpc"
@@ -345,7 +338,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
+    value     = "${azurerm_application_insights.insights.instrumentation_key}"
   }
 
   setting {
@@ -390,28 +383,28 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 # Because Elastic Beanstalk does not yet support configuring a redirect action
 # we have to do it this way.  Find the arn of the ALB and listener, and
 # then setup the listener rule:
-data "aws_lb_listener" "listener" {
-  load_balancer_arn = "${aws_elastic_beanstalk_environment.app-env.load_balancers[0]}"
-  port = 80
-}
-
-resource "aws_lb_listener_rule" "redirect_http_to_https" {
-  listener_arn = "${data.aws_lb_listener.listener.arn}"
-
-  action {
-    type = "redirect"
-    redirect {
-      port = "443"
-      protocol = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-
-  condition {
-    field  = "path-pattern"
-    values = ["/*"]
-  }
-}
+//data "aws_lb_listener" "listener" {
+//  load_balancer_arn = "${aws_elastic_beanstalk_environment.app-env.load_balancers[0]}"
+//  port = 80
+//}
+//
+//resource "aws_lb_listener_rule" "redirect_http_to_https" {
+//  listener_arn = "${data.aws_lb_listener.listener.arn}"
+//
+//  action {
+//    type = "redirect"
+//    redirect {
+//      port = "443"
+//      protocol = "HTTPS"
+//      status_code = "HTTP_301"
+//    }
+//  }
+//
+//  condition {
+//    field  = "path-pattern"
+//    values = ["/*"]
+//  }
+//}
 
 
 locals {
@@ -419,11 +412,11 @@ locals {
 }
 
 # Allow AWS's ACM to manage the apps FQDN
-resource "aws_acm_certificate" "cert" {
-  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
-  validation_method = "DNS"
-  tags              = "${var.tags}"
-}
+//resource "aws_acm_certificate" "cert" {
+//  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
+//  validation_method = "DNS"
+//  tags              = "${var.tags}"
+//}
 # 
 # resource "azurerm_dns_cname_record" "cname" {
 #   name                = "${local.cname}"
@@ -432,17 +425,17 @@ resource "aws_acm_certificate" "cert" {
 #   ttl                 = "60"
 #   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 # }
-# 
-# locals {
-#   aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
-# }
-# 
-# resource "azurerm_dns_cname_record" "acm-verify" {
-#   name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
-#   zone_name           = "${local.azure_dns_zone_name}"
-#   resource_group_name = "${local.azure_dns_zone_rg}"
-#   ttl                 = "300"
-#   record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
-# }
+#
+//locals {
+//  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
+//}
+//
+//resource "azurerm_dns_cname_record" "acm-verify" {
+//  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
+//  zone_name           = "${local.azure_dns_zone_name}"
+//  resource_group_name = "${local.azure_dns_zone_rg}"
+//  ttl                 = "300"
+//  record              = "${aws_acm_certificate.cert.domain_validation_options.0.resource_record_value}"
+//}
 
 
