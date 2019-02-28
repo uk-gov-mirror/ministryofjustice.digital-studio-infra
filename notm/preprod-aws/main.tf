@@ -172,11 +172,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "HTTPS"
   }
 
-  setting {
-    namespace = "aws:elbv2:listener:443"
-    name      = "SSLCertificateArns"
-    value     = "${aws_acm_certificate.cert.arn}"
-  }
+//  setting {
+//    namespace = "aws:elbv2:listener:443"
+//    name      = "SSLCertificateArns"
+//    value     = "${aws_acm_certificate.cert.arn}"
+//  }
 
   setting {
     namespace = "aws:elbv2:listener:443"
