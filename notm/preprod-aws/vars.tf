@@ -46,6 +46,8 @@ locals {
     "${var.ips["office"]}/32",
     "${var.ips["quantum"]}/32",
     "${var.ips["health-kick"]}/32",
+    "${var.ips["digitalprisons1"]}/32",
+    "${var.ips["digitalprisons2"]}/32",
     "${var.ips["mojvpn"]}/32",
   ]
 }
