@@ -52,8 +52,12 @@ $ az login
 Scripted
 --------
 Checkout https://github.com/ministryofjustice/digital-studio-infra
+
 source ./aws-users/get-access-token.sh [AWS profile name]
+
 This script will ask for your MFA code and setup the required AWS environment variables containing the session token.  See manual steps, or look inside the script.
+
+If this returns an error 'Invalid
 
 Manual Steps
 ------------
