@@ -1,13 +1,13 @@
 variable "app-name" {
   type    = "string"
-  default = "notm-prod"
+  default = "notm-preprod"
 }
 
 variable "tags" {
   type = "map"
   default {
     Service     = "NOTM"
-    Environment = "Prod"
+    Environment = "PreProd"
   }
 }
 
@@ -19,24 +19,24 @@ locals {
 }
 
 locals {
-  api_base_endpoint           = "https://gateway.prod.nomis-api.service.hmpps.dsd.io"
+  api_base_endpoint           = "https://gateway.preprod.nomis-api.service.hmpps.dsd.io"
   api_endpoint_url            = "${local.api_base_endpoint}/elite2api/"
   oauth_endpoint_url          = "${local.api_base_endpoint}/auth/"
-  keyworker_api_url           = "https://keyworker-api.service.hmpps.dsd.io/"
-  nn_endpoint_url             = "https://notm.service.hmpps.dsd.io/"
-  omic_ui_url                 = "https://omic.service.hmpps.dsd.io/"
-  whereabouts_ui_url          = "https://prisonstaffhub.service.hmpps.dsd.io/whereaboutssearch"
-  establishment_rollcheck_url = "https://prisonstaffhub.service.hmpps.dsd.io/establishmentroll"
-  prison_staff_hub_ui_url     = "https://prisonstaffhub.service.hmpps.dsd.io/"
+  keyworker_api_url           = "https://keyworker-api-preprod.service.hmpps.dsd.io/"
+  nn_endpoint_url             = "https://notm-preprod.service.hmpps.dsd.io/"
+  omic_ui_url                 = "https://omic-preprod.service.hmpps.dsd.io/"
+  whereabouts_ui_url          = "https://prisonstaffhub-preprod.service.hmpps.dsd.io/whereaboutssearch"
+  establishment_rollcheck_url = "https://prisonstaffhub-preprod.service.hmpps.dsd.io/establishmentroll"
+  prison_staff_hub_ui_url     = "https://prisonstaffhub-preprod.service.hmpps.dsd.io/"
   api_client_id               = "elite2apiclient"
-  hmpps_cookie_name           = "hmpps-session-prod"
+  hmpps_cookie_name           = "hmpps-session-preprod"
   hmpps_cookie_domain         = "service.hmpps.dsd.io"
   remote_auth_strategy         = "true"
 }
 
 # Azure config
 locals {
-  azurerm_resource_group = "notm-prod"
+  azurerm_resource_group = "notm-preprod"
   azure_region           = "ukwest"
 }
 
@@ -57,22 +57,12 @@ locals {
     "${var.ips["j5-phones-2"]}/32",
     "${var.ips["sodexo-northumberland"]}/32",
     "${var.ips["thameside-private-prison"]}/32",
-    "${var.ips["ark-nps-hmcts-ttp1"]}/24",
-    "${var.ips["ark-nps-hmcts-ttp2"]}/25",
+    "${var.ips["ark-nps-hmcts-ttp1"]}/32",
+    "${var.ips["ark-nps-hmcts-ttp2"]}/24",
     "${var.ips["ark-nps-hmcts-ttp3"]}/25",
     "${var.ips["ark-nps-hmcts-ttp4"]}/25",
     "${var.ips["ark-nps-hmcts-ttp5"]}/25",
   ]
 }
 
-    ip11 = "${var.ips["ark-nps-hmcts-ttp1"]}"
-    subnet11 = "255.255.255.0"
-    ip12 = "${var.ips["ark-nps-hmcts-ttp2"]}"
-    subnet12 = "255.255.255.128"
-    ip13 = "${var.ips["ark-nps-hmcts-ttp3"]}"
-    subnet13 = "255.255.255.128"
-    ip14 = "${var.ips["ark-nps-hmcts-ttp4"]}"
-    subnet14 = "255.255.255.128"
-    ip15 = "${var.ips["ark-nps-hmcts-ttp5"]}"
-    subnet15 = "255.255.255.128"
 

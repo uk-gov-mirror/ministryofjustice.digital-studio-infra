@@ -1,33 +1,5 @@
-variable "app-name" {
-  type    = "string"
-  default = "notm-preprod"
-}
 
-variable "tags" {
-  type = "map"
 
-  default {
-    Service     = "NOTM"
-    Environment = "PreProd"
-  }
-}
-
-resource "azurerm_resource_group" "group" {
-  name     = "${var.app-name}"
-  location = "ukwest"
-  tags     = "${var.tags}"
-}
-
-resource "azurerm_storage_account" "storage" {
-  name                     = "${replace(var.app-name, "-", "")}storage"
-  resource_group_name      = "${azurerm_resource_group.group.name}"
-  location                 = "${azurerm_resource_group.group.location}"
-  account_tier             = "Standard"
-  account_replication_type = "RAGRS"
-  enable_blob_encryption   = true
-
-  tags = "${var.tags}"
-}
 
 variable "log-containers" {
   type    = "list"
@@ -160,20 +132,6 @@ resource "azurerm_template_deployment" "webapp-weblogs" {
   parameters {
     name       = "${azurerm_app_service.app.name}"
     storageSAS = "${data.external.sas-url.result["url"]}"
-  }
-}
-
-resource "azurerm_template_deployment" "insights" {
-  name                = "${var.app-name}"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  deployment_mode     = "Incremental"
-  template_body       = "${file("../../shared/insights.template.json")}"
-
-  parameters {
-    name        = "${var.app-name}"
-    location    = "northeurope"                // Not in UK yet
-    service     = "${var.tags["Service"]}"
-    environment = "${var.tags["Environment"]}"
   }
 }
 

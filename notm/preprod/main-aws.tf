@@ -10,11 +10,29 @@ resource "azurerm_resource_group" "group" {
   tags     = "${var.tags}"
 }
 
-resource "azurerm_application_insights" "insights" {
+resource "azurerm_storage_account" "storage" {
+  name                     = "${replace(var.app-name, "-", "")}storage"
+  resource_group_name      = "${azurerm_resource_group.group.name}"
+  location                 = "${azurerm_resource_group.group.location}"
+  account_tier             = "Standard"
+  account_replication_type = "RAGRS"
+  enable_blob_encryption   = true
+
+  tags = "${var.tags}"
+}
+
+resource "azurerm_template_deployment" "insights" {
   name                = "${var.app-name}"
-  location            = "North Europe"
   resource_group_name = "${azurerm_resource_group.group.name}"
-  application_type    = "Web"
+  deployment_mode     = "Incremental"
+  template_body       = "${file("../../shared/insights.template.json")}"
+
+  parameters {
+    name        = "${var.app-name}"
+    location    = "northeurope"                // Not in UK yet
+    service     = "${var.tags["Service"]}"
+    environment = "${var.tags["Environment"]}"
+  }
 }
 
 resource "aws_security_group" "elb" {
@@ -338,7 +356,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${azurerm_application_insights.insights.instrumentation_key}"
+    value     = "${azurerm_template_deployment.insights.outputs["instrumentationKey"]}"
   }
 
   setting {
@@ -383,11 +401,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 # Because Elastic Beanstalk does not yet support configuring a redirect action
 # we have to do it this way.  Find the arn of the ALB and listener, and
 # then setup the listener rule:
-//data "aws_lb_listener" "listener" {
-//  load_balancer_arn = "${aws_elastic_beanstalk_environment.app-env.load_balancers[0]}"
-//  port = 80
-//}
-//
+data "aws_lb_listener" "listener" {
+  load_balancer_arn = "${aws_elastic_beanstalk_environment.app-env.load_balancers[0]}"
+  port = 80
+}
+
 //resource "aws_lb_listener_rule" "redirect_http_to_https" {
 //  listener_arn = "${data.aws_lb_listener.listener.arn}"
 //
@@ -406,30 +424,29 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
 //  }
 //}
 
-
 locals {
   cname = "${replace(var.app-name,"-prod","")}"
 }
 
 # Allow AWS's ACM to manage the apps FQDN
-//resource "aws_acm_certificate" "cert" {
-//  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
-//  validation_method = "DNS"
-//  tags              = "${var.tags}"
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
+  validation_method = "DNS"
+  tags              = "${var.tags}"
+}
+
+//resource "azurerm_dns_cname_record" "cname" {
+//  name                = "${local.cname}"
+//  zone_name           = "${local.azure_dns_zone_name}"
+//  resource_group_name = "${local.azure_dns_zone_rg}"
+//  ttl                 = "60"
+//  record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
 //}
-// 
-// resource "azurerm_dns_cname_record" "cname" {
-//   name                = "${local.cname}"
-//   zone_name           = "${local.azure_dns_zone_name}"
-//   resource_group_name = "${local.azure_dns_zone_rg}"
-//   ttl                 = "60"
-//   record              = "${aws_elastic_beanstalk_environment.app-env.cname}"
-// }
-//
-//locals {
-//  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
-//}
-//
+
+locals {
+  aws_record_name = "${replace(aws_acm_certificate.cert.domain_validation_options.0.resource_record_name,local.azure_dns_zone_name,"")}"
+}
+
 //resource "azurerm_dns_cname_record" "acm-verify" {
 //  name                = "${substr(local.aws_record_name, 0, length(local.aws_record_name)-2)}"
 //  zone_name           = "${local.azure_dns_zone_name}"
