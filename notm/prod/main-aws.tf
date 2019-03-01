@@ -430,11 +430,11 @@ locals {
 }
 
 # Allow AWS's ACM to manage the apps FQDN
-//resource "aws_acm_certificate" "cert" {
-//  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
-//  validation_method = "DNS"
-//  tags              = "${var.tags}"
-//}
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${local.cname}.${local.azure_dns_zone_name}"
+  validation_method = "DNS"
+  tags              = "${var.tags}"
+}
 // 
 // resource "azurerm_dns_cname_record" "cname" {
 //   name                = "${local.cname}"
