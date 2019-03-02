@@ -188,12 +188,3 @@ module "slackhook" {
   azure_subscription = "production"
   channels           = ["nomisonthemove"]
 }
-
-resource "azurerm_dns_cname_record" "cname" {
-  name                = "notm"
-  zone_name           = "service.hmpps.dsd.io"
-  resource_group_name = "webops-prod"
-  ttl                 = "300"
-  record              = "${var.app-name}.azurewebsites.net"
-  tags                = "${var.tags}"
-}
