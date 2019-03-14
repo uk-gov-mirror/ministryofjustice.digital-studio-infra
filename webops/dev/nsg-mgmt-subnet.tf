@@ -1,3 +1,5 @@
+data "github_ip_ranges" "whitelist" {}
+
 resource "azurerm_network_security_group" "mgmt-app-gw" {
   name                = "mgmt-app-gw"
   location            = "ukwest"
@@ -15,6 +17,19 @@ resource "azurerm_network_security_group" "mgmt-app-gw" {
     access                     = "Allow"
     protocol                   = "TCP"
     source_address_prefixes      = ["${local.studio_ip}", "${local.moj_vpn_ip}", "${local.health_kick_ip}", "${local.dev_forti_ip}"]
+    source_port_range          = "*"
+    destination_address_prefix = "*"
+    destination_port_ranges    = ["443"]
+  }
+
+  security_rule {
+    name                       = "mgmtwebhooks"
+    description                = "Access mgmt tools from the office/vpn and AWS health-kick app"
+    priority                   = 2010
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "TCP"
+    source_address_prefixes      = ["${data.github_ip_ranges.whitelist.hooks}"]
     source_port_range          = "*"
     destination_address_prefix = "*"
     destination_port_ranges    = ["443"]
