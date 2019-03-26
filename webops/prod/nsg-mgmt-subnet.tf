@@ -1,3 +1,5 @@
+data "github_ip_ranges" "whitelist" {}
+
 resource "azurerm_network_security_group" "mgmt-app-gw" {
   name                = "mgmt-app-gw"
   location            = "ukwest"
@@ -31,6 +33,19 @@ resource "azurerm_network_security_group" "mgmt-app-gw" {
     source_port_range          = "*"
     destination_address_prefix = "10.0.4.0/29"
     destination_port_ranges    = ["65503-65534"]
+  }
+
+  security_rule {
+    name                       = "mgmtwebhooks"
+    description                = "Access for github webhooks"
+    priority                   = 2010
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "TCP"
+    source_address_prefixes      = ["${data.github_ip_ranges.whitelist.hooks}"]
+    source_port_range          = "*"
+    destination_address_prefix = "10.40.128.6/32"
+    destination_port_ranges    = ["443"]
   }
 
   security_rule {
