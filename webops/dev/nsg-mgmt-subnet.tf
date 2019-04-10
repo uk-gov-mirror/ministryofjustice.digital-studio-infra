@@ -18,7 +18,20 @@ resource "azurerm_network_security_group" "mgmt-app-gw" {
     protocol                   = "TCP"
     source_address_prefixes      = ["${local.studio_ip}", "${local.moj_vpn_ip}", "${local.health_kick_ip}", "${local.dev_forti_ip}"]
     source_port_range          = "*"
-    destination_address_prefix = "*"
+    destination_address_prefix = "10.0.4.0/29"
+    destination_port_ranges    = ["443"]
+  }
+
+  security_rule {
+    name                       = "mgmtwebhooks"
+    description                = "Access for github webhooks"
+    priority                   = 2010
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "TCP"
+    source_address_prefixes      = ["${data.github_ip_ranges.whitelist.hooks}"]
+    source_port_range          = "*"
+    destination_address_prefix = "10.0.4.0/29"
     destination_port_ranges    = ["443"]
   }
 
@@ -42,7 +55,7 @@ resource "azurerm_network_security_group" "mgmt-app-gw" {
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "TCP"
-    source_address_prefix    = "*" 
+    source_address_prefix      = "*" 
     source_port_range          = "*"
     destination_address_prefix = "10.0.4.0/29"
     destination_port_ranges    = ["65503-65534"]
