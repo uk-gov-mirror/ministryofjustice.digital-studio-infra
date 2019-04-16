@@ -154,7 +154,7 @@ def create_certificate(dns_names, resource_group, certbot_location):
         return False
 
 
-def create_pkcs12(saved_cert,vault):
+def create_pkcs12(saved_cert,vault,fqdn):
 
     path_to_cert = saved_cert + "/fullchain.pem"
     path_to_key = saved_cert + "/privkey.pem"
@@ -166,7 +166,7 @@ def create_pkcs12(saved_cert,vault):
         password = azure_account.create_password()
         set_passphrase = "pass:" + password
 
-        store_password(password,vault)
+        store_password(password,vault,fqdn)
 
     subprocess.run(
         ["openssl", "pkcs12", "-export",
@@ -189,7 +189,7 @@ def store_certificate(vault, fqdn, certbot_location,saved_cert):
 
     name = fqdn.replace(".", "DOT")
 
-    cert_file = create_pkcs12(saved_cert,vault)
+    cert_file = create_pkcs12(saved_cert,vault,fqdn)
 
     cert_dates = get_local_certificate_expiry(saved_cert)
 
@@ -232,9 +232,10 @@ def store_certificate(vault, fqdn, certbot_location,saved_cert):
     else:
         sys.exit("Could not set secret in key vault.")
 
-def store_password(password,vault):
+def store_password(password,vault,fqdn):
 
-    name = "appgw-ssl-certificate-password"
+    name = fqdn.replace(".", "DOT")
+    name = name + "-password"
 
     if args.test_environment:
         name = "test-" + name
