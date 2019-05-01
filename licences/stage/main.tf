@@ -393,6 +393,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "NOTIFY_API_KEY"
     value     = "${data.aws_ssm_parameter.notify-api-client-secret.value}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "PUSH_TO_NOMIS"
+    value     = "${local.pushToNomis}"
+  }
   tags = "${var.tags}"
 }
 
