@@ -36,19 +36,6 @@ resource "azurerm_network_security_group" "mgmt-app-gw" {
   }
 
   security_rule {
-    name                       = "mgmtwebhooks"
-    description                = "Access mgmt tools from the office/vpn and AWS health-kick app"
-    priority                   = 2010
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "TCP"
-    source_address_prefixes      = ["${data.github_ip_ranges.whitelist.hooks}"]
-    source_port_range          = "*"
-    destination_address_prefix = "*"
-    destination_port_ranges    = ["443"]
-  }
-
-  security_rule {
     name                       = "mgmthealthapi"
     description                = "Access to azure app gateway health api"
     priority                   = 2001
