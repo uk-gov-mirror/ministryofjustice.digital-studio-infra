@@ -205,6 +205,10 @@ resource "azurerm_app_service" "app" {
     }
 
     ip_restriction {
+      ip_address = "${var.ips["quantum_alt"]}"
+    }
+
+    ip_restriction {
       ip_address = "${var.ips["health-kick"]}"
     }
 
