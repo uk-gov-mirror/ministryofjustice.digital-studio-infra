@@ -63,6 +63,7 @@ locals {
     "${var.ips["ark-nps-hmcts-ttp3"]}/25",
     "${var.ips["ark-nps-hmcts-ttp4"]}/25",
     "${var.ips["ark-nps-hmcts-ttp5"]}/25",
+    "${var.ips["oakwood"]}/32"
   ]
 }
 
