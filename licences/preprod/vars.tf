@@ -47,6 +47,9 @@ locals {
   authStrategy        = "oauth"
   global_search_url   = "https://prisonstaffhub-preprod.service.hmpps.dsd.io/global-search"
   pushToNomis         = "no"
+  remindersScheduleRo = "0 1 * * 1-5"
+  scheduledJobAuto    = "no"
+  scheduledJobOverlap = "5000"
 }
 
 # Azure config

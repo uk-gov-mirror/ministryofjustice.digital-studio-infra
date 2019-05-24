@@ -13,3 +13,7 @@ data "aws_ssm_parameter" "tag-manager-api-client-secret" {
 data "aws_ssm_parameter" "notify-api-client-secret" {
   name = "/${lower(var.tags["Service"])}/${lower(var.tags["Environment"])}/notify_api_client_secret"
 }
+
+data "aws_ssm_parameter" "reminders-system-user" {
+  name = "/${lower(var.tags["Service"])}/${lower(var.tags["Environment"])}/reminders_system_user"
+}
