@@ -46,7 +46,7 @@ locals {
   domain              = "https://licences.service.hmpps.dsd.io"
   authStrategy        = "oauth"
   global_search_url   = "https://prisonstaffhub.service.hmpps.dsd.io/global-search"
-  pushToNomis         = "no"
+  pushToNomis         = "yes"
 }
 
 # Azure config
