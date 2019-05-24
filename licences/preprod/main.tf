@@ -398,6 +398,26 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "PUSH_TO_NOMIS"
     value     = "${local.pushToNomis}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "REMINDERS_SYSTEM_USER"
+    value     = "${data.aws_ssm_parameter.reminders-system-user.value}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "REMINDERS_SCHEDULE_RO"
+    value     = "${local.remindersScheduleRo}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SCHEDULED_JOBS_AUTOSTART"
+    value     = "${local.scheduledJobAuto}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SCHEDULED_JOBS_OVERLAP"
+    value     = "${local.scheduledJobOverlap}"
+  }
   tags = "${var.tags}"
 }
 
