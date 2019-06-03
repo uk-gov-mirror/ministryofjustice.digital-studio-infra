@@ -12,7 +12,11 @@
     "Microsoft.Web/serverfarms/*",
     "Microsoft.Network/applicationGateways/read",
     "Microsoft.Network/applicationGateways/write",
-    "Microsoft.Storage/storageAccounts/listKeys/action"
+    "Microsoft.Storage/storageAccounts/listKeys/action",
+    "Microsoft.Resources/subscriptions/resourcegroups/read",
+    "Microsoft.Resources/subscriptions/resourcegroups/write",
+    "Microsoft.Storage/storageAccounts/read",
+    "Microsoft.Storage/storageAccounts/write"
   ],
   "NotActions": [
     "Microsoft.KeyVault/vaults/accessPolicies/write",
