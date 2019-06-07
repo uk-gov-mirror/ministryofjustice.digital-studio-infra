@@ -154,9 +154,6 @@ resource "azurerm_template_deployment" "rsr-github" {
 
 resource "github_repository_webhook" "rsr-deploy" {
   repository = "rsr-calculator-service"
-
-  name = "web"
-
   configuration {
     url          = "${azurerm_template_deployment.rsr-github.outputs["deployTrigger"]}?scmType=GitHub"
     content_type = "form"
