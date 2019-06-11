@@ -122,10 +122,15 @@ def create_certificate(dns_names, resource_group, certbot_location):
     domains_to_renew.extend(["-d", common_name])
 
     if "additional_name" in dns_names:
-        additional_name = '.'.join(dns_names["additional_name"])
+        logging.debug('additional_name in dns_names found!')
+     
+        if not dns_names["additional_name"][0]:
+            logging.debug('must be adding basename!')
+            additional_name = dns_names["additional_name"][1]
+        else:
+            additional_name = '.'.join(dns_names["additional_name"])
+    
         domains_to_renew.extend(["-d", additional_name])
-
-
 
     cmd = ["certbot", "certonly", "--manual",
            "--email", "noms-studio-webops@digital.justice.gov.uk",
