@@ -93,9 +93,10 @@ def get_zone_details(resource_group, zone):
     if find_dns_records:
         dns_records = json.loads(find_dns_records)
 
-        key = "fqdn"
-
-        for key, zone in dns_records.items():
+        for key, value in dns_records.items():
+            if key == "fqdn" and value.startswith(zone):
+                zone_found = True
+        if zone_found:
             return True
         else:
             return False
