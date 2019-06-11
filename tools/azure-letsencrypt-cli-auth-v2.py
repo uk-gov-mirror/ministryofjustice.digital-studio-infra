@@ -13,7 +13,7 @@ import logging
 import string
 
 from time import gmtime, strftime, strptime
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from python_modules import azure_account
 
