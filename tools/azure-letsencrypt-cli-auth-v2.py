@@ -43,9 +43,22 @@ parser.add_argument(
 parser.add_argument(
     "-x", "--extra-host", help="Create an additional host on the certificate.")
 parser.add_argument(
-        "-y", "--extra-zone", help="Add the zone or the additional host on the certificate.")
+    "-y", "--extra-zone", help="Add the zone or the additional host on the certificate.")
+parser.add_argument(
+    "-internal", "--internal", help="Cert may be used internally only (record may not exist in external DNS)",action='store_true')
+parser.add_argument(
+    "-debug", "--debug", help="Change logging level to debug.",action='store_true')
 
 args = parser.parse_args()
+
+if args.debug:
+    print("Setting logging level to debug")
+    logging.basicConfig(stream=sys.stdout, level=logging.debug)
+    logging.getLogger().setLevel(10)
+else:
+    print("Setting logging level to info")
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+    logging.getLogger().setLevel(20)
 
 hostname = args.hostname
 extra_host = args.extra_host
@@ -407,7 +420,81 @@ def certificate_renewal_due(fqdn):
         logging.info("Couldn't check certificate.")
         sys.exit(1)
 
+def get_cert_expiry_from_keyvault(vault_name, fqdn):
 
+    logging.debug("function: get_cert_expiry_from_keyvault")
+
+    name = fqdn.replace(".", "DOT")
+
+    #adding this extra try block as it catches issues with the vault being inaccessable
+    try:
+        vault = subprocess.run(
+            ["az", "keyvault", "show",
+             "--name", vault_name        
+             ],
+            stdout=subprocess.PIPE,
+        ).stdout.decode()
+
+        if vault:
+            logging.debug("vault exists!")
+        else:
+            sys.exit("Cannot access vault!")
+            
+    except subprocess.CalledProcessError:
+        sys.exit("There was an error accessing the key vault")
+
+    try:
+        cert = subprocess.run(
+            ["az", "keyvault", "certificate", "show",
+             "--name", name,
+             "--vault-name", vault_name,         
+             ],
+            stdout=subprocess.PIPE,
+        ).stdout.decode()
+
+        if cert:
+            cert_info = json.loads(cert)
+
+            return cert_info["attributes"]["expires"]
+            
+    except subprocess.CalledProcessError:
+        sys.exit("There was an error retrieving cert from the key vault")
+
+def check_if_cert_renewal_due(current_cert_expiry):
+
+    logging.debug("function: check_if_cert_renewal_due")
+
+    logging.debug('current_cert_expiry is %s', current_cert_expiry)
+    
+    #removing colon from timezone as it causes issues with format function
+    if ":" == current_cert_expiry[-3:-2]:
+        current_cert_expiry = current_cert_expiry[:-3]+current_cert_expiry[-2:]
+    
+    logging.debug('formatted current_cert_expiry is %s', current_cert_expiry)
+    
+    present_date = datetime.now(timezone.utc)
+
+    cert_end_date = datetime.strptime(
+            current_cert_expiry, "%Y-%m-%dT%H:%M:%S%z")
+    
+    # Adjust the renewal date
+    adjusted_renewal_date = cert_end_date - timedelta(days=21)
+
+    logging.debug('present_date is %s', present_date)
+    logging.debug('current_cert_expiry is %s', current_cert_expiry)
+    logging.debug('adjusted_renewal_date is %s', adjusted_renewal_date)
+    
+    logging.info("Current Certificate expires on %s" %
+                         (cert_end_date.strftime('%d %b %Y')))
+
+    if adjusted_renewal_date > present_date:
+            logging.debug("Certificate does not need renewing until %s" %
+                         (adjusted_renewal_date.strftime('%d %b %Y')))
+            
+            logging.info("Exiting as certificate doesnt need renewing!")
+            sys.exit(0)
+    
+    return True
 
 azure_account.azure_set_subscription(args.subscription_id)
 
