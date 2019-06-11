@@ -48,6 +48,8 @@ parser.add_argument(
     "-internal", "--internal", help="Cert may be used internally only (record may not exist in external DNS)",action='store_true')
 parser.add_argument(
     "-debug", "--debug", help="Change logging level to debug.",action='store_true')
+parser.add_argument(
+    "-storeascert", "--store-as-cert", help="Stores the certificate in keyvault under 'certificates'rather than 'secrets'.",action='store_true')
 
 args = parser.parse_args()
 
@@ -141,6 +143,8 @@ def create_certificate(dns_names, resource_group, certbot_location):
         cmd.append('--staging')
         logging.info("Using staging environment")
 
+    logging.debug('Value of certbot cmd is: %s' ,cmd)
+
     try:
         certificate = subprocess.run(
             cmd,
@@ -198,6 +202,8 @@ def create_pkcs12(saved_cert,vault):
 
 def store_certificate(vault, fqdn, certbot_location,saved_cert):
 
+    logging.debug("running function: store_certificate")
+    
     name = fqdn.replace(".", "DOT")
 
     if args.application_gateway:
@@ -212,41 +218,58 @@ def store_certificate(vault, fqdn, certbot_location,saved_cert):
     open_pkcs12 = open(cert_file, 'rb').read()
     cert_encoded = base64.encodestring(open_pkcs12)
 
-    try:
-        set_secret = subprocess.run(
-            ["az", "keyvault", "secret", "set",
+    if (args.store_as_cert):
+        logging.debug('adding cert to keyvault as a certificate')
+        try:
+            subprocess.run(
+            ["az", "keyvault", "certificate", "import",
              "--file", cert_file,
-             "--encoding", "base64",
              "--name", name,
-             "--vault-name", vault
+             "--vault-name", vault,
+             "--disabled", "false",          
              ],
             stdout=subprocess.PIPE,
             check=True
-        )
+            ).stdout.decode()
+        except subprocess.CalledProcessError:
+            sys.exit("There was an error saving to the key vault")
 
-    except subprocess.CalledProcessError:
-        sys.exit("There was an error saving to the key vault")
+        return True
+        
+    else:
+        logging.debug('adding cert to keyvault as a secret')
+        try:
+            set_secret = subprocess.run(
+                ["az", "keyvault", "secret", "set",
+                "--file", cert_file,
+                "--encoding", "base64",
+                "--name", name,
+                "--vault-name", vault
+                ],
+                stdout=subprocess.PIPE,
+                check=True
+            )
+        except subprocess.CalledProcessError:
+            sys.exit("There was an error saving to the key vault")
 
-    if set_secret.returncode == 0:
-        set_secret_attributes = subprocess.run(
-            ["az", "keyvault", "secret", "set-attributes",
-             "--name", name,
-             "--content-type", "application/x-pkcs12",
-             "--expires", cert_dates["end"],
-             "--not-before", cert_dates["start"],
-             "--vault-name", vault
-             ],
-            stdout=subprocess.PIPE,
-            check=True
-        )
+        if set_secret.returncode == 0:
+            set_secret_attributes = subprocess.run(
+                ["az", "keyvault", "secret", "set-attributes",
+                "--name", name,
+                "--content-type", "application/x-pkcs12",
+                "--expires", cert_dates["end"],
+                "--not-before", cert_dates["start"],
+                "--vault-name", vault
+                ],
+                stdout=subprocess.PIPE,
+                check=True
+            )
 
         if set_secret_attributes.returncode == 0:
             logging.info("Certificate successfully stored to vault.")
             return True
         else:
             sys.exit("Could not set secret attributes in key vault.")
-    else:
-        sys.exit("Could not set secret in key vault.")
 
 def store_password(password,vault):
 
