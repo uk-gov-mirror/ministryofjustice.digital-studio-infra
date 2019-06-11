@@ -18,14 +18,18 @@ for key,value in dns_names.items():
     
     logging.info("host and zone =  %s.%s" % (host, zone))
     
-    if host == "*":
+    if host == "*" or host is None:
+        logging.debug("host empty or requesting wildcard cert")
         acme_challenge_name = "_acme-challenge"
     else:
         acme_challenge_name = "_acme-challenge." + host
 
     logging.info("CERTBOT_DOMAIN =  %s" % (os.getenv("CERTBOT_DOMAIN")))
     
-    host_domain = ".".join(value)
+    if host is not None:
+        host_domain = ".".join(value)
+    else:
+        host_domain = zone
 
     if host != "*" and host_domain != os.getenv("CERTBOT_DOMAIN"):
         continue
