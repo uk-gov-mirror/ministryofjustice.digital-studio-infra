@@ -62,7 +62,12 @@ else:
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     logging.getLogger().setLevel(20)
 
-hostname = args.hostname
+#added this as otherwise cert is being saved to vault with hostname value (if it supplied)
+if args.wildcard:
+    hostname = "wildcard"
+else:
+    hostname = args.hostname
+    
 extra_host = args.extra_host
 
 if args.test_environment:
