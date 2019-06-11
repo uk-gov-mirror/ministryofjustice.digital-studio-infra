@@ -67,7 +67,7 @@ if args.wildcard:
     hostname = "wildcard"
 else:
     hostname = args.hostname
-    
+
 extra_host = args.extra_host
 
 if args.test_environment:
@@ -531,7 +531,8 @@ if not get_zone_details(args.resource_group, args.zone):
 
 if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
     if not args.ignore_expiry:
-        logging.info("Check expiry date")
+        logging.debug("args.ignore_expiry is false!")
+        logging.debug("Calling 'certificate_renewal_due'")
         certificate_renewal_due(fqdn)
 else:
     logging.info("A record or CNAME doesn't exist. No expiry date to check.")
@@ -543,9 +544,12 @@ dns_names = {
    "common_name": [hostname,args.zone]
    }
 if args.extra_zone:
-   dns_names.update({
-   "additional_name" : [extra_host,args.extra_zone]
-   })
+   logging.debug('args.extra_zone is true')
+    dns_names.update({
+    "additional_name" : [extra_host,args.extra_zone]
+    })
+else:
+    logging.debug('args.extra_zone is false!')
 
 saved_cert = create_certificate(dns_names, args.resource_group, args.certbot)
 
