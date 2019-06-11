@@ -34,18 +34,21 @@ for key,value in dns_names.items():
     if host != "*" and host_domain != os.getenv("CERTBOT_DOMAIN"):
         continue
 
-    cmd = ["az", "network", "dns", "record-set", "txt", "create",
-         "--name", acme_challenge_name,
-         "--resource-group", resource_group,
-         "--zone-name", zone,
-         "--ttl", "60"
-         ]
-    logging.info("Running: %s" % (" ".join(cmd)))
-    create_record_set = subprocess.run(
-        cmd,
-        stdout=subprocess.PIPE,
-        check=True
-    )
+    #### finally figured out this is causing issues when adding the base domain!!!!
+    #### multiple records are required and this is wiping them out! removing for now.
+    #### note - with this removed the next 'dns add-record' command may chuck error if the same value exists
+    # cmd = ["az", "network", "dns", "record-set", "txt", "create",
+    #      "--name", acme_challenge_name,
+    #      "--resource-group", resource_group,
+    #      "--zone-name", zone,
+    #      "--ttl", "60"
+    #      ]
+    # logging.info("Running: %s" % (" ".join(cmd)))
+    # create_record_set = subprocess.run(
+    #     cmd,
+    #     stdout=subprocess.PIPE,
+    #     check=True
+    # )
 
     cmd = ["az", "network", "dns", "record-set", "txt", "add-record",
          "--record-set-name", acme_challenge_name,
