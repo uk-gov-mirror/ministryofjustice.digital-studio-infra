@@ -535,13 +535,26 @@ azure_account.azure_set_subscription(args.subscription_id)
 if not get_zone_details(args.resource_group, args.zone):
     sys.exit("Failed to find existing zone " + args.zone)
 
-if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
+if args.internal:
+    logging.debug('args.internal is true!')
     if not args.ignore_expiry:
-        logging.debug("args.ignore_expiry is false!")
-        logging.debug("Calling 'certificate_renewal_due'")
-        certificate_renewal_due(fqdn)
+        logging.debug('args.ignore_expiry is false!')
+        logging.debug("Calling 'get_cert_expiry_from_keyvault'")
+        current_cert_expiry = get_cert_expiry_from_keyvault(args.vault, fqdn)
+        
+        if current_cert_expiry:
+                check_if_cert_renewal_due(current_cert_expiry)
+        else:
+            logging.info("Cert not found. Assume its a new request.")
+
 else:
-    logging.info("A record or CNAME doesn't exist. No expiry date to check.")
+    if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
+            if not args.ignore_expiry:
+                logging.debug("args.ignore_expiry is false!")
+                logging.debug("Calling 'certificate_renewal_due'")
+                certificate_renewal_due(fqdn)
+    else:
+        logging.info("A record or CNAME doesn't exist. No expiry date to check.")
 
 if args.wildcard:
     hostname = "*"
@@ -550,7 +563,7 @@ dns_names = {
    "common_name": [hostname,args.zone]
    }
 if args.extra_zone:
-   logging.debug('args.extra_zone is true')
+    logging.debug('args.extra_zone is true')
     dns_names.update({
     "additional_name" : [extra_host,args.extra_zone]
     })
