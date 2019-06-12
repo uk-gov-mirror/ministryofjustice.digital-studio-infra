@@ -467,6 +467,7 @@ def get_cert_expiry_from_keyvault(vault_name, fqdn):
              "--name", vault_name        
              ],
             stdout=subprocess.PIPE,
+            check=True
         ).stdout.decode()
 
         if vault:
@@ -478,11 +479,17 @@ def get_cert_expiry_from_keyvault(vault_name, fqdn):
         sys.exit("There was an error accessing the key vault")
 
     try:
+        cmd = ["az", "keyvault", "secret", "show",
+        "--name", name,
+        "--vault-name", vault_name       
+        ]
+
+        if args.vault_as_cert:
+            cmd[2] = "certificate"
+            logging.debug("updating command to pull cert rather than secret.")
+    
         cert = subprocess.run(
-            ["az", "keyvault", "certificate", "show",
-             "--name", name,
-             "--vault-name", vault_name,         
-             ],
+            cmd,
             stdout=subprocess.PIPE,
         ).stdout.decode()
 
