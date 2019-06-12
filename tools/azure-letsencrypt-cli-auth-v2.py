@@ -467,7 +467,6 @@ def get_cert_expiry_from_keyvault(vault_name, fqdn):
              "--name", vault_name        
              ],
             stdout=subprocess.PIPE,
-            check=True
         ).stdout.decode()
 
         if vault:
