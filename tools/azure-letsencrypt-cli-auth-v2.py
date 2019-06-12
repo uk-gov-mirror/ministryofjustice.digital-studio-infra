@@ -541,26 +541,28 @@ azure_account.azure_set_subscription(args.subscription_id)
 if not get_zone_details(args.resource_group, args.zone):
     sys.exit("Failed to find existing zone " + args.zone)
 
-if args.internal:
-    logging.debug('args.internal is true!')
-    if not args.ignore_expiry:
-        logging.debug('args.ignore_expiry is false!')
-        logging.debug("Calling 'get_cert_expiry_from_keyvault'")
-        current_cert_expiry = get_cert_expiry_from_keyvault(args.vault, fqdn)
-        
-        if current_cert_expiry:
-                check_if_cert_renewal_due(current_cert_expiry)
-        else:
-            logging.info("Cert not found. Assume its a new request.")
-
-else:
+if not args.internal:
+    logging.debug('args.internal is false!')
     if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
-            if not args.ignore_expiry:
-                logging.debug("args.ignore_expiry is false!")
-                logging.debug("Calling 'certificate_renewal_due'")
-                certificate_renewal_due(fqdn)
+        logging.debug('DNS record found!')
     else:
         logging.info("A record or CNAME doesn't exist. No expiry date to check.")
+
+if args.ignore_expiry:
+    logging.debug('args.ignore_expiry is true, proceeding to create cert.')
+else:
+    logging.debug('args.ignore_expiry is false, checking cert expiry.')
+    if not args.internal:
+        logging.debug("args.internal is false, endpoint should be accessible.")
+        logging.debug("Calling 'certificate_renewal_due'")
+        certificate_renewal_due(fqdn)
+    else:
+        logging.debug("args.internal is true, check expiry via date from vault.")
+        current_cert_expiry = get_cert_expiry_from_keyvault(args.vault, fqdn)
+        if current_cert_expiry:
+            check_if_cert_renewal_due(current_cert_expiry)
+        else:
+            logging.info("Cert not found. Assume its a new request.")
 
 if args.wildcard:
     hostname = "*"
