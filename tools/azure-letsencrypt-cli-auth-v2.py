@@ -49,7 +49,7 @@ parser.add_argument(
 parser.add_argument(
     "-debug", "--debug", help="Change logging level to debug.",action='store_true')
 parser.add_argument(
-    "-storeascert", "--store-as-cert", help="Stores the certificate in keyvault under 'certificates'rather than 'secrets'.",action='store_true')
+    "-vaultascert", "--vault-as-cert", help="Working with a 'certificate' in keyvault rather than a 'secret'.",action='store_true')
 
 args = parser.parse_args()
 
@@ -229,7 +229,7 @@ def store_certificate(vault, fqdn, certbot_location,saved_cert):
     open_pkcs12 = open(cert_file, 'rb').read()
     cert_encoded = base64.encodestring(open_pkcs12)
 
-    if (args.store_as_cert):
+    if (args.vault_as_cert):
         logging.debug('adding cert to keyvault as a certificate')
         try:
             subprocess.run(
