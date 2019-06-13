@@ -217,12 +217,6 @@ def store_certificate(vault, fqdn, certbot_location,saved_cert):
     
     name = fqdn.replace(".", "DOT")
 
-    # Commented this out as we to store certs in the vault using the common name
-    # if args.application_gateway:
-    #     name = "appgw-ssl-certificate"
-    #     if args.test_environment:
-    #         name = "test-" + name
-
     cert_file = create_pkcs12(saved_cert,vault,fqdn)
 
     cert_dates = get_local_certificate_expiry(saved_cert)
