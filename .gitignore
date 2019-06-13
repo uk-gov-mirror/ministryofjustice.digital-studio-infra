@@ -4,7 +4,6 @@
 *.tfplan
 graph.png
 node_modules/
-sshkey.pub
 *.swp
 *.pyc
 config.tf.json
