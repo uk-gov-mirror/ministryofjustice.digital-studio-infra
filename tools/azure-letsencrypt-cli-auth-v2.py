@@ -142,7 +142,7 @@ def create_certificate(dns_names, resource_group, certbot_location):
            "--config-dir", certbot_location,
            "--work-dir", certbot_location,
            "--logs-dir", certbot_location,
-           "--server", "https://acme-v02.api.letsencrypt.org/directory",
+           "--server", "https://acme-staging-v02.api.letsencrypt.org/directory",
            "--force-renewal",
            "--agree-tos",
            "--non-interactive"
