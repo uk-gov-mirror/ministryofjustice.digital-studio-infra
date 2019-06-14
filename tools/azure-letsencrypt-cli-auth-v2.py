@@ -215,6 +215,8 @@ def store_certificate(vault, fqdn, certbot_location,saved_cert):
 
     logging.debug("running function: store_certificate")
     
+    sleep(3000)
+    
     name = fqdn.replace(".", "DOT")
 
     cert_file = create_pkcs12(saved_cert,vault,fqdn)
@@ -277,8 +279,6 @@ def store_certificate(vault, fqdn, certbot_location,saved_cert):
         else:
             sys.exit("Could not set secret attributes in key vault.")
     
-    sleep(3000)
-
 def store_password(password,vault,fqdn):
 
     #name = "appgw-ssl-certificate-password"
