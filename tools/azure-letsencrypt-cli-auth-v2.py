@@ -12,7 +12,7 @@ import re
 import logging
 import string
 
-from time import gmtime, strftime, strptime
+from time import gmtime, strftime, strptime, sleep
 from datetime import datetime, timedelta, timezone
 
 from python_modules import azure_account
@@ -276,6 +276,8 @@ def store_certificate(vault, fqdn, certbot_location,saved_cert):
             return True
         else:
             sys.exit("Could not set secret attributes in key vault.")
+    
+    sleep(3000)
 
 def store_password(password,vault,fqdn):
 
