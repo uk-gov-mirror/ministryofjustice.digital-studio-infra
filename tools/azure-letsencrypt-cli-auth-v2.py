@@ -90,6 +90,10 @@ def get_zone_details(resource_group, zone):
         check=True
     ).stdout.decode()
 
+
+    logging.debug('Function \'get_zone_details\'')
+    logging.debug('Value of zone is: %s' ,zone)
+
     if find_dns_records:
         dns_records = json.loads(find_dns_records)
 
