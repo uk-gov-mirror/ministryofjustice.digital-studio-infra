@@ -142,7 +142,7 @@ def create_certificate(dns_names, resource_group, certbot_location):
            "--config-dir", certbot_location,
            "--work-dir", certbot_location,
            "--logs-dir", certbot_location,
-           "--server", "https://acme-staging-v02.api.letsencrypt.org/directory",
+           "--server", "https://acme-v02.api.letsencrypt.org/directory",
            "--force-renewal",
            "--agree-tos",
            "--non-interactive"
@@ -188,12 +188,6 @@ def create_pkcs12(saved_cert,vault,fqdn):
 
     set_passphrase = "pass:"
 
-    if args.application_gateway:
-        password = azure_account.create_password()
-        set_passphrase = "pass:" + password
-
-        store_password(password,vault,fqdn)
-
     subprocess.run(
         ["openssl", "pkcs12", "-export",
          "-inkey", path_to_key,
@@ -214,12 +208,11 @@ def create_pkcs12(saved_cert,vault,fqdn):
 def store_certificate(vault, fqdn, certbot_location,saved_cert):
 
     logging.debug("running function: store_certificate")
-    
-    sleep(3000)
-    
+      
     name = fqdn.replace(".", "DOT")
 
     cert_file = create_pkcs12(saved_cert,vault,fqdn)
+    logging.debug('value of certfile is %s', cert_file)
 
     cert_dates = get_local_certificate_expiry(saved_cert)
 
@@ -292,7 +285,7 @@ def store_password(password,vault,fqdn):
     try:
         set_secret = subprocess.run(
             ["az", "keyvault", "secret", "set",
-             "--value", password,
+             "--value", "NO_PASSWORD_ON_THIS_CERT",
              "--encoding", "base64",
              "--name", name,
              "--vault-name", vault
