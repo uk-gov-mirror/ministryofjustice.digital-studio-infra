@@ -12,8 +12,8 @@ import re
 import logging
 import string
 
-from time import gmtime, strftime, strptime
-from datetime import datetime, timedelta
+from time import gmtime, strftime, strptime, sleep
+from datetime import datetime, timedelta, timezone
 
 from python_modules import azure_account
 
@@ -43,11 +43,29 @@ parser.add_argument(
 parser.add_argument(
     "-x", "--extra-host", help="Create an additional host on the certificate.")
 parser.add_argument(
-        "-y", "--extra-zone", help="Add the zone or the additional host on the certificate.")
+    "-y", "--extra-zone", help="Add the zone or the additional host on the certificate.")
+parser.add_argument(
+    "-internal", "--internal", help="Cert may be used internally only (record may not exist in external DNS)",action='store_true')
+parser.add_argument(
+    "-debug", "--debug", help="Change logging level to debug.",action='store_true')
 
 args = parser.parse_args()
 
-hostname = args.hostname
+if args.debug:
+    print("Setting logging level to debug")
+    logging.basicConfig(stream=sys.stdout, level=logging.debug)
+    logging.getLogger().setLevel(10)
+else:
+    print("Setting logging level to info")
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+    logging.getLogger().setLevel(20)
+
+#added this as otherwise cert is being saved to vault with hostname value (if it supplied)
+if args.wildcard:
+    hostname = "wildcard"
+else:
+    hostname = args.hostname
+
 extra_host = args.extra_host
 
 if args.test_environment:
@@ -70,12 +88,17 @@ def get_zone_details(resource_group, zone):
         check=True
     ).stdout.decode()
 
+
+    logging.debug('Function \'get_zone_details\'')
+    logging.debug('Value of zone is: %s' ,zone)
+
     if find_dns_records:
         dns_records = json.loads(find_dns_records)
 
-        key = "fqdn"
-
-        for key, zone in dns_records.items():
+        for key, value in dns_records.items():
+            if key == "fqdn" and value.startswith(zone):
+                zone_found = True
+        if zone_found:
             return True
         else:
             return False
@@ -87,10 +110,10 @@ def create_certificate(dns_names, resource_group, certbot_location):
 
     path_to_hook_scripts = azure_account.get_git_root() + '/tools/letsencrypt'
 
-    manual_auth_hook = "python3 {path_to_scripts}/authenticator.py '{dns_names}' {resource_group}".format(
+    manual_auth_hook = "python3 {path_to_scripts}/authenticator-v2.py '{dns_names}' {resource_group}".format(
         dns_names= json.dumps(dns_names), resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
 
-    manual_cleanup_hook = "python3 {path_to_scripts}/cleanup.py '{dns_names}' {resource_group}".format(
+    manual_cleanup_hook = "python3 {path_to_scripts}/cleanup-v2.py '{dns_names}' {resource_group}".format(
         dns_names= json.dumps(dns_names), resource_group=resource_group, path_to_scripts=path_to_hook_scripts)
 
     logging.info("Creating certificate")
@@ -102,10 +125,15 @@ def create_certificate(dns_names, resource_group, certbot_location):
     domains_to_renew.extend(["-d", common_name])
 
     if "additional_name" in dns_names:
-        additional_name = '.'.join(dns_names["additional_name"])
+        logging.debug('additional_name in dns_names found!')
+     
+        if not dns_names["additional_name"][0]:
+            logging.debug('must be adding basename!')
+            additional_name = dns_names["additional_name"][1]
+        else:
+            additional_name = '.'.join(dns_names["additional_name"])
+    
         domains_to_renew.extend(["-d", additional_name])
-
-
 
     cmd = ["certbot", "certonly", "--manual",
            "--email", "noms-studio-webops@digital.justice.gov.uk",
@@ -127,6 +155,8 @@ def create_certificate(dns_names, resource_group, certbot_location):
     if args.test_environment:
         cmd.append('--staging')
         logging.info("Using staging environment")
+
+    logging.debug('Value of certbot cmd is: %s' ,cmd)
 
     try:
         certificate = subprocess.run(
@@ -160,12 +190,6 @@ def create_pkcs12(saved_cert,vault):
 
     set_passphrase = "pass:"
 
-    if args.application_gateway:
-        password = azure_account.create_password()
-        set_passphrase = "pass:" + password
-
-        store_password(password,vault)
-
     subprocess.run(
         ["openssl", "pkcs12", "-export",
          "-inkey", path_to_key,
@@ -185,78 +209,31 @@ def create_pkcs12(saved_cert,vault):
 
 def store_certificate(vault, fqdn, certbot_location,saved_cert):
 
+    logging.debug("running function: store_certificate")
+      
     name = fqdn.replace(".", "DOT")
 
-    if args.application_gateway:
-        name = "appgw-ssl-certificate"
-        if args.test_environment:
-            name = "test-" + name
-
     cert_file = create_pkcs12(saved_cert,vault)
+    logging.debug('value of certfile is %s', cert_file)
 
     cert_dates = get_local_certificate_expiry(saved_cert)
 
-    open_pkcs12 = open(cert_file, 'rb').read()
-    cert_encoded = base64.encodestring(open_pkcs12)
-
     try:
-        set_secret = subprocess.run(
-            ["az", "keyvault", "secret", "set",
-             "--file", cert_file,
-             "--encoding", "base64",
-             "--name", name,
-             "--vault-name", vault
-             ],
-            stdout=subprocess.PIPE,
-            check=True
-        )
-
+        subprocess.run(
+        ["az", "keyvault", "certificate", "import",
+            "--file", cert_file,
+            "--name", name,
+            "--vault-name", vault,
+            "--disabled", "false",          
+            ],
+        stdout=subprocess.PIPE,
+        check=True
+        ).stdout.decode()
     except subprocess.CalledProcessError:
         sys.exit("There was an error saving to the key vault")
 
-    if set_secret.returncode == 0:
-        set_secret_attributes = subprocess.run(
-            ["az", "keyvault", "secret", "set-attributes",
-             "--name", name,
-             "--content-type", "application/x-pkcs12",
-             "--expires", cert_dates["end"],
-             "--not-before", cert_dates["start"],
-             "--vault-name", vault
-             ],
-            stdout=subprocess.PIPE,
-            check=True
-        )
-
-        if set_secret_attributes.returncode == 0:
-            logging.info("Certificate successfully stored to vault.")
-            return True
-        else:
-            sys.exit("Could not set secret attributes in key vault.")
-    else:
-        sys.exit("Could not set secret in key vault.")
-
-def store_password(password,vault):
-
-    name = "appgw-ssl-certificate-password"
-
-    if args.test_environment:
-        name = "test-" + name
-
-    try:
-        set_secret = subprocess.run(
-            ["az", "keyvault", "secret", "set",
-             "--value", password,
-             "--encoding", "base64",
-             "--name", name,
-             "--vault-name", vault
-             ],
-            stdout=subprocess.PIPE,
-            check=True
-        )
-
-    except subprocess.CalledProcessError:
-        sys.exit("There was an error saving the password to the vault")
-
+    return True
+            
 def get_local_certificate_expiry(saved_cert):
 
     cert_dates = {}
@@ -407,19 +384,111 @@ def certificate_renewal_due(fqdn):
         logging.info("Couldn't check certificate.")
         sys.exit(1)
 
+def get_cert_expiry_from_keyvault(vault_name, fqdn):
 
+    logging.debug("function: get_cert_expiry_from_keyvault")
+
+    name = fqdn.replace(".", "DOT")
+
+    #adding this extra try block as it catches issues with the vault being inaccessable
+    try:
+        vault = subprocess.run(
+            ["az", "keyvault", "show",
+             "--name", vault_name        
+             ],
+            stdout=subprocess.PIPE,
+        ).stdout.decode()
+
+        if vault:
+            logging.debug("vault exists!")
+        else:
+            sys.exit("Cannot access vault!")
+            
+    except subprocess.CalledProcessError:
+        sys.exit("There was an error accessing the key vault")
+
+    try:
+        cmd = ["az", "keyvault", "certificate", "show",
+        "--name", name,
+        "--vault-name", vault_name       
+        ]
+    
+        cert = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+        ).stdout.decode()
+
+        if cert:
+            cert_info = json.loads(cert)
+
+            return cert_info["attributes"]["expires"]
+            
+    except subprocess.CalledProcessError:
+        sys.exit("There was an error retrieving cert from the key vault")
+
+def check_if_cert_renewal_due(current_cert_expiry):
+
+    logging.debug("function: check_if_cert_renewal_due")
+
+    logging.debug('current_cert_expiry is %s', current_cert_expiry)
+    
+    #removing colon from timezone as it causes issues with format function
+    if ":" == current_cert_expiry[-3:-2]:
+        current_cert_expiry = current_cert_expiry[:-3]+current_cert_expiry[-2:]
+    
+    logging.debug('formatted current_cert_expiry is %s', current_cert_expiry)
+    
+    present_date = datetime.now(timezone.utc)
+
+    cert_end_date = datetime.strptime(
+            current_cert_expiry, "%Y-%m-%dT%H:%M:%S%z")
+    
+    # Adjust the renewal date
+    adjusted_renewal_date = cert_end_date - timedelta(days=21)
+
+    logging.debug('present_date is %s', present_date)
+    logging.debug('current_cert_expiry is %s', current_cert_expiry)
+    logging.debug('adjusted_renewal_date is %s', adjusted_renewal_date)
+    
+    logging.info("Current Certificate expires on %s" %
+                         (cert_end_date.strftime('%d %b %Y')))
+
+    if adjusted_renewal_date > present_date:
+            logging.debug("Certificate does not need renewing until %s" %
+                         (adjusted_renewal_date.strftime('%d %b %Y')))
+            
+            logging.info("Exiting as certificate doesnt need renewing!")
+            sys.exit(0)
+    
+    return True
 
 azure_account.azure_set_subscription(args.subscription_id)
 
 if not get_zone_details(args.resource_group, args.zone):
     sys.exit("Failed to find existing zone " + args.zone)
 
-if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
-    if not args.ignore_expiry:
-        logging.info("Check expiry date")
-        certificate_renewal_due(fqdn)
+if not args.internal:
+    logging.debug('args.internal is false!')
+    if check_dns_name_exits(args.hostname, args.zone, args.resource_group):
+        logging.debug('DNS record found!')
+    else:
+        logging.info("A record or CNAME doesn't exist. No expiry date to check.")
+
+if args.ignore_expiry:
+    logging.debug('args.ignore_expiry is true, proceeding to create cert.')
 else:
-    logging.info("A record or CNAME doesn't exist. No expiry date to check.")
+    logging.debug('args.ignore_expiry is false, checking cert expiry.')
+    if not args.internal:
+        logging.debug("args.internal is false, endpoint should be accessible.")
+        logging.debug("Calling 'certificate_renewal_due'")
+        certificate_renewal_due(fqdn)
+    else:
+        logging.debug("args.internal is true, check expiry via date from vault.")
+        current_cert_expiry = get_cert_expiry_from_keyvault(args.vault, fqdn)
+        if current_cert_expiry:
+            check_if_cert_renewal_due(current_cert_expiry)
+        else:
+            logging.info("Cert not found. Assume its a new request.")
 
 if args.wildcard:
     hostname = "*"
@@ -428,9 +497,12 @@ dns_names = {
    "common_name": [hostname,args.zone]
    }
 if args.extra_zone:
-   dns_names.update({
-   "additional_name" : [extra_host,args.extra_zone]
-   })
+    logging.debug('args.extra_zone is true')
+    dns_names.update({
+    "additional_name" : [extra_host,args.extra_zone]
+    })
+else:
+    logging.debug('args.extra_zone is false!')
 
 saved_cert = create_certificate(dns_names, args.resource_group, args.certbot)
 
