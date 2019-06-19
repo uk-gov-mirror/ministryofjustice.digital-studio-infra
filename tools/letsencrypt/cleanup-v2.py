@@ -16,12 +16,15 @@ for key,value in dns_names.items():
     host = value[0]
     zone = value[1]
 
-    if host == "*":
+    if host == "*" or host is None:
         acme_challenge_name = "_acme-challenge"
     else:
         acme_challenge_name = "_acme-challenge." + host
 
-    host_domain = ".".join(value)
+    if host is not None:
+        host_domain = ".".join(value)
+    else:
+        host_domain = zone
     
     if host_domain != os.getenv("CERTBOT_DOMAIN"):
         continue

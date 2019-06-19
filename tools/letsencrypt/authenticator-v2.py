@@ -18,30 +18,37 @@ for key,value in dns_names.items():
     
     logging.info("host and zone =  %s.%s" % (host, zone))
     
-    if host == "*":
+    if host == "*" or host is None:
+        logging.debug("host empty or requesting wildcard cert")
         acme_challenge_name = "_acme-challenge"
     else:
         acme_challenge_name = "_acme-challenge." + host
 
     logging.info("CERTBOT_DOMAIN =  %s" % (os.getenv("CERTBOT_DOMAIN")))
     
-    host_domain = ".".join(value)
+    if host is not None:
+        host_domain = ".".join(value)
+    else:
+        host_domain = zone
 
     if host != "*" and host_domain != os.getenv("CERTBOT_DOMAIN"):
         continue
 
-    cmd = ["az", "network", "dns", "record-set", "txt", "create",
-         "--name", acme_challenge_name,
-         "--resource-group", resource_group,
-         "--zone-name", zone,
-         "--ttl", "60"
-         ]
-    logging.info("Running: %s" % (" ".join(cmd)))
-    create_record_set = subprocess.run(
-        cmd,
-        stdout=subprocess.PIPE,
-        check=True
-    )
+    #### finally figured out this is causing issues when adding the base domain!!!!
+    #### multiple records are required and this is wiping them out! removing for now.
+    #### note - with this removed the next 'dns add-record' command may chuck error if the same value exists
+    # cmd = ["az", "network", "dns", "record-set", "txt", "create",
+    #      "--name", acme_challenge_name,
+    #      "--resource-group", resource_group,
+    #      "--zone-name", zone,
+    #      "--ttl", "60"
+    #      ]
+    # logging.info("Running: %s" % (" ".join(cmd)))
+    # create_record_set = subprocess.run(
+    #     cmd,
+    #     stdout=subprocess.PIPE,
+    #     check=True
+    # )
 
     cmd = ["az", "network", "dns", "record-set", "txt", "add-record",
          "--record-set-name", acme_challenge_name,
