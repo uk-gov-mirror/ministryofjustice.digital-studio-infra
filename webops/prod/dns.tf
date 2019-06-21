@@ -34,3 +34,14 @@ resource "azurerm_dns_ns_record" "nomis-api" {
 output "service.hmpps.dsd.io nameservers" {
     value = ["${azurerm_dns_zone.service-hmpps.name_servers}"]
 }
+
+resource "azurerm_dns_zone" "az_justice_gov_uk" {
+  name                = "az.justice.gov.uk"
+  resource_group_name = "${azurerm_resource_group.group.name}"
+
+  tags {
+        Service = "WebOps"
+        Environment = "Management"
+    }
+  
+}
