@@ -403,6 +403,16 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "NOTIFY_ACTIVE_TEMPLATES"
     value     = "${local.notifyActiveTemplates}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "RO_SERVICE_TYPE"
+    value     = "${local.roServiceType}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "DELIUS_API_URL"
+    value     = "${local.deliusApiUrl}"
+  }
   tags = "${var.tags}"
 }
 
