@@ -31,7 +31,7 @@ resource "azurerm_key_vault" "ssl_az_justice_gov_uk" {
       object_id = "${var.azure_jenkins_sp_oid}"
       key_permissions = []
       secret_permissions = ["set", "get"]
-      certificate_permissions = ["list", "get"]
+      certificate_permissions = ["list", "get", "import"]
   }
 
   enabled_for_deployment          = false
