@@ -47,6 +47,25 @@ variable "azure_secret_permissions_all" {
   ]
 }
 
+variable "azure_certificate_permissions_all" {
+  type = "list"
+
+  default = [
+    "create",
+      "delete",
+      "deleteissuers",
+      "get",
+      "getissuers",
+      "import",
+      "list",
+      "listissuers",
+      "managecontacts",
+      "manageissuers",
+      "setissuers",
+      "update",
+  ]
+}
+
 locals {
   dns_zone_name = "service.hmpps.dsd.io"
   dns_zone_rg   = "webops-prod"
