@@ -199,6 +199,7 @@ resource "azurerm_key_vault" "o11y-app-gw" {
         object_id = "${var.azure_webops_group_oid}"
         key_permissions = []
         secret_permissions = "${var.azure_secret_permissions_all}"
+        certificate_permissions = "${var.azure_certificate_permissions_all}"
     }
 
     access_policy {
