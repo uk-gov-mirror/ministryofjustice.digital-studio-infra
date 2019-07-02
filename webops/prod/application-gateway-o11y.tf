@@ -191,7 +191,7 @@ resource "azurerm_key_vault" "o11y-app-gw" {
   sku {
     name = "standard"
   }
-    
+
     tenant_id = "${var.azure_tenant_id}"
 
     access_policy {
@@ -199,6 +199,7 @@ resource "azurerm_key_vault" "o11y-app-gw" {
         object_id = "${var.azure_webops_group_oid}"
         key_permissions = []
         secret_permissions = "${var.azure_secret_permissions_all}"
+        certificate_permissions = "${var.azure_certificate_permissions_all}"
     }
 
     access_policy {
@@ -206,6 +207,7 @@ resource "azurerm_key_vault" "o11y-app-gw" {
         object_id = "${var.azure_jenkins_sp_oid}"
         key_permissions = []
         secret_permissions = ["set", "get"]
+        certificate_permissions = ["list", "get", "import"]
     }
 
   enabled_for_deployment = false
