@@ -89,8 +89,6 @@ resource "azurerm_template_deployment" "slackhook-github" {
 resource "github_repository_webhook" "slackhook-deploy" {
   repository = "slackhook"
 
-  name = "web"
-
   configuration {
     url          = "${azurerm_template_deployment.slackhook-github.outputs["deployTrigger"]}?scmType=GitHub"
     content_type = "form"
