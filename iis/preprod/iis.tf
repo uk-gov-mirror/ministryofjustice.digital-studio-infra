@@ -299,7 +299,6 @@ resource "azurerm_template_deployment" "webapp-github" {
 resource "github_repository_webhook" "webapp-deploy" {
   repository = "iis"
 
-  name = "web"
   configuration {
     url = "${azurerm_template_deployment.webapp-github.outputs["deployTrigger"]}?scmType=GitHub"
     content_type = "form"
