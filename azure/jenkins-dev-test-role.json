@@ -3,20 +3,32 @@
   "IsCustom": true,
   "Description": "All permissions needed for jenkins jobs",
   "Actions": [
-    "Microsoft.Web/certificates/*",
+    "Microsoft.Authorization/roleAssignments/read",
+    "Microsoft.Authorization/roleAssignments/write",
+    "Microsoft.Compute/virtualMachines/*",
+    "Microsoft.Insights/components/read",
+    "Microsoft.Insights/components/write",
+    "Microsoft.KeyVault/vaults/*",
+    "Microsoft.Network/applicationGateways/read",
+    "Microsoft.Network/applicationGateways/write",
     "Microsoft.Network/dnsZones/*/read",
     "Microsoft.Network/dnsZones/TXT/write",
     "Microsoft.Network/dnsZones/TXT/delete",
+    "Microsoft.Network/loadBalancers/read",
+    "Microsoft.Network/networkInterfaces/*",
+    "Microsoft.Network/networkSecurityGroups/*",
+    "Microsoft.Network/publicIPAddresses/*",
+    "Microsoft.Network/routeTables/read",
+    "Microsoft.Network/virtualNetworks/*",   
     "Microsoft.Resources/deployments/*",
-    "Microsoft.KeyVault/vaults/*",
-    "Microsoft.Web/serverfarms/*",
-    "Microsoft.Network/applicationGateways/read",
-    "Microsoft.Network/applicationGateways/write",
-    "Microsoft.Storage/storageAccounts/listKeys/action",
     "Microsoft.Resources/subscriptions/resourcegroups/read",
     "Microsoft.Resources/subscriptions/resourcegroups/write",
     "Microsoft.Storage/storageAccounts/read",
-    "Microsoft.Storage/storageAccounts/write"
+    "Microsoft.Storage/storageAccounts/write",
+    "Microsoft.Storage/storageAccounts/listKeys/action",
+    "Microsoft.Web/certificates/*",
+    "Microsoft.Web/serverfarms/*",
+    "Microsoft.Web/sites/*"
   ],
   "NotActions": [
     "Microsoft.KeyVault/vaults/accessPolicies/write",
@@ -27,3 +39,7 @@
     "/subscriptions/b1f3cebb-4988-4ff9-9259-f02ad7744fcb"
   ]
 }
+          
+          
+          
+          
