@@ -50,11 +50,11 @@ locals {
   remindersScheduleRo = "0 1 * * 1-5"
   scheduledJobAuto    = "yes"
   scheduledJobOverlap = "5000"
-  notifyActiveTemplates = "CA_RETURN,CA_DECISION,RO_NEW,DM_NEW"
+  notifyActiveTemplates = "CA_RETURN,CA_DECISION,RO_NEW,DM_NEW,DM_TO_CA_RETURN"
   roServiceType       = "NOMIS"
   deliusApiUrl        = "https://community-api.service.hmpps.dsd.io/communityapi/api"
+  clearingOfficeEmail = "HDC.ClearingOffice@justice.gov.uk"
 }
-
 # Azure config
 locals {
   azurerm_resource_group = "licences-prod"
