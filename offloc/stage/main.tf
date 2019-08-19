@@ -255,9 +255,6 @@ resource "azurerm_template_deployment" "github" {
 resource "github_repository_webhook" "deploy" {
   count      = "${local.github_deploy_branch == "" ? 0 : 1}"
   repository = "offloc-server"
-
-  name = "web"
-
   configuration {
     url          = "${azurerm_template_deployment.github.outputs["deployTrigger"]}?scmType=GitHub"
     content_type = "form"

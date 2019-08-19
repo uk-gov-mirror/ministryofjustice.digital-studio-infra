@@ -40,7 +40,7 @@ resource "aws_db_instance" "db" {
   allocated_storage         = 20
   storage_type              = "gp2"
   engine                    = "postgres"
-  engine_version            = "10.1"
+  engine_version            = "10.6"
   parameter_group_name      = "${aws_db_parameter_group.db.name}"
   instance_class            = "db.t2.small"
   name                      = "${replace(var.app-name, "-", "_")}"
@@ -58,7 +58,7 @@ resource "aws_db_instance" "db" {
   backup_window             = "01:00-03:00"
   maintenance_window        = "sun:03:00-sun:06:00"
   apply_immediately         = "${local.db_apply_immediately}"
-  
+
   tags = "${var.tags}"
 }
 

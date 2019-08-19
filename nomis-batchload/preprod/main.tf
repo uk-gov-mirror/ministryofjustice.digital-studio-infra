@@ -1,43 +1,11 @@
-resource "azurerm_storage_account" "storage" {
-  name                     = "${substr(format("%s%s", replace(var.app-name, "-", ""), "storage"),0,24)}"
-  resource_group_name      = "${azurerm_resource_group.group.name}"
-  location                 = "${azurerm_resource_group.group.location}"
-  account_tier             = "Standard"
-  account_replication_type = "RAGRS"
-  enable_blob_encryption   = true
-
-  tags = "${var.tags}"
-}
-
-resource "azurerm_storage_container" "logs" {
-  name                  = "web-logs"
-  resource_group_name   = "${azurerm_resource_group.group.name}"
-  storage_account_name  = "${azurerm_storage_account.storage.name}"
-  container_access_type = "private"
-}
-
 # This resource is managed in multiple places
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "nomis-batchload"
   description = "nomis-batchload"
 }
 
-
 resource "random_id" "session-secret" {
   byte_length = 40
-}
-
-resource "azurerm_resource_group" "group" {
-  name     = "${local.azurerm_resource_group}"
-  location = "${local.azure_region}"
-  tags     = "${var.tags}"
-}
-
-resource "azurerm_application_insights" "insights" {
-  name                = "${var.app-name}"
-  location            = "North Europe"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  application_type    = "Web"
 }
 
 resource "aws_security_group" "elb" {
@@ -154,6 +122,24 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:environment:process:default"
     name      = "HealthCheckPath"
     value     = "/health"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "HealthCheckInterval"
+    value     = "30"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "HealthyThresholdCount"
+    value     = "2"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "UnhealthyThresholdCount"
+    value     = "3"
   }
 
   setting {
@@ -349,6 +335,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "DB_PASS"
     value     = "${aws_db_instance.db.password}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
+    value     = "${data.aws_ssm_parameter.appinsights_instrumentationkey.value}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"

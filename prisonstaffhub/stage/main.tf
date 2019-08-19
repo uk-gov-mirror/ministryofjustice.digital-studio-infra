@@ -4,19 +4,6 @@ resource "aws_elastic_beanstalk_application" "app" {
   description = "prisonstaffhub"
 }
 
-resource "azurerm_resource_group" "group" {
-  name     = "${local.azurerm_resource_group}"
-  location = "${local.azure_region}"
-  tags     = "${var.tags}"
-}
-
-resource "azurerm_application_insights" "insights" {
-  name                = "${var.app-name}"
-  location            = "North Europe"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  application_type    = "Web"
-}
-
 resource "aws_security_group" "elb" {
   name        = "${var.app-name}-elb"
   vpc_id      = "${aws_vpc.vpc.id}"
@@ -77,6 +64,24 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:application"
     name      = "Application Healthcheck URL"
     value     = "/health"
+  }
+
+  setting {
+    namespace = "aws:elb:healthcheck"
+    name      = "Interval"
+    value     = "30"
+  }
+
+  setting {
+    namespace = "aws:elb:healthcheck"
+    name      = "HealthyThreshold"
+    value     = "2"
+  }
+
+  setting {
+    namespace = "aws:elb:healthcheck"
+    name      = "UnhealthyThreshold"
+    value     = "3"
   }
 
   setting {
@@ -259,6 +264,21 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "API_WHEREABOUTS_ENDPOINT_URL"
+    value     = "${local.api_whereabouts_endpoint_url}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "IEP_CHANGE_LINK_ENABLED"
+    value     = "${local.iep_change_link_enabled}"
+  }
+    setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "UPDATE_ATTENDANCE_PRISONS"
+    value     = "${local.update_attendance_prisons}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "LICENCES_URL"
     value     = "${local.licences_endpoint_url}"
   }
@@ -285,7 +305,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${azurerm_application_insights.insights.instrumentation_key}"
+    value     = "${data.aws_ssm_parameter.appinsights_instrumentationkey.value}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"

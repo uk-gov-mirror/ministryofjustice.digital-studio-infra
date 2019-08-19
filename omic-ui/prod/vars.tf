@@ -49,6 +49,7 @@ locals {
   allowed-list = [
     "${var.ips["office"]}/32",
     "${var.ips["quantum"]}/32",
+    "${var.ips["quantum_alt"]}/32",
     "${var.ips["health-kick"]}/32",
     "${var.ips["mojvpn"]}/32",
     "${var.ips["digitalprisons1"]}/32",
@@ -62,5 +63,6 @@ locals {
     "${var.ips["ark-nps-hmcts-ttp3"]}/25",
     "${var.ips["ark-nps-hmcts-ttp4"]}/25",
     "${var.ips["ark-nps-hmcts-ttp5"]}/25",
+    "${var.ips["oakwood"]}/32"
   ]
 }

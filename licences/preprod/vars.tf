@@ -46,6 +46,13 @@ locals {
   domain              = "https://licences-preprod.service.hmpps.dsd.io"
   authStrategy        = "oauth"
   global_search_url   = "https://prisonstaffhub-preprod.service.hmpps.dsd.io/global-search"
+  pushToNomis         = "yes"
+  remindersScheduleRo = "0 1 * * 1-5"
+  scheduledJobAuto    = "yes"
+  scheduledJobOverlap = "5000"
+  notifyActiveTemplates = "CA_RETURN,CA_DECISION,RO_NEW,DM_NEW,DM_TO_CA_RETURN"
+  roServiceType       = "NOMIS"
+  clearingOfficeEmail = "hdc_test+co@digital.justice.gov.uk"
 }
 
 # Azure config
@@ -58,6 +65,7 @@ locals {
   allowed-list = [
     "${var.ips["office"]}/32",
     "${var.ips["quantum"]}/32",
+    "${var.ips["quantum_alt"]}/32",
     "${var.ips["health-kick"]}/32",
     "${var.ips["mojvpn"]}/32",
     "${var.ips["digitalprisons1"]}/32",

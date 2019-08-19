@@ -1,23 +1,3 @@
-
-resource "azurerm_storage_account" "storage" {
-  name                     = "${replace(var.app-name, "-", "")}storage"
-  resource_group_name      = "${azurerm_resource_group.group.name}"
-  location                 = "${azurerm_resource_group.group.location}"
-  account_tier             = "Standard"
-  account_replication_type = "RAGRS"
-  enable_blob_encryption   = true
-
-  tags = "${var.tags}"
-}
-
-resource "azurerm_storage_container" "logs" {
-  name                  = "web-logs"
-  resource_group_name   = "${azurerm_resource_group.group.name}"
-  storage_account_name  = "${azurerm_storage_account.storage.name}"
-  container_access_type = "private"
-}
-
-
 # This resource is managed in multiple places (licences mock)
 resource "aws_elastic_beanstalk_application" "app" {
   name        = "licences"
@@ -26,19 +6,6 @@ resource "aws_elastic_beanstalk_application" "app" {
 
 resource "random_id" "session-secret" {
   byte_length = 40
-}
-
-resource "azurerm_resource_group" "group" {
-  name     = "${local.azurerm_resource_group}"
-  location = "${local.azure_region}"
-  tags     = "${var.tags}"
-}
-
-resource "azurerm_application_insights" "insights" {
-  name                = "${var.app-name}"
-  location            = "North Europe"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  application_type    = "Web"
 }
 
 resource "aws_security_group" "elb" {
@@ -155,6 +122,24 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:environment:process:default"
     name      = "HealthCheckPath"
     value     = "/health"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "HealthCheckInterval"
+    value     = "30"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "HealthyThresholdCount"
+    value     = "2"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "UnhealthyThresholdCount"
+    value     = "3"
   }
 
   setting {
@@ -356,7 +341,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPINSIGHTS_INSTRUMENTATIONKEY"
-    value     = "${azurerm_application_insights.insights.instrumentation_key}"
+    value     = "${data.aws_ssm_parameter.appinsights_instrumentationkey.value}"
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
@@ -388,7 +373,51 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "AUTH_STRATEGY"
     value     = "${local.authStrategy}"
   }
-
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NOTIFY_API_KEY"
+    value     = "${data.aws_ssm_parameter.notify-api-client-secret.value}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "PUSH_TO_NOMIS"
+    value     = "${local.pushToNomis}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "REMINDERS_SCHEDULE_RO"
+    value     = "${local.remindersScheduleRo}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SCHEDULED_JOBS_AUTOSTART"
+    value     = "${local.scheduledJobAuto}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "SCHEDULED_JOBS_OVERLAP"
+    value     = "${local.scheduledJobOverlap}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "NOTIFY_ACTIVE_TEMPLATES"
+    value     = "${local.notifyActiveTemplates}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "RO_SERVICE_TYPE"
+    value     = "${local.roServiceType}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "DELIUS_API_URL"
+    value     = "${local.deliusApiUrl}"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "CLEARING_OFFICE_EMAIL"
+    value     = "${local.clearingOfficeEmail}"
+  }
   tags = "${var.tags}"
 }
 

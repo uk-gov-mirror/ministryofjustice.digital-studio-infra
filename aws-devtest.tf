@@ -21,6 +21,9 @@ variable "aws_az_b" {
 provider "aws" {
   allowed_account_ids = ["${var.aws_account_id}"]
   region              = "${var.aws_region}"
+  assume_role {
+    role_arn     = "arn:aws:iam::${var.aws_account_id}:role/terraform"
+  }
 }
 
 variable "elastic-beanstalk-single-docker" {
@@ -35,5 +38,5 @@ locals {
 #Config for Azure
 locals {
   azure_dns_zone_name = "hmpps.dsd.io"
-  azure_dns_zone_rg   = "webops"
+  azure_dns_zone_rg   = "webops-shared-dns-devtest"
 }
