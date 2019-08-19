@@ -23,6 +23,7 @@ locals {
   api_endpoint_url            = "${local.api_base_endpoint}/elite2api/"
   oauth_endpoint_url          = "${local.api_base_endpoint}/auth/"
   keyworker_api_url           = "https://keyworker-api.service.hmpps.dsd.io/"
+  categorisation_ui_url       = "https://offender-categorisation.service.justice.gov.uk/"
   nn_endpoint_url             = "https://notm.service.hmpps.dsd.io/"
   omic_ui_url                 = "https://omic.service.hmpps.dsd.io/"
   whereabouts_ui_url          = "https://prisonstaffhub.service.hmpps.dsd.io/whereaboutssearch"
@@ -50,6 +51,7 @@ locals {
   allowed-list = [
     "${var.ips["office"]}/32",
     "${var.ips["quantum"]}/32",
+    "${var.ips["quantum_alt"]}/32",
     "${var.ips["health-kick"]}/32",
     "${var.ips["digitalprisons1"]}/32",
     "${var.ips["digitalprisons2"]}/32",
@@ -63,6 +65,7 @@ locals {
     "${var.ips["ark-nps-hmcts-ttp3"]}/25",
     "${var.ips["ark-nps-hmcts-ttp4"]}/25",
     "${var.ips["ark-nps-hmcts-ttp5"]}/25",
+    "${var.ips["oakwood"]}/32"
   ]
 }
 

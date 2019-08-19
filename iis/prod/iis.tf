@@ -205,6 +205,10 @@ resource "azurerm_app_service" "app" {
     }
 
     ip_restriction {
+      ip_address = "${var.ips["quantum_alt"]}"
+    }
+
+    ip_restriction {
       ip_address = "${var.ips["health-kick"]}"
     }
 
@@ -393,8 +397,6 @@ resource "azurerm_template_deployment" "stats-exposer-github" {
 
 resource "github_repository_webhook" "stats-exposer-deploy" {
   repository = "ai-stats-exposer"
-
-  name = "web"
 
   configuration {
     url          = "${azurerm_template_deployment.stats-exposer-github.outputs["deployTrigger"]}?scmType=GitHub"

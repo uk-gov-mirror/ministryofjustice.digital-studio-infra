@@ -220,7 +220,8 @@ resource "azurerm_template_deployment" "webapp-whitelist" {
         name = "${azurerm_template_deployment.webapp.parameters.name}"
         ip1 = "${var.ips["office"]}"
         ip2 = "${var.ips["quantum"]}"
-        ip3 = "${var.ips["health-kick"]}"
+        ip3 = "${var.ips["quantum_alt"]}",
+        ip4 = "${var.ips["health-kick"]}"
     }
 
     depends_on = ["azurerm_template_deployment.webapp"]
@@ -298,7 +299,6 @@ resource "azurerm_template_deployment" "webapp-github" {
 resource "github_repository_webhook" "webapp-deploy" {
   repository = "iis"
 
-  name = "web"
   configuration {
     url = "${azurerm_template_deployment.webapp-github.outputs["deployTrigger"]}?scmType=GitHub"
     content_type = "form"

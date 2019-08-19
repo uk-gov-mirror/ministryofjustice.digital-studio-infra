@@ -88,8 +88,6 @@ resource "azurerm_template_deployment" "app-github" {
 
 resource "github_repository_webhook" "app" {
   repository = "hmpps-portfolio"
-
-  name = "web"
   configuration {
     url = "${azurerm_template_deployment.app-github.outputs["deployTrigger"]}?scmType=GitHub"
     content_type = "form"

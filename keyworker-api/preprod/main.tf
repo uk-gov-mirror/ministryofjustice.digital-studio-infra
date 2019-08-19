@@ -13,14 +13,14 @@ resource "aws_security_group" "elb" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = "${local.allowed-list}"
   }
 
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = "${local.allowed-list}"
   }
 
   egress {
@@ -68,19 +68,6 @@ data "aws_elastic_beanstalk_solution_stack" "docker" {
   name_regex  = "^64bit Amazon Linux .* v2.* running Docker *.*$"
 }
 
-resource "azurerm_resource_group" "group" {
-  name     = "${local.azurerm_resource_group}"
-  location = "${local.azure_region}"
-  tags     = "${var.tags}"
-}
-
-resource "azurerm_application_insights" "insights" {
-  name                = "${var.app-name}"
-  location            = "North Europe"
-  resource_group_name = "${azurerm_resource_group.group.name}"
-  application_type    = "Web"
-}
-
 resource "aws_elastic_beanstalk_environment" "app-env" {
   name                = "${var.app-name}"
   application         = "${aws_elastic_beanstalk_application.app.name}"
@@ -125,6 +112,24 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:elasticbeanstalk:application"
     name      = "Application Healthcheck URL"
     value     = "/health"
+  }
+
+  setting {
+    namespace = "aws:elb:healthcheck"
+    name      = "Interval"
+    value     = "30"
+  }
+
+  setting {
+    namespace = "aws:elb:healthcheck"
+    name      = "HealthyThreshold"
+    value     = "2"
+  }
+
+  setting {
+    namespace = "aws:elb:healthcheck"
+    name      = "UnhealthyThreshold"
+    value     = "3"
   }
 
   setting {
@@ -345,7 +350,7 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "APPLICATION_INSIGHTS_IKEY"
-    value     = "${azurerm_application_insights.insights.instrumentation_key}"
+    value     = "${data.aws_ssm_parameter.appinsights_instrumentationkey.value}"
   }
   tags = "${var.tags}"
 }
