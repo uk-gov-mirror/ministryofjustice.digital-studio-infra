@@ -26,6 +26,7 @@ locals {
   hmpps_cookie_name       = "hmpps-session-prod"
   google_analytics_id     = "UA-106741063-2"
   remote_auth_strategy    = "true"
+  session_timeout_mins    = "60"
 }
 
 # Instance and Deployment settings

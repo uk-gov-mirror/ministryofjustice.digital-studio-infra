@@ -32,6 +32,7 @@ locals {
   hmpps_cookie_name           = "hmpps-session-preprod"
   hmpps_cookie_domain         = "service.hmpps.dsd.io"
   remote_auth_strategy         = "true"
+  session_timeout_mins        = "60"
 }
 
 # Azure config
