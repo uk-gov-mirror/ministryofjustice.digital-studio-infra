@@ -257,6 +257,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "1"
   }
 
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:proxy"
+    name      = "ProxyServer"
+    value     = "none"
+  }
+
   # Begin app-specific config settings
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
