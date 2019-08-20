@@ -32,7 +32,8 @@ locals {
   api_client_id               = "elite2apiclient"
   hmpps_cookie_name           = "hmpps-session-prod"
   hmpps_cookie_domain         = "service.hmpps.dsd.io"
-  remote_auth_strategy         = "true"
+  remote_auth_strategy        = "true"
+  session_timeout_mins        = "60"
 }
 
 # Azure config

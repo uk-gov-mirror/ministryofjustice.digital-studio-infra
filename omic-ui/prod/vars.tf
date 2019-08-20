@@ -36,6 +36,7 @@ locals {
   keyworker_profile_stats_enabled = "true"
   keyworker_dashboard_stats_enabled = "true"
   remote_auth_strategy = "true"
+  session_timeout_mins        = "60"
 }
 
 # Azure config
