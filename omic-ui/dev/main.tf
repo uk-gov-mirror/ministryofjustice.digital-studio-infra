@@ -289,7 +289,6 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     value     = "none"
   }
  
-
   # Begin app-specific config settings
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
