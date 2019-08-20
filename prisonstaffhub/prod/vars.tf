@@ -29,6 +29,7 @@ locals {
   remote_auth_strategy           = "true"
   update_attendance_prisons      = "MDI,HMI,LEI,HLI"
   iep_change_link_enabled        = "true"
+  session_timeout_mins           = "60"
 }
 
 # Instance and Deployment settings
