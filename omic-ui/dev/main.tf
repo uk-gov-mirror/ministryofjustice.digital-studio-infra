@@ -379,6 +379,11 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     name      = "REMOTE_AUTH_STRATEGY"
     value     = "${local.remote_auth_strategy}"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "WEB_SESSION_TIMEOUT_IN_MINUTES"
+    value     = "${local.session_timeout_mins}"
+  }
   tags = "${var.tags}"
 }
 
