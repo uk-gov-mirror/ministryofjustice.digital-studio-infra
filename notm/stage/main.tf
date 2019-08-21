@@ -183,6 +183,24 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "AccessLogsS3Enabled"
+    value     = "true"
+  }
+
+  setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "AccessLogsS3Prefix"
+    value     = "${var.app-name}"
+  }
+
+  setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "AccessLogsS3Bucket"
+    value     = "dps-elasticbeanstalk-access-logs"
+  }
+
+  setting {
     namespace = "aws:ec2:vpc"
     name      = "VPCId"
     value     = "${aws_vpc.vpc.id}"
