@@ -165,6 +165,24 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
   }
 
   setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "AccessLogsS3Enabled"
+    value     = "true"
+  }
+
+  setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "AccessLogsS3Prefix"
+    value     = "${var.app-name}"
+  }
+
+  setting {
+    namespace = "aws:elbv2:loadbalancer"
+    name      = "AccessLogsS3Bucket"
+    value     = "dps-elasticbeanstalk-access-logs"
+  }
+
+  setting {
     namespace = "aws:elbv2:listener:443"
     name      = "Protocol"
     value     = "HTTPS"
@@ -286,6 +304,12 @@ resource "aws_elastic_beanstalk_environment" "app-env" {
     namespace = "aws:autoscaling:updatepolicy:rollingupdate"
     name      = "MaxBatchSize"
     value     = "1"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:proxy"
+    name      = "ProxyServer"
+    value     = "none"
   }
 
   #
