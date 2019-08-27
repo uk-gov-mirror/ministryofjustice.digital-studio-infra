@@ -265,7 +265,9 @@ python3 tools/application_gateway_update.py \
 
 ## App Gateway TLS Versions
 
-Until [supported by terraform](https://github.com/terraform-providers/terraform-provider-azurerm/issues/1576), if you 
+> This step can now (from Terraform 1.30.0) be carried out via Terraform, so should not need to be done through the Azure CLI.
+
+Prior to v1.30.0, Terraform didn not support SSL profile configuration for App Gateays ([GitHub issue](https://github.com/terraform-providers/terraform-provider-azurerm/issues/1576)). If you 
 wish to change the SSL Profile of your app gateways, you will need to do so using the Azure CLI.  This is a one-time 
 manual step for now and has intentionally been kept clear of the `null_resource`/`local_exec` features of terraform as 
 it doesn't cause a changed state when run and subsequent terraform changes will not undo this!  
