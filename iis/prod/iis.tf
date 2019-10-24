@@ -274,6 +274,25 @@ resource "azurerm_app_service" "app" {
       ip_address  = "194.33.197.0"
       subnet_mask = "255.255.255.128"
     }
+
+    #dxc_webproxy1
+    ip_restriction {
+      ip_address  = "195.92.38.20"
+      subnet_mask = "255.255.255.255"
+    }
+
+    #dxc_webproxy2
+    ip_restriction {
+      ip_address  = "195.92.38.21"
+      subnet_mask = "255.255.255.255"
+    }
+
+    #dxc_webproxy3
+    ip_restriction {
+      ip_address  = "195.92.38.23"
+      subnet_mask = "255.255.255.255"
+    }
+
   }
 }
 
@@ -397,6 +416,7 @@ resource "azurerm_template_deployment" "stats-exposer-github" {
 
 resource "github_repository_webhook" "stats-exposer-deploy" {
   repository = "ai-stats-exposer"
+   name = "web"
 
   configuration {
     url          = "${azurerm_template_deployment.stats-exposer-github.outputs["deployTrigger"]}?scmType=GitHub"
