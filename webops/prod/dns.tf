@@ -45,3 +45,25 @@ resource "azurerm_dns_zone" "az_justice_gov_uk" {
     }
   
 }
+
+resource "azurerm_dns_zone" "studio-hosting" {
+    name = "studio-hosting.service.hmpps.dsd.io"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    tags {
+        Service = "WebOps"
+        Environment = "Management"
+    }
+}
+
+resource "azurerm_dns_ns_record" "studio-hosting" {
+    name                = "studio-hosting"
+    zone_name           = "${azurerm_dns_zone.service-hmpps.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    ttl                 = 300
+    records             = ["${azurerm_dns_zone.service-hmpps.name_servers}"]
+    tags {
+        Service = "WebOps"
+        Environment = "Management"
+    }
+}
+

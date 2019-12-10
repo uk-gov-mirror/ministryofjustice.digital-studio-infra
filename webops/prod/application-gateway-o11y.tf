@@ -106,7 +106,7 @@ resource "azurerm_application_gateway" "o11y-app-gw" {
     cookie_based_affinity = "Disabled"
     port                  = 8080
     protocol              = "Http"
-    request_timeout       = 1
+    request_timeout       = 10
     probe_name            = "prometheus-probe"
   }
 
@@ -115,7 +115,7 @@ resource "azurerm_application_gateway" "o11y-app-gw" {
     cookie_based_affinity = "Disabled"
     port                  = 9093
     protocol              = "Http"
-    request_timeout       = 1
+    request_timeout       = 10
     probe_name            = "alertmanager-probe"
   }
 

@@ -99,7 +99,7 @@ resource "azurerm_application_gateway" "mgmt-app-gw" {
     port                  = 8080
     protocol              = "Http"
     probe_name            = "jenkins-probe"
-    request_timeout       = 1
+    request_timeout       = 10
   }
 
   probe {
