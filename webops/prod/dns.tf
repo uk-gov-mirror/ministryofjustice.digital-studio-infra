@@ -67,3 +67,24 @@ resource "azurerm_dns_ns_record" "studio-hosting" {
     }
 }
 
+resource "azurerm_dns_zone" "studio" {
+    name = "studio.service.hmpps.dsd.io"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    tags {
+        Service = "WebOps"
+        Environment = "Management"
+    }
+}
+
+resource "azurerm_dns_ns_record" "ds" {
+    name                = "studio"
+    zone_name           = "${azurerm_dns_zone.service-hmpps.name}"
+    resource_group_name = "${azurerm_resource_group.group.name}"
+    ttl                 = 300
+    records             = ["${azurerm_dns_zone.service-hmpps.name_servers}"]
+    tags {
+        Service = "WebOps"
+        Environment = "Management"
+    }
+}
+
