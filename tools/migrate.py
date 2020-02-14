@@ -120,7 +120,7 @@ state = json.dumps(subprocess.run(
     check=True
 ).stdout.decode())
 
-with open('.terraform.tfstate.backup', 'w') as outfile:
+with open('.terraform.tfstate_copy.backup_copy', 'w') as outfile:
     json.dump(state, outfile, indent=4) 
 
 subprocess.run(

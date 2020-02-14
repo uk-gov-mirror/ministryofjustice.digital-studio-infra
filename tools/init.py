@@ -25,7 +25,7 @@ def create_config_file():
 
     appDir = os.path.split(os.path.dirname(os.getcwd()))[1]
 
-    keyName = ''.join([appDir, '-', cwd, '.terraform.tfstate'])
+    keyName = ''.join([appDir, '-', cwd, '.terraform.tfstate_copy'])
 
     storage_account = appDir.replace('-','') + cwd + "storage"
     # make sure it's not over the 24 character limit for storage account names
