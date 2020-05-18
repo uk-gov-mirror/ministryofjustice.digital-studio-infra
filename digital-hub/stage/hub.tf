@@ -32,6 +32,33 @@ locals {
   hub_bounce_prod_ip = "51.140.76.188"
 }
 
+resource "azurerm_dns_a_record" "digihub" {
+  name                = "pfs-digital-hub-feedback"
+  zone_name           = "hmpps.dsd.io"
+  resource_group_name = "webops-shared-dns-devtest"
+  ttl                 = 300
+  records             = ["51.143.132.235"]
+  tags = "${local.tags}"
+}
+
+resource "azurerm_dns_a_record" "pfsmanagement" {
+  name                = "pfs-management"
+  zone_name           = "hmpps.dsd.io"
+  resource_group_name = "webops-shared-dns-devtest"
+  ttl                 = 300
+  records             = ["51.143.132.235"]
+  tags = "${local.tags}"
+}
+
+resource "azurerm_dns_a_record" "dnstest" {
+  name                = "pfs-digital-hub-dev"
+  zone_name           = "hmpps.dsd.io"
+  resource_group_name = "webops-shared-dns-devtest"
+  ttl                 = 300
+  records             = ["51.143.165.90"]
+  tags = "${local.tags}"
+}
+
 resource "azurerm_network_security_group" "hub" {
   name                = "${local.name}-hub-nsg"
   location            = "uksouth"
