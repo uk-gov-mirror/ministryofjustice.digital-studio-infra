@@ -9,12 +9,12 @@ resource "azurerm_network_security_group" "o11y-app-gw" {
 
   security_rule {
     name                       = "o11ytools"
-    description                = "Access o11y tools from the office/vpn and AWS health-kick app"
+    description                = "Access o11y tools from the office/vpn and AWS health-kick app and jenkins"
     priority                   = 2000
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "TCP"
-    source_address_prefixes      = ["${local.studio_ip}", "${local.moj_vpn_ip}", "${local.health_kick_ip}"]
+    source_address_prefixes      = ["${local.studio_ip}", "${local.moj_vpn_ip}", "${local.health_kick_ip}", "${local.prod_forti_ip}"]
     source_port_range          = "*"
     destination_address_prefix = "*"
     destination_port_ranges    = ["443"]
