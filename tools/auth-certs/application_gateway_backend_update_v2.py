@@ -301,5 +301,4 @@ def add_cert_to_http_settings(app_gateway_name, resource_group, http_settings_na
 #cert_name = update_auth_cert(args.gateway_name, args.resource_group, args.gw_cert_name, args.key_vault, cert_file, args.gw_subscription_id)
 
 if not args.gw_http_settings_name is None and args.gw_http_settings_name:
-    print("here")
-    #add_cert_to_http_settings(args.gateway_name, args.resource_group, args.gw_http_settings_name, cert_name, args.gw_subscription_id)
+    add_cert_to_http_settings(args.gateway_name, args.resource_group, args.gw_http_settings_name, cert_name, args.gw_subscription_id)
