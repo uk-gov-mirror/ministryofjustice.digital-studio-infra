@@ -294,11 +294,11 @@ def add_cert_to_http_settings(app_gateway_name, resource_group, http_settings_na
 
     logging.info('Cert successfully added to application gateway http settings')
 
-#cert_file = args.key_vault_cert_name + '.cer'
+cert_file = args.key_vault_cert_name + '.cer'
 
-#certificate = get_cert_from_keyvault(args.key_vault, args.key_vault_cert_name, args.key_vault_subscription_id)
+certificate = get_cert_from_keyvault(args.key_vault, args.key_vault_cert_name, args.key_vault_subscription_id)
 
-#cert_name = update_auth_cert(args.gateway_name, args.resource_group, args.gw_cert_name, args.key_vault, cert_file, args.gw_subscription_id)
+cert_name = update_auth_cert(args.gateway_name, args.resource_group, args.gw_cert_name, args.key_vault, cert_file, args.gw_subscription_id)
 
 if not args.gw_http_settings_name is None and args.gw_http_settings_name:
     add_cert_to_http_settings(args.gateway_name, args.resource_group, args.gw_http_settings_name, cert_name, args.gw_subscription_id)
