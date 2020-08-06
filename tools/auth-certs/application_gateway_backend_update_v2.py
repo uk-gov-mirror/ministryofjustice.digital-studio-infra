@@ -68,7 +68,7 @@ def update_auth_cert(app_gateway_name, resource_group, gw_cert_name, key_vault, 
 
         logging.debug("Initial value of 'app_gw_info' is: %s", app_gw_info)
 
-    if gw_cert_name is None:
+    if gw_cert_name is None or not gw_cert_name or gw_cert_name.lower() == "none":
         try:
             x509_cert_file = cert_file + '.x509'
 
@@ -300,5 +300,7 @@ certificate = get_cert_from_keyvault(args.key_vault, args.key_vault_cert_name, a
 
 cert_name = update_auth_cert(args.gateway_name, args.resource_group, args.gw_cert_name, args.key_vault, cert_file, args.gw_subscription_id)
 
-if not args.gw_http_settings_name is None and args.gw_http_settings_name:
+if args.gw_http_settings_name is None or not args.gw_http_settings_name or args.gw_http_settings_name.lower() == "none":
+    logging.debug('All done as app gateway http setting not specified')
+else: 
     add_cert_to_http_settings(args.gateway_name, args.resource_group, args.gw_http_settings_name, cert_name, args.gw_subscription_id)
