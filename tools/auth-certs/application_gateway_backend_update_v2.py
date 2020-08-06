@@ -274,11 +274,12 @@ def add_cert_to_http_settings(app_gateway_name, resource_group, http_settings_na
 
     try:
         cmd = ['az', 'network', 'application-gateway', 'http-settings', 'update',
-               '--auth-certs', ' '.join(authCertNames),
                '--gateway-name', app_gateway_name,
                '--resource-group', resource_group,
                '--name', http_settings_name,
-               '--query', 'authenticationCertificates[].id']
+               '--query', 'authenticationCertificates[].id',
+               '--auth-certs']
+        cmd.extend(authCertNames)
         logging.info('Running: %s' % (' '.join(cmd)))
 
         authCertUpdate = subprocess.run(
