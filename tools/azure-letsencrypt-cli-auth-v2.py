@@ -22,6 +22,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-z', '--zone', help='DNS Zone')
 parser.add_argument('-n', '--hostname', help='Hostname')
+parser.add_argument('-cn', '--certname', help='Name of the certificate in keyvault')
 parser.add_argument('-g', '--resource-group', help='Azure Resource Group for the DNS zone')
 parser.add_argument('-s', '--zone-subscription-id', help='Azure Zone Subscription ID')
 parser.add_argument('-kvs', '--keyvault-subscription-id', help='Key Vault Subscription ID')
@@ -34,7 +35,7 @@ parser.add_argument(
 parser.add_argument(
     '-e', '--ignore-expiry', help='Ignore the expiry date check to perform an early renewal', action='store_true')
 parser.add_argument(
-    '-a', '--application-gateway', help='Create a certificate for an Application Gateway.', action='store_true')
+    '-a', '--application-gateway', help='OBSOLETE', action='store_true')
 parser.add_argument(
     '-w', '--wildcard', help='Create a wildcard cert', action='store_true')
 parser.add_argument(
@@ -59,6 +60,11 @@ else:
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     logging.getLogger().setLevel(20)
 
+if not args.hostname or not args.zone:
+    logging.info('Missing arguments, use --help for usage')
+    exit(1)
+
+
 # added this as otherwise cert is being saved to vault with hostname value (if it supplied)
 if args.wildcard:
     hostname = 'wildcard'
@@ -72,10 +78,12 @@ if args.test_environment:
     if extra_host:
         extra_host = 'test-' + extra_host
 
-#    args.ignore_expiry = True
-
 fqdn = hostname + '.' + args.zone
-
+if args.certname:
+    certname = args.certname
+else:
+    certname = fqdn.replace('.', 'DOT')
+    logging.info('Setting keyvault certname to %s', certname)    
 
 def get_zone_details(resource_group, zone):
 
@@ -205,11 +213,9 @@ def create_pkcs12(saved_cert, vault):
         sys.exit('There was a problem creating the certificate')
 
 
-def store_certificate(vault, fqdn, certbot_location, saved_cert, keyvault_subscription_id):
+def store_certificate(vault, cert_name, certbot_location, saved_cert, keyvault_subscription_id):
 
     logging.debug('running function: store_certificate')
-
-    name = fqdn.replace('.', 'DOT')
 
     cert_file = create_pkcs12(saved_cert, vault)
     logging.debug('value of certfile is %s', cert_file)
@@ -220,7 +226,7 @@ def store_certificate(vault, fqdn, certbot_location, saved_cert, keyvault_subscr
         subprocess.run(
             ['az', 'keyvault', 'certificate', 'import',
                 '--file', cert_file,
-                '--name', name,
+                '--name', cert_name,
                 '--vault-name', vault,
                 '--subscription', keyvault_subscription_id,
                 '--disabled', 'false'],
@@ -382,11 +388,9 @@ def certificate_renewal_due(fqdn):
         sys.exit(1)
 
 
-def get_cert_expiry_from_keyvault(vault_name, fqdn, keyvault_subscription_id):
+def get_cert_expiry_from_keyvault(vault_name, cert_name, keyvault_subscription_id):
 
     logging.debug('function: get_cert_expiry_from_keyvault')
-
-    name = fqdn.replace('.', 'DOT')
 
     # adding this extra try block as it catches issues with the vault being inaccessable
     try:
@@ -408,7 +412,7 @@ def get_cert_expiry_from_keyvault(vault_name, fqdn, keyvault_subscription_id):
 
     try:
         cmd = ['az', 'keyvault', 'certificate', 'show',
-               '--name', name,
+               '--name', cert_name,
                '--vault-name', vault_name,
                '--subscription', keyvault_subscription_id
                ]
@@ -493,7 +497,7 @@ else:
         certificate_renewal_due(fqdn)
     else:
         logging.debug('args.internal is true, check expiry via date from vault.')
-        current_cert_expiry = get_cert_expiry_from_keyvault(args.vault, fqdn, args.keyvault_subscription_id)
+        current_cert_expiry = get_cert_expiry_from_keyvault(args.vault, certname, args.keyvault_subscription_id)
         if current_cert_expiry:
             check_if_cert_renewal_due(current_cert_expiry)
         else:
@@ -517,7 +521,7 @@ saved_cert = create_certificate(dns_names, args.resource_group, args.certbot)
 
 if not args.certificate_only:
 
-    store_certificate(args.vault, fqdn, args.certbot, saved_cert, args.keyvault_subscription_id)
+    store_certificate(args.vault, certname, args.certbot, saved_cert, args.keyvault_subscription_id)
 
 
 logging.info('Certificate update complete.')
