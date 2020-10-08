@@ -7,21 +7,8 @@ variable "o11y-tags" {
 }
 
 # Resource group
-resource "azurerm_resource_group" "o11y-app-gw" {
-  name     = "o11y-app-gw-${local.env-name}"
-  location = "ukwest"
-  tags = "${var.o11y-tags}"
-}
 
 # Public IP for app gateway
-resource "azurerm_public_ip" "o11y-app-gw-pip" {
-  name                         = "o11y-app-gw-pip-${local.env-name}"
-  domain_name_label            = "o11y-${local.env-name}"
-  location                     = "ukwest"
-  resource_group_name          = "${azurerm_resource_group.o11y-app-gw.name}"
-  public_ip_address_allocation = "dynamic"
-  tags = "${var.o11y-tags}"
-}
 
 # Nice DNS name for easy access
 resource "azurerm_dns_cname_record" "o11y" {
@@ -33,188 +20,12 @@ resource "azurerm_dns_cname_record" "o11y" {
 }
 
 # vnet for gateway to live in
-resource "azurerm_virtual_network" "o11y-app-gw-net" {
-  name                = "o11y-app-gw-${local.env-name}-net"
-  location            = "ukwest"
-  resource_group_name = "${azurerm_resource_group.o11y-app-gw.name}"
-  tags = "${var.o11y-tags}"
-  address_space = ["10.0.3.0/24"]
-}
-
-resource "azurerm_virtual_network_peering" "o11y-app-gw-to-noms-mgnt" {
-  name                         = "o11y-app-gw-to-noms-mgnt"
-  resource_group_name          = "${azurerm_resource_group.o11y-app-gw.name}"
-  virtual_network_name         = "${azurerm_virtual_network.o11y-app-gw-net.name}"
-  remote_virtual_network_id    = "/subscriptions/1d95dcda-65b2-4273-81df-eb979c6b547b/resourceGroups/Network-NOMS-Mgmt-Live/providers/Microsoft.Network/virtualNetworks/NOMS-Mgmt-Live"
-  allow_virtual_network_access = true
-}
 
 # Subnet for gateway, with NSG attached
-resource "azurerm_subnet" "o11y-app-gw-subnet" {
-  name                      = "o11y-app-gw-subnet"
-  resource_group_name       = "${azurerm_resource_group.o11y-app-gw.name}"
-  virtual_network_name      = "${azurerm_virtual_network.o11y-app-gw-net.name}"
-  address_prefix            = "10.0.3.0/29"
-  network_security_group_id = "${azurerm_network_security_group.o11y-app-gw.id}"
-  route_table_id            = ""
-  service_endpoints         = []
-}
 
 # Application Gateway
-resource "azurerm_application_gateway" "o11y-app-gw" {
-  name                = "o11y-app-gw-${local.env-name}"
-  resource_group_name = "${azurerm_resource_group.o11y-app-gw.name}"
-  location            = "ukwest"
-
-  sku {
-    name     = "Standard_Small"
-    tier     = "Standard"
-    capacity = 1
-  }
-
-  gateway_ip_configuration {
-    name      = "o11y-gateway-ip-configuration"
-    subnet_id = "${azurerm_virtual_network.o11y-app-gw-net.id}/subnets/${azurerm_subnet.o11y-app-gw-subnet.name}"
-  }
-
-  frontend_port {
-    name = "o11y-app-gw-feport-${local.env-name}"
-    port = 443
-  }
-
-  frontend_ip_configuration {
-    name                 = "o11y-app-gw-feip-${local.env-name}"
-    public_ip_address_id = "${azurerm_public_ip.o11y-app-gw-pip.id}"
-  }
-
-  # This should be dymanically generated list of backend servers
-  backend_address_pool {
-    name            = "o11y-be-pool"
-    ip_address_list = ["10.40.128.6"]
-  }
-
-  backend_http_settings {
-    name                  = "grafana"
-    cookie_based_affinity = "Disabled"
-    port                  = 80
-    protocol              = "Http"
-    request_timeout       = 1
-  }
-
-  backend_http_settings {
-    name                  = "prometheus"
-    cookie_based_affinity = "Disabled"
-    port                  = 8080
-    protocol              = "Http"
-    request_timeout       = 10
-    probe_name            = "prometheus-probe"
-  }
-
-  backend_http_settings {
-    name                  = "alertmanager"
-    cookie_based_affinity = "Disabled"
-    port                  = 9093
-    protocol              = "Http"
-    request_timeout       = 10
-    probe_name            = "alertmanager-probe"
-  }
-
-  probe {
-    name                = "alertmanager-probe"
-    protocol            = "Http"
-    path                = "/alertmanager/"
-    host                = "127.0.0.1"
-    interval            = "30"
-    timeout             = "30"
-    unhealthy_threshold = "5"
-  }
-
-  probe {
-    name                = "prometheus-probe"
-    protocol            = "Http"
-    path                = "/prometheus/"
-    host                = "127.0.0.1"
-    interval            = "30"
-    timeout             = "30"
-    unhealthy_threshold = "5"
-  }
-
-  http_listener {
-    name                           = "o11y-app-gw-httplstn-${local.env-name}"
-    frontend_ip_configuration_name = "o11y-app-gw-feip-${local.env-name}"
-    frontend_port_name             = "o11y-app-gw-feport-${local.env-name}"
-    protocol                       = "Https"
-    ssl_certificate_name           = "o11y-app-gw-prodSslCert"
-  }
-
-  ssl_certificate {
-    name     = "o11y-app-gw-prodSslCert"
-    data     = "${local.bootstrap_selfsigned_cert}"
-    #data     = "${base64encode(file("o11y-app-gw-bootstrapcert.pfx"))}"
-    password = "bootstrapcert"
-  }
-
-  request_routing_rule {
-    name                       = "o11y-app-gw-routing-rules"
-    rule_type                  = "PathBasedRouting"
-    http_listener_name         = "o11y-app-gw-httplstn-${local.env-name}"
-    url_path_map_name          = "o11y-path-map"
-  }
-
-  url_path_map {
-    name                               = "o11y-path-map"
-    default_backend_address_pool_name  = "o11y-be-pool"
-    default_backend_http_settings_name = "grafana"
-
-    path_rule {
-      name                       = "prometheus"
-      paths                      = ["/prometheus*"]
-      backend_address_pool_name  = "o11y-be-pool"
-      backend_http_settings_name = "prometheus"
-    }
-
-    path_rule {
-      name                       = "alertmanager"
-      paths                      = ["/alertmanager*"]
-      backend_address_pool_name  = "o11y-be-pool"
-      backend_http_settings_name = "alertmanager"
-    }
-  }
-}
 
 # Setup keyvault for storing SSL certificate in, this is used by jenkins for the lets-encrypt autorenewals
-resource "azurerm_key_vault" "o11y-app-gw" {
-  name                = "o11y-app-gw-${local.env-name}"
-  location            = "ukwest"
-  resource_group_name = "${azurerm_resource_group.o11y-app-gw.name}"
-
-  sku {
-    name = "standard"
-  }
-
-    tenant_id = "${var.azure_tenant_id}"
-
-    access_policy {
-        tenant_id = "${var.azure_tenant_id}"
-        object_id = "${var.azure_webops_group_oid}"
-        key_permissions = []
-        secret_permissions = "${var.azure_secret_permissions_all}"
-        certificate_permissions = "${var.azure_certificate_permissions_all}"
-    }
-
-    access_policy {
-        tenant_id = "${var.azure_tenant_id}"
-        object_id = "${var.azure_jenkins_sp_oid}"
-        key_permissions = []
-        secret_permissions = ["set", "get"]
-        certificate_permissions = ["list", "get", "import"]
-    }
-
-  enabled_for_deployment = false
-  enabled_for_disk_encryption = false
-  enabled_for_template_deployment = true
-  tags = "${var.o11y-tags}"
-}
 
 
 # Below code doesn't work because of bug, https://github.com/terraform-providers/terraform-provider-azurerm/issues/656

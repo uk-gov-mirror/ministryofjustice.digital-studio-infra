@@ -7,21 +7,8 @@ variable "mgmt-tags" {
 }
 
 # Resource group
-resource "azurerm_resource_group" "mgmt-app-gw" {
-  name     = "mgmt-app-gw-${local.env-name}"
-  location = "ukwest"
-  tags = "${var.mgmt-tags}"
-}
 
 # Public IP for app gateway
-resource "azurerm_public_ip" "mgmt-app-gw-pip" {
-  name                         = "mgmt-app-gw-pip-${local.env-name}"
-  domain_name_label            = "mgmt-${local.env-name}"
-  location                     = "ukwest"
-  resource_group_name          = "${azurerm_resource_group.mgmt-app-gw.name}"
-  public_ip_address_allocation = "dynamic"
-  tags = "${var.mgmt-tags}"
-}
 
 # Nice DNS name for easy access
 resource "azurerm_dns_cname_record" "mgmt" {
@@ -33,152 +20,12 @@ resource "azurerm_dns_cname_record" "mgmt" {
 }
 
 # vnet for gateway to live in
-resource "azurerm_virtual_network" "mgmt-app-gw-net" {
-  name                = "mgmt-app-gw-${local.env-name}-net"
-  location            = "ukwest"
-  resource_group_name = "${azurerm_resource_group.mgmt-app-gw.name}"
-  tags = "${var.mgmt-tags}"
-  address_space = ["10.0.4.0/24"]
-}
-
-resource "azurerm_virtual_network_peering" "mgmt-app-gw-net-to-noms-mgmt" {
-  name                        = "mgmt-app-gw-net-to-noms-mgmt"
-  resource_group_name         = "${azurerm_resource_group.mgmt-app-gw.name}"
-  virtual_network_name        = "${azurerm_virtual_network.mgmt-app-gw-net.name}"
-  remote_virtual_network_id   = "/subscriptions/b1f3cebb-4988-4ff9-9259-f02ad7744fcb/resourceGroups/Network-NOMS-Mgmt/providers/Microsoft.Network/virtualNetworks/NOMS-Mgmt"
-  allow_virtual_network_access = true
-}
 
 # Subnet for gateway, with NSG attached
-resource "azurerm_subnet" "mgmt-app-gw-subnet" {
-  name                      = "mgmt-app-gw-subnet"
-  resource_group_name       = "${azurerm_resource_group.mgmt-app-gw.name}"
-  virtual_network_name      = "${azurerm_virtual_network.mgmt-app-gw-net.name}"
-  address_prefix            = "10.0.4.0/29"
-  network_security_group_id = "${azurerm_network_security_group.mgmt-app-gw.id}"
-  route_table_id            = ""
-  service_endpoints         = []
-}
 
 # Application Gateway
-resource "azurerm_application_gateway" "mgmt-app-gw" {
-  name                = "mgmt-app-gw-${local.env-name}"
-  resource_group_name = "${azurerm_resource_group.mgmt-app-gw.name}"
-  location            = "ukwest"
-
-  sku {
-    name     = "Standard_Small"
-    tier     = "Standard"
-    capacity = 1
-  }
-
-  gateway_ip_configuration {
-    name      = "mgmt-gateway-ip-configuration"
-    subnet_id = "${azurerm_virtual_network.mgmt-app-gw-net.id}/subnets/${azurerm_subnet.mgmt-app-gw-subnet.name}"
-  }
-
-  frontend_port {
-    name = "mgmt-app-gw-feport-${local.env-name}"
-    port = 443
-  }
-
-  frontend_ip_configuration {
-    name                 = "mgmt-app-gw-feip-${local.env-name}"
-    public_ip_address_id = "${azurerm_public_ip.mgmt-app-gw-pip.id}"
-  }
-
-  # This should be dymanically generated list of backend servers
-  backend_address_pool {
-    name            = "mgmt-be-pool"
-    ip_address_list = ["10.102.4.4"]
-  }
-
-  backend_http_settings {
-    name                  = "jenkins-be-settings"
-    cookie_based_affinity = "Disabled"
-    port                  = 8080
-    protocol              = "Http"
-    probe_name            = "jenkins-probe"
-    request_timeout       = 1
-  }
-
-  probe {
-    name                = "jenkins-probe"
-    protocol            = "Http"
-    path                = "/login"
-    host                = "127.0.0.1"
-    interval            = "30"
-    timeout             = "30"
-    unhealthy_threshold = "5"
-  }
-
-  http_listener {
-    name                           = "mgmt-app-gw-httplstn-${local.env-name}"
-    frontend_ip_configuration_name = "mgmt-app-gw-feip-${local.env-name}"
-    frontend_port_name             = "mgmt-app-gw-feport-${local.env-name}"
-    protocol                       = "Https"
-    ssl_certificate_name           = "mgmt-app-gw-devtestSslCert"
-  }
-
-  ssl_certificate {
-    name     = "mgmt-app-gw-${local.env-name}SslCert"
-    data     = "${local.bootstrap_mgmt_selfsigned_cert}"
-    #data     = "${base64encode(file("mgmt-app-gw-bootstrapcert.pfx"))}"
-    password = "bootstrapcert"
-  }
-
-  request_routing_rule {
-    name                       = "mgmt-app-gw-routing-rules"
-    rule_type                  = "PathBasedRouting"
-    http_listener_name         = "mgmt-app-gw-httplstn-${local.env-name}"
-    url_path_map_name          = "mgmt-path-map"
-  }
-
-  url_path_map {
-    name                               = "mgmt-path-map"
-    default_backend_address_pool_name  = "mgmt-be-pool"
-    default_backend_http_settings_name = "jenkins-be-settings"
-
-    path_rule {
-      name                       = "jenkins"
-      paths                      = ["/*"]
-      backend_address_pool_name  = "mgmt-be-pool"
-      backend_http_settings_name = "jenkins-be-settings"
-    }
-  }
-}
 
 # Setup keyvault for storing SSL certificate in, this is used by jenkins for the lets-encrypt autorenewals
-resource "azurerm_key_vault" "mgmt-app-gw" {
-  name                = "mgmt-app-gw-${local.env-name}"
-  location            = "ukwest"
-  resource_group_name = "${azurerm_resource_group.mgmt-app-gw.name}"
-
-  sku {
-    name = "standard"
-  }
-    
-    tenant_id = "${var.azure_tenant_id}"
-
-    access_policy {
-        tenant_id = "${var.azure_tenant_id}"
-        object_id = "${var.azure_webops_group_oid}"
-        key_permissions = []
-        secret_permissions = "${var.azure_secret_permissions_all}"
-    }
-
-    access_policy {
-        tenant_id = "${var.azure_tenant_id}"
-        object_id = "${var.azure_jenkins_sp_oid}"
-        key_permissions = []
-        secret_permissions = ["set", "get"]
-    }
-
-  enabled_for_deployment = false
-  enabled_for_disk_encryption = false
-  enabled_for_template_deployment = true
-  tags = "${var.mgmt-tags}"
-}
 
 
 # Below code doesn't work because of bug, https://github.com/terraform-providers/terraform-provider-azurerm/issues/656
