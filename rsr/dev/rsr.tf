@@ -1,6 +1,3 @@
-
-
-
 module "app_service" {
   source               = "../../shared/modules/azure-app-service"
   app                  = var.app
