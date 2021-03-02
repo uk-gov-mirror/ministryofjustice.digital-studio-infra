@@ -146,20 +146,7 @@ resource "azurerm_sql_firewall_rule" "app-access" {
   end_ip_address      = module.app_service.app_service_outbound_ips[count.index]
   depends_on          = [module.app_service.webapp]
 }
-#Don't think the deployment works currently, really this should be removed and oauth between the azure sub & github with the github scmtype should be used.
-resource "github_repository_webhook" "webapp-deploy" {
-  repository = "iis"
 
-  configuration {
-    # url is hardcoded to match live
-    url          = "https://$iis-preprod:KvQb7vusM7WLlsrxZXEKZvJGA74jJrvTyBEWcc5wJbpK1KA0KxSbzqeSgx2z@iis-preprod.scm.azurewebsites.net/deploy?scmType=GitHub"
-    content_type = "form"
-    insecure_ssl = false
-  }
-  active = true
-
-  events = ["push"]
-}
 resource "azurerm_dns_cname_record" "cname" {
   name                = "hpa-preprod"
   zone_name           = "service.hmpps.dsd.io"
