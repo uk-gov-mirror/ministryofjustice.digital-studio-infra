@@ -27,17 +27,3 @@ module "app_service" {
   ]
   tags = var.tags
 }
-
-resource "github_repository_webhook" "rsr-deploy" {
-  repository = "rsr-calculator-service"
-  configuration {
-    #hardcoded if this is ever rebuilt will need to be updated
-    url          = "***REMOVED***"
-    content_type = "form"
-    insecure_ssl = false
-  }
-
-  active = true
-
-  events = ["push"]
-}
