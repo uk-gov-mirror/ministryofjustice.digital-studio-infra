@@ -1,9 +1,17 @@
 .env*
-.terraform
-*.tfstate*
-*.tfplan
 graph.png
 node_modules/
 *.swp
 *.pyc
-.idea
+
+# Terraform
+.terraform
+*.tfstate*
+*.tfstate.backup
+*.tfplan
+
+# Terragrunt
+.terragrunt-cache
+
+# IntelliJ
+.idea/

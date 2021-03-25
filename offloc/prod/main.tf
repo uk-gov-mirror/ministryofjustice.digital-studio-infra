@@ -15,7 +15,6 @@ module "app_service" {
   custom_hostname          = var.custom_hostname
   ssl_state                = "IpBasedEnabled"
   app_service_plan_size    = var.app_service_plan_size
-  scm_type                 = "LocalGit"
   app_settings = {
     "AZURE_STORAGE_ACCOUNT_NAME"    = "offlocprodapp"
     "AZURE_STORAGE_CONTAINER_NAME"  = "cde"

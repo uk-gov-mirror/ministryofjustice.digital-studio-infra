@@ -34,8 +34,8 @@ variable "scale" {
   # eg "S3"
 }
 variable "space_gb" {
-  type    = string
-  default = "2"
+  type    = number
+  default = 2
 }
 variable "collation" {
   type    = string

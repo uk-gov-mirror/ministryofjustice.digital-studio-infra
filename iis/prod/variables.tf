@@ -1,70 +1,41 @@
-variable "app" {
-  type = string
+##
+# Have no defaults
+
+# TODO note which are from app module, and possibly take them out of here because they are defined in module variables.tf
+
+variable "always_on"                 { type = bool         }
+variable "app"                       { type = string       }
+variable "app_service_plan_size"     { type = string       }
+variable "certificate_name"          { type = string       }
+variable "custom_hostname"           { type = string       }
+variable "env"                       { type = string       }
+variable "firewall_rules"            { type = list(any)    }
+variable "https_only"                { type = bool         }
+variable "key_vault_secrets"         { type = list(string) }
+variable "repo_url"                  { type = string       }
+variable "sc_branch"                 { type = string       }
+variable "setup_queries"             { type = list(string) }
+variable "sql_collation"             { type = string       }
+variable "sql_edition"               { type = string       }
+variable "sql_scale"                 { type = string       }
+variable "sql_space_gb"              { type = number       }
+variable "sql_users"                 { type = list(string) }
+variable "tags"                      { type = map(any)     }
+variable "use_32_bit_worker_process" { type = bool         }
+
+variable "default_documents" {
+  type = list(string)
+  description = "default documents for the app site config"
 }
 
-variable "env" {
-  type = string
-}
-locals {
-  name    = "${var.app}-${var.env}"
-  storage = "${var.app}${var.env}storage"
-  cname   = local.name
-
-  github_deploy_branch = "deploy-to-${var.env}"
-
-  extra_dns_zone = "${var.app}-${var.env}-zone.hmpps.dsd.io"
-
-  app_size  = "S1"
-  app_count = 1
-
-  tags = {
-    Service     = var.app
-    Environment = var.env
-  }
-}
-variable "log_containers" {
-  type    = list(any)
-  default = ["app-logs", "web-logs", "db-logs"]
-}
-variable "tags" {
-  type = map(any)
-}
-#When you need to re-create add the key vault secret key id in, comment after so it doesn't get in the way of the plan or you'll need to main after every cert refresh
-variable "certificate_kv_secret_id" {
-  type        = string
-  default     = null
-  description = "Used to bind a certificate to the app"
-}
-variable "scm_use_main_ip_restriction" {
-  type    = bool
-  default = null
-}
-
-variable "certificate_name" {
-  type = string
-}
-
-variable "https_only" {
-  type    = bool
-  default = null
-}
-
-variable "app_service_plan_size" {
-  type    = string
-  default = "B1"
+variable "has_storage" {
+  type        = bool
+  description = "If the app service creates a sql server and DB with the app service"
 }
 
 variable "sampling_percentage" {
   type        = string
   description = "Fixed rate samping for app insights for reduing volume of telemetry"
-}
-variable "custom_hostname" {
-  type        = string
-  description = "custom hostname for the app service"
-}
-variable "has_storage" {
-  type        = bool
-  description = "If the app service creates a sql server and DB with the app service"
 }
 
 variable "signon_hostname" {
@@ -72,7 +43,75 @@ variable "signon_hostname" {
   description = "If the app uses a token host in the app config which redirects to a signon page"
 }
 
-#variable "default_documents" {
-#  type = list(string)
-#  description = "default documents for the app site config"
-#}
+
+
+##
+# Have defaults
+
+# When you need to re-create add the key vault secret key id in, comment after so it doesn't get in
+# the way of the plan or you'll need to main after every cert refresh
+variable "certificate_kv_secret_id" {
+  type        = string
+  default     = null
+  description = "Used to bind a certificate to the app"
+}
+
+variable "log_containers" {
+  type    = list(any)
+  default = ["app-logs", "web-logs", "db-logs"]
+}
+
+variable "scm_use_main_ip_restriction" {
+  type    = bool
+  default = null
+}
+
+
+##
+# locals
+
+locals {
+  name                 = "${var.app}-${var.env}"
+  storage              = "${var.app}${var.env}storage"
+
+  github_deploy_branch = "deploy-to-${var.env}"
+
+  extra_dns_zone       = "${var.app}-${var.env}-zone.hmpps.dsd.io"
+
+  app_size             = "S1"
+  app_count            = 1
+
+  dns_name             = "hpa"
+
+  ip_restriction_addresses = [
+    "${var.ips["office"]}/32",
+    "${var.ips["quantum"]}/32",
+    "${var.ips["quantum_alt"]}/32",
+    "35.177.252.195/32",
+    "${var.ips["mojvpn"]}/32",
+    "157.203.176.138/31",
+    "157.203.176.140/32",
+    "157.203.177.190/31",
+    "157.203.177.192/32",
+    "62.25.109.201/32",
+    "62.25.109.203/32",
+    "212.137.36.233/32",
+    "212.137.36.234/32",
+    "195.59.75.0/24",
+    "194.33.192.0/25",
+    "194.33.193.0/25",
+    "194.33.196.0/25",
+    "194.33.197.0/25",
+    "195.92.38.20/32", # dxc_webproxy1
+    "195.92.38.21/32", # dxc_webproxy2
+    "195.92.38.22/32", # dxc_webproxy3
+    "195.92.38.23/32", # dxc_webproxy4
+    "51.149.250.0/24", # pttp access
+    "${var.ips["studiohosting-live"]}/32"
+  ]
+
+  tags = {
+    Service     = var.app
+    Environment = var.env
+  }
+}

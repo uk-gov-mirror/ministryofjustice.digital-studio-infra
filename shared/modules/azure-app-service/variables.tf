@@ -31,10 +31,6 @@ variable "ssl_state" {
   default = "SniEnabled"
 }
 
-variable "scm_type" {
-  type    = string
-  default = null
-}
 variable "tags" {
   type = map(any)
 }

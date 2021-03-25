@@ -5,7 +5,6 @@ module "app_service" {
   env                       = var.env
   certificate_name          = var.certificate_name
   app_service_kind          = "Windows"
-  scm_type                  = "LocalGit"
   use_32_bit_worker_process = false
 
   app_service_plan_size = "S1"

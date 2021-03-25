@@ -49,7 +49,7 @@ resource "azurerm_dns_cname_record" "cname" {
   }
 }
 
-#note - need to remove the record from https://github.com/ministryofjustice/dps-infra-assessment-api/blob/master/aks_infra/dns.tf
+#note - need to remove the record from https://github.com/ministryofjustice/dps-infra-assessment-api/blob/master/aks_infra/dns.tf
 resource "azurerm_dns_ns_record" "protoassessment-api" {
   name                = "proto.assessment-api"
   zone_name           = azurerm_dns_zone.hmpps.name

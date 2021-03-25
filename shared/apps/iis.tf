@@ -78,6 +78,26 @@ module "sql" {
   tags                  = var.tags
 }
 
+# you may need to do a target apply on the app service first if building from scratch
+resource "azurerm_sql_firewall_rule" "app-access" {
+  count               = length(module.app_service.app_service_outbound_ips)
+  name                = "Application IP ${count.index}"
+  resource_group_name = local.name
+  server_name         = local.name
+  start_ip_address    = module.app_service.app_service_outbound_ips[count.index]
+  end_ip_address      = module.app_service.app_service_outbound_ips[count.index]
+  depends_on          = [module.app_service.webapp]
+}
+
+resource "azurerm_dns_cname_record" "cname" {
+  name                = local.dns_name
+  zone_name           = "service.hmpps.dsd.io"
+  resource_group_name = "webops-prod"
+  ttl                 = "300"
+  record              = "${local.name}.azurewebsites.net"
+  tags                = var.tags
+}
+
 output "advice" {
   value = [
     "Don't forget to set up the SQL instance user/schemas manually.",

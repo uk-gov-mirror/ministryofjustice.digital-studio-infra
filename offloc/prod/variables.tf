@@ -2,18 +2,24 @@ variable "app" {
   type = string
 }
 
+variable "env" {
+  type = string
+}
+
+variable "app_service_plan_size" {
+  type    = string
+  default = "B1"
+}
+
 variable "deployment-channels" {
   type    = list(any)
   default = ["offloc-replacement"]
 }
 
-variable "env" {
-  type = string
-}
+
 locals {
   name    = "${var.app}-${var.env}"
   storage = "${var.app}${var.env}storage"
-  cname   = local.name
 
   github_deploy_branch = "deploy-to-${var.env}"
 
@@ -34,15 +40,17 @@ variable "certificate_name" {
   type = string
 }
 
+variable "default_documents" {
+ type = list(string)
+ description = "default documents for the app site config"
+}
+
 variable "https_only" {
   type    = bool
   default = null
 }
 
-variable "app_service_plan_size" {
-  type    = string
-  default = "B1"
-}
+
 
 variable "has_storage" {
   type        = bool
@@ -57,7 +65,4 @@ variable "custom_hostname" {
   description = "custom hostname for the app service"
 }
 
-#variable "default_documents" {
-#  type = list(string)
-#  description = "default documents for the app site config"
-#}
+
