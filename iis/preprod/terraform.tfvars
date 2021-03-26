@@ -9,6 +9,8 @@ env = "preprod"
 always_on                   = false
 app_service_plan_size       = "B1"
 certificate_name            = "iis-preprod-iis-preprod-CERThpa-preprodDOTserviceDOThmppsDOTdsdDOTio"
+create_cname                = true
+create_sql_firewall         = true
 custom_hostname             = "hpa-preprod.service.hmpps.dsd.io"
 default_documents           = [
   "Default.htm",

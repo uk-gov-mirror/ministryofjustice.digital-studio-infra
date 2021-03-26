@@ -80,7 +80,7 @@ module "sql" {
 
 # you may need to do a target apply on the app service first if building from scratch
 resource "azurerm_sql_firewall_rule" "app-access" {
-  count               = length(module.app_service.app_service_outbound_ips)
+  count               = var.create_sql_firewall ? length(module.app_service.app_service_outbound_ips) : 0
   name                = "Application IP ${count.index}"
   resource_group_name = local.name
   server_name         = local.name
@@ -90,6 +90,7 @@ resource "azurerm_sql_firewall_rule" "app-access" {
 }
 
 resource "azurerm_dns_cname_record" "cname" {
+  count               = var.create_cname ? 1 : 0
   name                = local.dns_name
   zone_name           = "service.hmpps.dsd.io"
   resource_group_name = "webops-prod"

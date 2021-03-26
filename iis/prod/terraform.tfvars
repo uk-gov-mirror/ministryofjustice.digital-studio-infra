@@ -8,6 +8,9 @@ env = "prod"
 always_on                   = true
 app_service_plan_size       = "S1"
 certificate_name            = "iis-prod-iis-prod-CERThpaDOTserviceDOThmppsDOTdsdDOTio"
+certificate_name            = "iis-preprod-iis-preprod-CERThpa-preprodDOTserviceDOThmppsDOTdsdDOTio"
+create_cname                = true
+create_sql_firewall         = true
 custom_hostname             = "hpa.service.hmpps.dsd.io"
 default_documents           = [
   "Default.htm",

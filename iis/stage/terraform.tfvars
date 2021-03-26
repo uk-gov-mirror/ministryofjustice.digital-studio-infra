@@ -5,6 +5,8 @@ env = "stage"
 always_on                   = false
 app_service_plan_size       = "B1"
 certificate_name            = "iis-stage-iis-stage-CERThpa-stageDOThmppsDOTdsdDOTio"
+create_cname                = false
+create_sql_firewall         = false
 custom_hostname             = "hpa-stage.hmpps.dsd.io"
 default_documents           = [
   "Default.htm",
