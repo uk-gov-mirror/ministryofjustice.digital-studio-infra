@@ -1,0 +1,119 @@
+name: CI/CD - NOMS Production 1
+​
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - NOMSProduction1/*
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches:
+      - master
+    paths:
+      - NOMSProduction1/*
+​
+env:
+  ENVIRONMENT: Prod
+  GITHUB_USERNAME: hmpps-dso-automation
+  GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+  TERRAFORM_CONFIG: NOMSProduction1
+  ARM_CLIENT_ID: f98c8e0b-b98b-4bb1-98fd-bdfde40787ce
+  ARM_CLIENT_SECRET: ${{ secrets.SP_SECRET_PROD }}
+  ARM_SUBSCRIPTION_ID: 1d95dcda-65b2-4273-81df-eb979c6b547b
+  ARM_TENANT_ID: 747381f4-e81f-4a43-bf68-ced6a1e14edf
+​
+jobs:
+  verify-terraform-config-and-apply:
+    runs-on: ubuntu-latest
+​
+    steps:
+      - name: Display terraform config path
+        run: |
+          echo "Terraform config: $TERRAFORM_CONFIG"
+​
+      - name: Checkout the code
+        uses: actions/checkout@v2
+​
+      - name: Setup GitHub credential.helper for terraform
+        uses: fusion-engineering/setup-git-credentials@v2
+        with:
+          credentials: https://${{ env.GITHUB_USERNAME }}:${{ env.GITHUB_TOKEN }}@github.com
+​
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 0.12.28
+          terraform_wrapper: false
+​
+      - name: terraform init
+        run: |
+          cd ${{ env.TERRAFORM_CONFIG }} && terraform init
+​
+      - name: terraform validate
+        run: |
+          cd ${{ env.TERRAFORM_CONFIG }} && terraform validate
+​
+      - name: terraform fmt
+        if: ${{ github.event_name == 'pull_request' }}
+        id: format
+        run: |
+          cd ${{ env.TERRAFORM_CONFIG }} && terraform fmt > tf_fmt.txt
+          fmt=$(wc -l tf_fmt.txt | awk '{print $1;}')
+          if [[ $fmt -gt 0 ]]; then
+            echo 'TF_FMT<<EOF' >> $GITHUB_ENV
+            cat tf_fmt.txt >> $GITHUB_ENV
+            echo 'EOF' >> $GITHUB_ENV
+            exit 1
+          fi
+​
+      - name: Post a PR comment with the files that need fomatting
+        if: ${{ github.event_name == 'pull_request' && failure() }}
+        uses: allthatjazzleo/actions-pull-request-add-comment@master
+        with:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          message: "The following files need formatting in ${{ env.ENVIRONMENT }} environment: \n```\n${{ env.TF_FMT }}\n```"
+​
+      - name: terraform refresh
+        run: |
+          cd ${{ env.TERRAFORM_CONFIG }} && terraform refresh
+​
+      - name: terraform plan
+        run: |
+          cd ${{ env.TERRAFORM_CONFIG }} && terraform plan -out=tf.plan -refresh=false -no-color > tf_out.txt
+          tail -c 65476 tf_out.txt > tf_plan.txt
+          cat tf_plan.txt
+          echo 'TF_PLAN_OUT<<EOF' >> $GITHUB_ENV
+          cat tf_plan.txt >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+​
+      - name: Post a PR comment with the terraform plan output
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: allthatjazzleo/actions-pull-request-add-comment@master
+        with:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          message: "Terraform plan output in ${{ env.ENVIRONMENT }} environment: \n```\n${{ env.TF_PLAN_OUT }}\n```"
+​
+      - name: Post a post merge PR comment with the terraform plan output
+        if: ${{ github.event.pull_request.merged || github.event_name == 'push' }}
+        uses: guchaocharlie/comment-pr@v1
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          comment: "Terraform plan output in ${{ env.ENVIRONMENT }} environment: \n```\n${{ env.TF_PLAN_OUT }}\n```"
+​
+      - name: terraform apply
+        if: ${{ github.event.pull_request.merged || github.event_name == 'push' }}
+        run: |
+          cd ${{ env.TERRAFORM_CONFIG }} && terraform apply -auto-approve -no-color tf.plan > tf_out.txt
+          tail -c 65476 tf_out.txt > tf_apply.txt
+          cat tf_apply.txt
+          echo 'TF_APPLY_OUT<<EOF' >> $GITHUB_ENV
+          cat tf_apply.txt >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+​
+      - name: Post a post merge PR comment with the terraform apply output
+        if: ${{ github.event.pull_request.merged || github.event_name == 'push' }}
+        uses: guchaocharlie/comment-pr@v1
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          comment: "Terraform apply output in ${{ env.ENVIRONMENT }} environment: \n```\n${{ env.TF_APPLY_OUT }}\n```"
