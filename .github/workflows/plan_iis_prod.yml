@@ -80,7 +80,7 @@ jobs:
       - name: terraform refresh
         run: |
           cd ${{ env.TERRAFORM_CONFIG }} && terraform refresh
-​
+
       - name: terraform plan
         run: |
           cd ${{ env.TERRAFORM_CONFIG }} && terraform plan -out=tf.plan -refresh=false -no-color > tf_out.txt
@@ -96,7 +96,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
           message: "Terraform plan output in ${{ env.ENVIRONMENT }} environment: \n```\n${{ env.TF_PLAN_OUT }}\n```"
-​
+
       - name: Post a post merge PR comment with the terraform plan output
         if: ${{ github.event.pull_request.merged || github.event_name == 'push' }}
         uses: guchaocharlie/comment-pr@v1
