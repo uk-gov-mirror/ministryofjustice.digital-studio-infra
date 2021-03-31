@@ -25,11 +25,12 @@ resource "azurerm_storage_container" "logs" {
 }
 
 resource "azurerm_key_vault" "vault" {
-  name                = local.name
-  resource_group_name = azurerm_resource_group.group.name
-  location            = azurerm_resource_group.group.location
-  sku_name            = "standard"
-  tenant_id           = var.azure_tenant_id
+  name                     = local.name
+  resource_group_name      = azurerm_resource_group.group.name
+  location                 = azurerm_resource_group.group.location
+  sku_name                 = "standard"
+  tenant_id                = var.azure_tenant_id
+  purge_protection_enabled = true
 
   access_policy {
     tenant_id               = var.azure_tenant_id
