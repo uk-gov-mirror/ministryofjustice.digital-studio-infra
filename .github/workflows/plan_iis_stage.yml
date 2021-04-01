@@ -16,19 +16,19 @@ on:
       - ips.tf
 
 env:
-  ENVIRONMENT: stage
+  ENVIRONMENT: iis/stage
   GITHUB_USERNAME: hmpps-dso-automation
-  GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+  GITHUB_TOKEN: ${{ secrets.DSO_GITHUB_AUTOMATION_PAT }}
   TERRAFORM_CONFIG: iis/stage
-  ARM_CLIENT_ID: 2c4e351c-a83e-4b3b-afac-ed75ba6e9db4 # GitHubActionsDevTest
-  ARM_CLIENT_SECRET: ${{ secrets.SP_SECRET_PROD }} 
+  ARM_CLIENT_ID: a9191af9-ee85-4422-9e39-146dcebedee5 # digital-studio-infra-devtest
+  ARM_CLIENT_SECRET: ${{ secrets.DIGITAL_STUDIO_INFRA_DEVTEST }} 
   ARM_SUBSCRIPTION_ID: c27cfedb-f5e9-45e6-9642-0fad1a5c94e7 # Digital Studio Dev & Test Environments
   ARM_TENANT_ID: 747381f4-e81f-4a43-bf68-ced6a1e14edf
 
 jobs:
   verify-terraform-config:
     runs-on: ubuntu-latest
-    environment: stage
+    environment: iis/stage
 
     steps:
       - name: Display terraform config path
