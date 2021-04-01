@@ -16,10 +16,11 @@ on:
       - ips.tf
 
 env:
+  GITHUB_ORGANIZATION: ministryofjustice
   ENVIRONMENT: iis/preprod
   GITHUB_USERNAME: hmpps-dso-automation
   GITHUB_TOKEN: ${{ secrets.DSO_GITHUB_AUTOMATION_PAT }}
-  TERRAFORM_CONFIG: iis/preprod
+  WORKING_DIRECTORY: iis/preprod
   ARM_CLIENT_ID: e5a6738f-5408-42ea-81e8-b708232cd78e # digital-studio-infra-prod
   ARM_CLIENT_SECRET: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} 
   ARM_SUBSCRIPTION_ID: a5ddf257-3b21-4ba9-a28c-ab30f751b383
@@ -28,13 +29,9 @@ env:
 jobs:
   verify-terraform-config:
     runs-on: ubuntu-latest
-    environment: iis/preprod
+    environment: env.ENVIRONMENT
 
     steps:
-      - name: Display terraform config path
-        run: |
-          echo "Terraform config: $TERRAFORM_CONFIG"
-      
       - name: Checkout the code
         uses: actions/checkout@v2
 
@@ -47,21 +44,21 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 0.14.9
-          terraform_wrapper: false
 
-      - name: terraform init
-        run: |
-          cd ${{ env.TERRAFORM_CONFIG }} && terraform init
+      - name: Terraform Init
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: terraform init
 
       - name: terraform validate
-        run: |
-          cd ${{ env.TERRAFORM_CONFIG }} && terraform validate
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: terraform validate
 
       - name: terraform fmt
         if: ${{ github.event_name == 'pull_request' }}
+        working-directory: ${{ env.WORKING_DIRECTORY }}
         id: format
         run: |
-          cd ${{ env.TERRAFORM_CONFIG }} && terraform fmt > tf_fmt.txt
+          terraform fmt > tf_fmt.txt
           fmt=$(wc -l tf_fmt.txt | awk '{print $1;}')
           if [[ $fmt -gt 0 ]]; then
             echo 'TF_FMT<<EOF' >> $GITHUB_ENV
@@ -78,12 +75,14 @@ jobs:
           message: "The following files need formatting in ${{ env.ENVIRONMENT }} environment: \n```\n${{ env.TF_FMT }}\n```"
 
       - name: terraform refresh
+        working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
-          cd ${{ env.TERRAFORM_CONFIG }} && terraform refresh
+          terraform refresh
 
       - name: terraform plan
+        working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
-          cd ${{ env.TERRAFORM_CONFIG }} && terraform plan -out=tf.plan -refresh=false -no-color > tf_out.txt
+          terraform plan -out=tf.plan -refresh=false -no-color > tf_out.txt
           tail -c 65476 tf_out.txt > tf_plan.txt
           cat tf_plan.txt
           echo 'TF_PLAN_OUT<<EOF' >> $GITHUB_ENV
