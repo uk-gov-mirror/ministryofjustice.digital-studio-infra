@@ -21,7 +21,7 @@ env:
   GITHUB_USERNAME: hmpps-dso-automation
   GITHUB_TOKEN: ${{ secrets.DSO_GITHUB_AUTOMATION_PAT }}
   WORKING_DIRECTORY: iis/preprod
-  ARM_CLIENT_ID: e5a6738f-5408-42ea-81e8-b708232cd78e # digital-studio-infra-prod
+  ARM_CLIENT_ID: d91544c4-212d-4da5-b6a4-ddf65fe188a5 # digital-studio-infra-prod
   ARM_CLIENT_SECRET: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} 
   ARM_SUBSCRIPTION_ID: a5ddf257-3b21-4ba9-a28c-ab30f751b383
   ARM_TENANT_ID: 747381f4-e81f-4a43-bf68-ced6a1e14edf
