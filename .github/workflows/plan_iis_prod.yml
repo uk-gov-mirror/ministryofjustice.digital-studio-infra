@@ -29,7 +29,7 @@ env:
 jobs:
   verify-terraform-config:
     runs-on: ubuntu-latest
-    environment: ${{ env.ENVIRONMENT }}
+    environment: iis/prod
 
     steps:
       - name: Checkout
