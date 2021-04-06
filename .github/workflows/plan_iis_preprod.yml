@@ -33,7 +33,7 @@ jobs:
 
     steps:
       - name: print stuff
-        run: echo ${{ env.DIGITAL_STUDIO_INFRA_PROD }}
+        run: echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }}
 
       - uses: azure/login@v1
         with:
