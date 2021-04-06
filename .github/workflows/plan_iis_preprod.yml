@@ -33,7 +33,7 @@ jobs:
 
     steps:
       - name: print stuff
-        run: echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | jq '.subscriptionId'
+        run: echo \"${{ secrets.DIGITAL_STUDIO_INFRA_PROD }}\" | jq '.subscriptionId'
 
       - uses: azure/login@v1
         with:
