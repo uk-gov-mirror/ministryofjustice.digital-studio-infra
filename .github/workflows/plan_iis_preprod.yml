@@ -32,6 +32,9 @@ jobs:
     environment: env.ENVIRONMENT
 
     steps:
+      - name: print stuff
+        run: echo ${{ env.ARM_SUBSCRIPTION_ID }}
+
       - name: Checkout the code
         uses: actions/checkout@v2
 
