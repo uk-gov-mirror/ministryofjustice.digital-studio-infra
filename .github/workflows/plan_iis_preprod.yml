@@ -17,14 +17,14 @@ on:
 
 env:
   GITHUB_ORGANIZATION: ministryofjustice
-  ENVIRONMENT: iis/preprod
-  GITHUB_USERNAME: hmpps-dso-automation
-  GITHUB_TOKEN: ${{ secrets.DSO_GITHUB_AUTOMATION_PAT }}
-  WORKING_DIRECTORY: iis/preprod
-  ARM_CLIENT_ID: d91544c4-212d-4da5-b6a4-ddf65fe188a5 # digital-studio-infra-prod
-  ARM_CLIENT_SECRET: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} 
-  ARM_SUBSCRIPTION_ID: a5ddf257-3b21-4ba9-a28c-ab30f751b383
-  ARM_TENANT_ID: 747381f4-e81f-4a43-bf68-ced6a1e14edf
+  ENVIRONMENT:         iis/preprod
+  GITHUB_USERNAME:     hmpps-dso-automation
+  GITHUB_TOKEN:        ${{ secrets.DSO_GITHUB_AUTOMATION_PAT }}
+  WORKING_DIRECTORY:   iis/preprod
+  ARM_CLIENT_ID:       ${{ secrets.DIGITAL_STUDIO_INFRA_PROD.clientId       }}  # digital-studio-infra-prod
+  ARM_CLIENT_SECRET:   ${{ secrets.DIGITAL_STUDIO_INFRA_PROD.clientSecret   }} 
+  ARM_SUBSCRIPTION_ID: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD.subscriptionId }}
+  ARM_TENANT_ID:       ${{ secrets.DIGITAL_STUDIO_INFRA_PROD.tenantId       }}
 
 jobs:
   verify-terraform-config:
