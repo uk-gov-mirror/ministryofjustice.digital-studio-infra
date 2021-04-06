@@ -21,10 +21,6 @@ env:
   GITHUB_USERNAME: hmpps-dso-automation
   GITHUB_TOKEN: ${{ secrets.DSO_GITHUB_AUTOMATION_PAT }}
   WORKING_DIRECTORY: iis/preprod
-  ARM_CLIENT_ID: d91544c4-212d-4da5-b6a4-ddf65fe188a5 # digital-studio-infra-prod
-  ARM_CLIENT_SECRET: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD.clientSecret }} 
-  ARM_SUBSCRIPTION_ID: a5ddf257-3b21-4ba9-a28c-ab30f751b383
-  ARM_TENANT_ID: 747381f4-e81f-4a43-bf68-ced6a1e14edf
 
 jobs:
   verify-terraform-config:
@@ -32,11 +28,12 @@ jobs:
     environment: iis/preprod
 
     steps:
-      - name: print stuff
+      - name: define arm vars
         run: |
-          echo \"${{ secrets.DIGITAL_STUDIO_INFRA_PROD }}\"
-          echo \"{ ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} }\"
-          echo \"${{ secrets.DIGITAL_STUDIO_INFRA_PROD }}\" | jq '.subscriptionId'
+          export ARM_CLIENT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientId:\([^ ]*\).*/\1/g'`
+          export ARM_CLIENT_SECRET=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientSecret:\([^ ]*\).*/\1/g'`
+          export ARM_SUBSCRIPTION_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*subscriptionId:\([^ ]*\).*/\1/g'`
+          export ARM_TENANT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*tenantId:\([^ ]*\).*/\1/g'`
 
       - uses: azure/login@v1
         with:
