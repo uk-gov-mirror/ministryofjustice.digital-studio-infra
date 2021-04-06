@@ -45,7 +45,11 @@ jobs:
         with:
           terraform_version: 0.14.9
 
-      - name: Terraform Init
+      - name: show backend
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: cat backend.tf
+      
+          - name: Terraform Init
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: terraform init
 
