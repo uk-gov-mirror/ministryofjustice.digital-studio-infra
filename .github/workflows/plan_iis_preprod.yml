@@ -30,10 +30,16 @@ jobs:
     steps:
       - name: define arm vars
         run: |
-          export ARM_CLIENT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientId:\([^ ]*\).*/\1/g'`
-          export ARM_CLIENT_SECRET=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientSecret:\([^ ]*\).*/\1/g'`
-          export ARM_SUBSCRIPTION_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*subscriptionId:\([^ ]*\).*/\1/g'`
-          export ARM_TENANT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*tenantId:\([^ ]*\).*/\1/g'`
+          echo "ARM_CLIENT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientSecret:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*subscriptionId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*tenantId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
+          echo ${{ env.GITHUB_TOKEN }}
+          
+
+      - name: define arm vars
+        run: |
+          echo ${{ env.ARM_CLIENT_ID }}
 
       # - uses: azure/login@v1
       #   with:
