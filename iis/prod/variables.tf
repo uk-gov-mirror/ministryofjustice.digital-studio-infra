@@ -11,7 +11,6 @@ variable "create_cname"              { type = bool         }
 variable "create_sql_firewall"       { type = bool         }
 variable "custom_hostname"           { type = string       }
 variable "env"                       { type = string       }
-variable "firewall_rules"            { type = list(any)    }
 variable "https_only"                { type = bool         }
 variable "key_vault_secrets"         { type = list(string) }
 variable "repo_url"                  { type = string       }
@@ -84,6 +83,19 @@ locals {
   app_count            = 1
 
   dns_name             = "hpa"
+
+  firewall_rules       = [
+    {
+      label = "NOMS Studio office"
+      start = var.ips["office"]
+      end   = var.ips["office"]
+    },
+    {
+      label = "MOJ Digital"
+      start = var.ips["mojvpn"]
+      end   = var.ips["mojvpn"]
+    }
+  ]
 
   ip_restriction_addresses = [
     "${var.ips["office"]}/32",

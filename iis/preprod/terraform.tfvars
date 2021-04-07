@@ -23,18 +23,6 @@ default_documents           = [
   "index.php",
   "hostingstart.html"
 ]
-firewall_rules              = [
-  {
-    label = "NOMS Studio office"
-    start = var.ips["office"]
-    end   = var.ips["office"]
-  },
-  {
-    label = "MOJ Digital"
-    start = var.ips["mojvpn"]
-    end   = var.ips["mojvpn"]
-  }
-]
 has_storage                 = true
 https_only                  = true
 key_vault_secrets           = [

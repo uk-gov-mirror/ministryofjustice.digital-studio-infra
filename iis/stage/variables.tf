@@ -9,7 +9,6 @@ variable "create_cname"                { type = bool         }
 variable "create_sql_firewall"         { type = bool         }
 variable "custom_hostname"             { type = string       }
 variable "env"                         { type = string       }
-variable "firewall_rules"              { type = list(any)    }
 variable "https_only"                  { type = bool         }
 variable "key_vault_secrets"           { type = list(string) }
 variable "repo_url"                    { type = string       }
@@ -79,6 +78,14 @@ locals {
   app_count = 1
 
   dns_name             = "hpa-${var.env}"
+
+  firewall_rules              = [
+    {
+      label = "Open to the world"
+      start = "0.0.0.0"
+      end   = "255.255.255.255"
+    },
+  ]
 
   ip_restriction_addresses = [
     "0.0.0.0/0",

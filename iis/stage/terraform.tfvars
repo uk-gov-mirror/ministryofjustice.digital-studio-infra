@@ -19,13 +19,6 @@ default_documents           = [
   "index.php",
   "hostingstart.html",
 ]
-firewall_rules              = [
-  {
-    label = "Open to the world"
-    start = "0.0.0.0"
-    end   = "255.255.255.255"
-  },
-]
 has_storage                 = true
 https_only                  = true
 key_vault_secrets           = [

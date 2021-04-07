@@ -67,7 +67,7 @@ module "sql" {
   resource_group        = local.name
   location              = module.app_service.rg_location
   administrator_login   = var.app
-  firewall_rules        = var.firewall_rules
+  firewall_rules        = local.firewall_rules
   audit_storage_account = "${replace(local.name, "-", "")}storage"
   edition               = var.sql_edition
   scale                 = var.sql_scale
