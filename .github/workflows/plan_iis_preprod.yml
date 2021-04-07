@@ -55,6 +55,12 @@ jobs:
       - name: show backend
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: cat backend.tf
+        
+      - name: terraform code formatter
+        uses: ministryofjustice/github-actions/code-formatter@main
+        if: ${{ github.event_name == 'pull_request' }}        
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       
       - name: Terraform Init
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -63,6 +69,10 @@ jobs:
       - name: terraform validate
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: terraform validate
+
+      - name: terraform refresh
+        working-directory: ${{ env.WORKING_DIRECTORY }}         
+        run: terraform refresh
 
       - name: terraform plan
         working-directory: ${{ env.WORKING_DIRECTORY }}
