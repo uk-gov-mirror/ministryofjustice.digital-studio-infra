@@ -28,16 +28,16 @@ jobs:
     environment: iis/preprod
 
     steps:
-      # - name: define arm vars
-      #   run: |
-      #     export ARM_CLIENT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientId:\([^ ]*\).*/\1/g'`
-      #     export ARM_CLIENT_SECRET=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientSecret:\([^ ]*\).*/\1/g'`
-      #     export ARM_SUBSCRIPTION_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*subscriptionId:\([^ ]*\).*/\1/g'`
-      #     export ARM_TENANT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*tenantId:\([^ ]*\).*/\1/g'`
+      - name: define arm vars
+        run: |
+          export ARM_CLIENT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientId:\([^ ]*\).*/\1/g'`
+          export ARM_CLIENT_SECRET=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientSecret:\([^ ]*\).*/\1/g'`
+          export ARM_SUBSCRIPTION_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*subscriptionId:\([^ ]*\).*/\1/g'`
+          export ARM_TENANT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*tenantId:\([^ ]*\).*/\1/g'`
 
-      - uses: azure/login@v1
-        with:
-          creds: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }}
+      # - uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }}
       
       - name: Checkout the code
         uses: actions/checkout@v2
