@@ -12,10 +12,10 @@ certificate_name      = "iis-preprod-iis-preprod-CERThpa-preprodDOTserviceDOThmp
 create_cname          = true
 create_sql_firewall   = true
 custom_hostname       = "hpa-preprod.service.hmpps.dsd.io"
-default_documents     = [ "Default.htm", "Default.html", "Default.asp", "index.htm", "index.html", "iisstart.htm", "default.aspx", "index.php", "hostingstart.html" ]
-has_storage                 = true
-https_only                  = true
-key_vault_secrets           = [
+default_documents     = ["Default.htm", "Default.html", "Default.asp", "index.htm", "index.html", "iisstart.htm", "default.aspx", "index.php", "hostingstart.html"]
+has_storage           = true
+https_only            = true
+key_vault_secrets = [
   "signon-client-id",
   "signon-client-secret",
   "administrators"
