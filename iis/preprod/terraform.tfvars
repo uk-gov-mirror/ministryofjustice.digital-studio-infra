@@ -6,16 +6,13 @@ env = "preprod"
 # set below if creating binding from scratch
 #certificate_kv_secret_id=""
 
-  "Default.htm",
-  "Default.html",
-  "Default.asp",
-  "index.htm",
-  "index.html",
-  "iisstart.htm",
-  "default.aspx",
-  "index.php",
-  "hostingstart.html"
-]
+always_on             = false
+app_service_plan_size = "B1"
+certificate_name      = "iis-preprod-iis-preprod-CERThpa-preprodDOTserviceDOThmppsDOTdsdDOTio"
+create_cname          = true
+create_sql_firewall   = true
+custom_hostname       = "hpa-preprod.service.hmpps.dsd.io"
+default_documents     = [ "Default.htm", "Default.html", "Default.asp", "index.htm", "index.html", "iisstart.htm", "default.aspx", "index.php", "hostingstart.html" ]
 has_storage                 = true
 https_only                  = true
 key_vault_secrets           = [
@@ -28,7 +25,6 @@ sampling_percentage         = "100"
 sc_branch                   = "deploy-to-preprod"
 scm_use_main_ip_restriction = true
 signon_hostname             = "https://signon.service.justice.gov.uk"
-setup_queries               = [
 setup_queries = [
   "IF SCHEMA_ID('HPA') IS NULL EXEC sp_executesql \"CREATE SCHEMA HPA\"",
   "GRANT SELECT ON SCHEMA::HPA TO iisuser",
@@ -47,11 +43,11 @@ setup_queries = [
   "ALTER ROLE db_ddladmin ADD MEMBER sgandalwar",
   "GRANT SHOWPLAN to sgandalwar",
 ]
-sql_collation               = "Latin1_General_CS_AS"
-sql_edition                 = "Standard"
-sql_scale                   = "S3"
-sql_space_gb                = 250
-sql_users                   = [
+sql_collation = "Latin1_General_CS_AS"
+sql_edition   = "Standard"
+sql_scale     = "S3"
+sql_space_gb  = 250
+sql_users = [
   "iisuser",
   "mwhitfield",
   "sgandalwar",
