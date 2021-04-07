@@ -57,8 +57,7 @@ jobs:
         run: cat backend.tf
         
       - name: terraform code formatter
-        uses: ministryofjustice/github-actions/code-formatter@main
-        if: ${{ github.event_name == 'pull_request' }}        
+        uses: ministryofjustice/github-actions/code-formatter@main       
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
       
@@ -87,3 +86,9 @@ jobs:
           echo 'TF_PLAN_OUT<<EOF' >> $GITHUB_ENV
           cat tf_plan.txt >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
+
+      - name: Post a PR comment with the terraform plan output
+        uses: allthatjazzleo/actions-pull-request-add-comment@master
+        with:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          message: "Terraform plan output in ${{ env.ENVIRONMENT }} environment: \n```\n${{ env.TF_PLAN_OUT }}\n```"
