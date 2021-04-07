@@ -19,7 +19,7 @@ env:
   GITHUB_ORGANIZATION: ministryofjustice
   ENVIRONMENT: iis/preprod
   GITHUB_USERNAME: hmpps-dso-automation
-  GITHUB_TOKEN: ${{ secrets.DSO_GITHUB_AUTOMATION_PAT }} # doesn't show up
+  GITHUB_TOKEN: ${{ secrets.DSO_GITHUB_AUTOMATION_PAT }}
   WORKING_DIRECTORY: iis/preprod
 
 jobs:
@@ -35,9 +35,9 @@ jobs:
           echo "ARM_SUBSCRIPTION_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*subscriptionId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
           echo "ARM_TENANT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*tenantId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
 
-      - uses: azure/login@v1
-        with:
-          creds: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }}
+      # - uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }}
       
       - name: Checkout the code
         uses: actions/checkout@v2
