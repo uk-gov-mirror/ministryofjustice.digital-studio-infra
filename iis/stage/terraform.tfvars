@@ -19,9 +19,9 @@ default_documents = [
   "index.php",
   "hostingstart.html",
 ]
-has_storage                 = true
-https_only                  = true
-key_vault_secrets           = [
+has_storage = true
+https_only  = true
+key_vault_secrets = [
   "signon-client-id",
   "signon-client-secret",
   "administrators"
