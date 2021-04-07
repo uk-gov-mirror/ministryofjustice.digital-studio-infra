@@ -6,13 +6,6 @@ env = "preprod"
 # set below if creating binding from scratch
 #certificate_kv_secret_id=""
 
-always_on                   = false
-app_service_plan_size       = "B1"
-certificate_name            = "iis-preprod-iis-preprod-CERThpa-preprodDOTserviceDOThmppsDOTdsdDOTio"
-create_cname                = true
-create_sql_firewall         = true
-custom_hostname             = "hpa-preprod.service.hmpps.dsd.io"
-default_documents           = [
   "Default.htm",
   "Default.html",
   "Default.asp",
@@ -36,6 +29,7 @@ sc_branch                   = "deploy-to-preprod"
 scm_use_main_ip_restriction = true
 signon_hostname             = "https://signon.service.justice.gov.uk"
 setup_queries               = [
+setup_queries = [
   "IF SCHEMA_ID('HPA') IS NULL EXEC sp_executesql \"CREATE SCHEMA HPA\"",
   "GRANT SELECT ON SCHEMA::HPA TO iisuser",
   "GRANT SELECT ON SCHEMA::IIS TO iisuser",
@@ -63,7 +57,7 @@ sql_users                   = [
   "sgandalwar",
   "atodd"
 ]
-tags                        = {
+tags = {
   application      = "HPA"
   environment_name = "preprod"
   service          = "Misc"

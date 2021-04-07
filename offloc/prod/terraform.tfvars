@@ -6,7 +6,7 @@ app = "offloc"
 env = "prod"
 # set below if creating binding from scratch
 #certificate_kv_secret_id=""
-certificate_name      = "offloc-prod-offloc-prod-CERTwwwDOTofflocDOTserviceDOTjusticeDOTgovDOTuk"
+certificate_name = "offloc-prod-offloc-prod-CERTwwwDOTofflocDOTserviceDOTjusticeDOTgovDOTuk"
 default_documents = [
   "Default.htm",
   "Default.html",

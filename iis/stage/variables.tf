@@ -24,8 +24,8 @@ variable "tags"                        { type = map(any)     }
 variable "use_32_bit_worker_process"   { type = bool         }
 
 variable "default_documents" {
- type = list(string)
- description = "default documents for the app site config"
+  type        = list(string)
+  description = "default documents for the app site config"
 }
 
 variable "has_storage" {
@@ -77,7 +77,7 @@ locals {
   app_size  = "S1"
   app_count = 1
 
-  dns_name             = "hpa-${var.env}"
+  dns_name = "hpa-${var.env}"
 
   firewall_rules              = [
     {

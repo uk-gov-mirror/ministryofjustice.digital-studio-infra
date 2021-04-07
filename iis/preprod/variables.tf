@@ -25,7 +25,7 @@ variable "tags"                      { type = map(any)     }
 variable "use_32_bit_worker_process" { type = bool         }
 
 variable "default_documents" {
-  type = list(string)
+  type        = list(string)
   description = "default documents for the app site config"
 }
 
@@ -72,17 +72,17 @@ variable "scm_use_main_ip_restriction" {
 # locals
 
 locals {
-  name                 = "${var.app}-${var.env}"
-  storage              = "${var.app}${var.env}storage"
+  name    = "${var.app}-${var.env}"
+  storage = "${var.app}${var.env}storage"
 
   github_deploy_branch = "deploy-to-${var.env}"
 
-  extra_dns_zone       = "${var.app}-${var.env}-zone.hmpps.dsd.io"
+  extra_dns_zone = "${var.app}-${var.env}-zone.hmpps.dsd.io"
 
-  app_size             = "S1"
-  app_count            = 1
+  app_size  = "S1"
+  app_count = 1
 
-  dns_name             = "hpa-${var.env}"
+  dns_name = "hpa-${var.env}"
 
   firewall_rules              = [
     {
