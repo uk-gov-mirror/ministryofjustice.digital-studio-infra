@@ -5,18 +5,18 @@ data "azurerm_key_vault_secret" "kv_secrets" {
   key_vault_id = module.app_service.vault_id
 }
 
-resource "random_id" "session-secret"      { byte_length = 20 }
-resource "random_id" "sql-users-passwords" { 
-  for_each = toset( var.sql_users )
+resource "random_id" "session-secret" { byte_length = 20 }
+resource "random_id" "sql-users-passwords" {
+  for_each    = toset(var.sql_users)
   byte_length = 16
 }
 
 module "app_service" {
-  source                      = "../../shared/modules/azure-app-service"
-  
-  always_on                   = var.always_on
-  app                         = var.app
-  app_settings                = {
+  source = "../../shared/modules/azure-app-service"
+
+  always_on = var.always_on
+  app       = var.app
+  app_settings = {
     DB_PASS        = random_id.sql-users-passwords["iisuser"].b64_url
     SESSION_SECRET = random_id.session-secret.b64_url
     ADMINISTRATORS = data.azurerm_key_vault_secret.kv_secrets["administrators"].value
@@ -49,10 +49,10 @@ module "app_service" {
 }
 
 #### need to check these work
-locals { 
-  db_user_passwords = [ 
-    for user in var.sql_users:
-      random_id.sql-users-passwords[user].b64_url
+locals {
+  db_user_passwords = [
+    for user in var.sql_users :
+    random_id.sql-users-passwords[user].b64_url
   ]
   db_users = zipmap(
     var.sql_users,
@@ -61,7 +61,7 @@ locals {
 }
 
 module "sql" {
-  source                = "../../shared/modules/azure-sql"
+  source = "../../shared/modules/azure-sql"
 
   name                  = local.name
   resource_group        = local.name

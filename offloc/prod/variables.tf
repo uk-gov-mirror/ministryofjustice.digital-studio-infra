@@ -41,8 +41,8 @@ variable "certificate_name" {
 }
 
 variable "default_documents" {
- type = list(string)
- description = "default documents for the app site config"
+  type        = list(string)
+  description = "default documents for the app site config"
 }
 
 variable "https_only" {
