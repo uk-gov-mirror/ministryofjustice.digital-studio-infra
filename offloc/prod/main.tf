@@ -15,6 +15,8 @@ module "app_service" {
   custom_hostname          = var.custom_hostname
   ssl_state                = "IpBasedEnabled"
   app_service_plan_size    = var.app_service_plan_size
+  scm_type                 = "LocalGit"
+  certificate_kv_secret_id = data.azurerm_key_vault_secret.webapp_ssl_secret_id.id
   app_settings = {
     "AZURE_STORAGE_ACCOUNT_NAME"    = "offlocprodapp"
     "AZURE_STORAGE_CONTAINER_NAME"  = "cde"
@@ -59,10 +61,11 @@ resource "azurerm_role_assignment" "app-read-storage" {
 }
 
 resource "azurerm_key_vault" "app" {
-  name                = "${local.name}-users"
-  resource_group_name = local.name
-  location            = "ukwest"
-  sku_name            = "standard"
+  name                     = "${local.name}-users"
+  resource_group_name      = local.name
+  location                 = "ukwest"
+  sku_name                 = "standard"
+  purge_protection_enabled = true
 
   tenant_id = var.azure_tenant_id
 
@@ -84,4 +87,9 @@ resource "azurerm_key_vault" "app" {
   enabled_for_disk_encryption     = false
   enabled_for_template_deployment = false
   tags                            = var.tags
+}
+
+data "azurerm_key_vault_secret" "webapp_ssl_secret_id" {
+  name         = "CERTwwwDOTofflocDOTserviceDOTjusticeDOTgovDOTuk"
+  key_vault_id = module.app_service.vault_id
 }

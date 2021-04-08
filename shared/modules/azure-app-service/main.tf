@@ -25,11 +25,12 @@ resource "azurerm_storage_container" "logs" {
 }
 
 resource "azurerm_key_vault" "vault" {
-  name                = local.name
-  resource_group_name = azurerm_resource_group.group.name
-  location            = azurerm_resource_group.group.location
-  sku_name            = "standard"
-  tenant_id           = var.azure_tenant_id
+  name                     = local.name
+  resource_group_name      = azurerm_resource_group.group.name
+  location                 = azurerm_resource_group.group.location
+  sku_name                 = "standard"
+  tenant_id                = var.azure_tenant_id
+  purge_protection_enabled = true
 
   access_policy {
     tenant_id               = var.azure_tenant_id
@@ -149,8 +150,14 @@ resource "azurerm_app_service_certificate" "webapp-ssl" {
   resource_group_name = azurerm_resource_group.group.name
   location            = azurerm_resource_group.group.location
   tags                = var.tags
-  #When you need to re-create add the key vault secret key id in, comment after so it doesn't get in the way of the plan or you'll need to main after every cert refresh
   key_vault_secret_id = var.certificate_kv_secret_id
+
+  lifecycle {
+    ignore_changes = [
+      key_vault_secret_id,
+    ]
+  }
+
 }
 
 resource "azurerm_app_service_certificate_binding" "binding" {
