@@ -56,10 +56,11 @@ resource "azurerm_role_assignment" "app-read-storage" {
   principal_id         = module.app_service.app_identity
 }
 resource "azurerm_key_vault" "app" {
-  name                = "${local.name}-users"
-  resource_group_name = local.name
-  location            = "ukwest"
-  sku_name            = "standard"
+  name                     = "${local.name}-users"
+  resource_group_name      = local.name
+  location                 = "ukwest"
+  sku_name                 = "standard"
+  purge_protection_enabled = true
 
   tenant_id = var.azure_tenant_id
 
