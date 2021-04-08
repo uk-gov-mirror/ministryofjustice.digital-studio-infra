@@ -67,9 +67,9 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: terraform validate
 
-      # - name: terraform refresh
-      #   working-directory: ${{ env.WORKING_DIRECTORY }}         
-      #   run: terraform refresh
+      - name: terraform refresh
+        working-directory: ${{ env.WORKING_DIRECTORY }}         
+        run: terraform refresh
 
       - name: terraform plan
         working-directory: ${{ env.WORKING_DIRECTORY }}
