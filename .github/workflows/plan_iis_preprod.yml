@@ -58,9 +58,8 @@ jobs:
         
       - name: terraform code formatter
         uses: ministryofjustice/github-actions/code-formatter@main
-       
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }} 
       
       - name: Terraform Init
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -81,7 +80,11 @@ jobs:
       - name: terraform plan
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
+          echo $GITHUB_ORGANIZATION
           terraform plan -out=tf.plan -refresh=false -no-color
+        # env:
+        #   GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        #   GITHUB_ORGANIZATION: ${{  }}
           
       # - name: terraform plan
       #   working-directory: ${{ env.WORKING_DIRECTORY }}
