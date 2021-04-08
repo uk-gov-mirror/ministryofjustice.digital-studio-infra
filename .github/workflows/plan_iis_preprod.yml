@@ -50,7 +50,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 0.14.9
+          terraform_version: 0.14.0
 
       - name: show backend
         working-directory: ${{ env.WORKING_DIRECTORY }}
