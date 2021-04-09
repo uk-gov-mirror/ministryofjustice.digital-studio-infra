@@ -16,15 +16,15 @@ resource "random_id" "sql-sgandalwar-password" {
 }
 
 locals {
-# use this commented out bit if we get users from list var
-#   db_user_passwords = [
-#     for user in var.sql_users :
-#     random_id.sql-users-passwords[user].b64_url
-#   ]
-#   db_users = zipmap(
-#     var.sql_users,
-#     local.db_user_passwords
-#   )
+  # use this commented out bit if we get users from list var
+  #   db_user_passwords = [
+  #     for user in var.sql_users :
+  #     random_id.sql-users-passwords[user].b64_url
+  #   ]
+  #   db_users = zipmap(
+  #     var.sql_users,
+  #     local.db_user_passwords
+  #   )
   db_pass = random_id.sql-iisuser-password.b64_url
   db_users = {
     iisuser    = random_id.sql-iisuser-password.b64_url
