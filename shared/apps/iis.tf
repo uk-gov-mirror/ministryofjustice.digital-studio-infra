@@ -6,10 +6,6 @@ data "azurerm_key_vault_secret" "kv_secrets" {
 }
 
 resource "random_id" "session-secret" { byte_length = 20 }
-resource "random_id" "sql-users-passwords" {
-  for_each    = toset(var.sql_users)
-  byte_length = 16
-}
 
 module "app_service" {
   source = "../../shared/modules/azure-app-service"
@@ -17,7 +13,8 @@ module "app_service" {
   always_on = var.always_on
   app       = var.app
   app_settings = {
-    DB_PASS        = random_id.sql-users-passwords["iisuser"].b64_url
+    # DB_PASS        = random_id.sql-users-passwords["iisuser"].b64_url
+    DB_PASS        = random_id.sql-iisuser-password.b64_url
     SESSION_SECRET = random_id.session-secret.b64_url
     ADMINISTRATORS = data.azurerm_key_vault_secret.kv_secrets["administrators"].value
     CLIENT_ID      = data.azurerm_key_vault_secret.kv_secrets["signon-client-id"].value
@@ -48,16 +45,22 @@ module "app_service" {
   use_32_bit_worker_process   = var.use_32_bit_worker_process
 }
 
-#### need to check these work
 locals {
-  db_user_passwords = [
-    for user in var.sql_users :
-    random_id.sql-users-passwords[user].b64_url
-  ]
-  db_users = zipmap(
-    var.sql_users,
-    local.db_user_passwords
-  )
+# use this commented out bit if we get users from list var
+#   db_user_passwords = [
+#     for user in var.sql_users :
+#     random_id.sql-users-passwords[user].b64_url
+#   ]
+#   db_users = zipmap(
+#     var.sql_users,
+#     local.db_user_passwords
+#   )
+  db_users = {
+    iisuser    = random_id.sql-iisuser-password.b64_url
+    atodd      = random_id.sql-atodd-password.b64_url
+    mwhitfield = random_id.sql-mwhitfield-password.b64_url
+    sgandalwar = random_id.sql-sgandalwar-password.b64_url
+  }
 }
 
 module "sql" {
