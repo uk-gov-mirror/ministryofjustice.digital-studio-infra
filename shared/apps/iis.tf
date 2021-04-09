@@ -14,7 +14,7 @@ module "app_service" {
   app       = var.app
   app_settings = {
     # DB_PASS        = random_id.sql-users-passwords["iisuser"].b64_url
-    DB_PASS        = random_id.sql-iisuser-password.b64_url
+    DB_PASS        = local.db_pass
     SESSION_SECRET = random_id.session-secret.b64_url
     ADMINISTRATORS = data.azurerm_key_vault_secret.kv_secrets["administrators"].value
     CLIENT_ID      = data.azurerm_key_vault_secret.kv_secrets["signon-client-id"].value

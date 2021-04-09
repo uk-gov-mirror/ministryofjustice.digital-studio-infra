@@ -5,6 +5,21 @@
 #   byte_length = 16
 # }
 
-resource "random_id" "sql-iisuser-password" {
+resource "random_id" "sql-user-password" {
   byte_length = 16
+}
+
+
+locals {
+# use this commented out bit if we get users from list var
+#   db_user_passwords = [
+#     for user in var.sql_users :
+#     random_id.sql-users-passwords[user].b64_url
+#   ]
+#   db_users = zipmap(
+#     var.sql_users,
+#     local.db_user_passwords
+#   )
+  db_pass = random_id.sql-user-password.b64_url
+  db_users = { }
 }
