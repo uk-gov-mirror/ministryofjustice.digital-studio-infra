@@ -73,7 +73,7 @@ module "sql" {
   edition               = "Basic"
   scale                 = "Basic"
   collation             = "SQL_Latin1_General_CP1_CI_AS"
-  tags = var.tags
+  tags                  = var.tags
 }
 output "advice" {
   value = "Don't forget to set up the SQL instance user/schemas manually."

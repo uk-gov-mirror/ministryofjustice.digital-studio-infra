@@ -13,11 +13,11 @@ sc_branch                = "azure"
 repo_url                 = "https://github.com/ministryofjustice/iis"
 
 tags = {
-  "application"      = "HPA"
-  "business_unit"    = "HMPPS"
+  "application"      = "HPA"                                                       # Mandatory
+  "business_unit"    = "HMPPS"                                                     # Mandatory
+  "is_production"    = "false"                                                     # Mandatory
+  "owner"            = "DSO:digital-studio-operations-team@digital.justice.gov.uk" # Mandatory
   "environment_name" = "devtest"
-  "is_production"    = "false"
-  "owner"            = "DSO:digital-studio-operations-team@digital.justice.gov.uk"
   "service"          = "Misc"
   "source_code"      = "https://github.com/ministryofjustice/digital-studio-infra/tree/master/iis/stage"
 }
