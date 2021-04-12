@@ -72,7 +72,7 @@ variable "scm_use_main_ip_restriction" {
 # locals
 
 locals {
-  name    = "${var.app}-${var.env}"
+  name = "${var.app}-${var.env}"
 
   dns_name = "hpa-${var.env}"
 
