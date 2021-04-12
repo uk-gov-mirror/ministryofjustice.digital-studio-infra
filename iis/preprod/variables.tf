@@ -75,8 +75,6 @@ locals {
   name    = "${var.app}-${var.env}"
   storage = "${var.app}${var.env}storage"
 
-  github_deploy_branch = "deploy-to-${var.env}"
-
   extra_dns_zone = "${var.app}-${var.env}-zone.hmpps.dsd.io"
 
   app_size  = "S1"
