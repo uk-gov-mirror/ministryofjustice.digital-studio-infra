@@ -51,10 +51,6 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 0.14.9
-
-      - name: show backend
-        working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: cat backend.tf
         
       - name: terraform code formatter
         uses: ministryofjustice/github-actions/code-formatter@main
