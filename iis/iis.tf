@@ -45,23 +45,17 @@ module "app_service" {
   use_32_bit_worker_process   = var.use_32_bit_worker_process
 }
 
-locals {
-  # use this commented out bit if we get users from list var
-  #   db_user_passwords = [
-  #     for user in var.sql_users :
-  #     random_id.sql-users-passwords[user].b64_url
-  #   ]
-  #   db_users = zipmap(
-  #     var.sql_users,
-  #     local.db_user_passwords
-  #   )
-  db_users = {
-    iisuser    = random_id.sql-iisuser-password.b64_url
-    atodd      = random_id.sql-atodd-password.b64_url
-    mwhitfield = random_id.sql-mwhitfield-password.b64_url
-    sgandalwar = random_id.sql-sgandalwar-password.b64_url
-  }
-}
+# locals {
+#   use this commented out bit if we get users from list var
+#     db_user_passwords = [
+#       for user in var.sql_users :
+#       random_id.sql-users-passwords[user].b64_url
+#     ]
+#     db_users = zipmap(
+#       var.sql_users,
+#       local.db_user_passwords
+#     )
+# }
 
 module "sql" {
   source = "../../shared/modules/azure-sql"
