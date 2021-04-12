@@ -11,3 +11,13 @@ custom_hostname          = "hpa-stage.hmpps.dsd.io"
 has_storage              = true
 sc_branch                = "azure"
 repo_url                 = "https://github.com/ministryofjustice/iis"
+
+tags = {
+  "application"      = "HPA"
+  "business_unit"    = "HMPPS"
+  "environment_name" = "devtest"
+  "is_production"    = "false"
+  "owner"            = "DSO:digital-studio-operations-team@digital.justice.gov.uk"
+  "service"          = "Misc"
+  "source_code"      = "https://github.com/ministryofjustice/digital-studio-infra/tree/master/iis/stage"
+}

@@ -78,3 +78,7 @@ variable "signon_hostname" {
 #  type = list(string)
 #  description = "default documents for the app site config"
 #}
+
+variable "tags" {
+  type = map(string)
+}

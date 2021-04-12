@@ -35,11 +35,7 @@ module "app_service" {
     "index.php",
     "hostingstart.html",
   ]
-  tags = {
-    "application"      = "HPA"
-    "environment_name" = "devtest"
-    "service"          = "Misc"
-  }
+  tags = var.tags
   app_settings = {
     DB_PASS        = random_id.sql-user-password.b64_url
     SESSION_SECRET = random_id.session-secret.b64_url
@@ -77,11 +73,7 @@ module "sql" {
   edition               = "Basic"
   scale                 = "Basic"
   collation             = "SQL_Latin1_General_CP1_CI_AS"
-  tags = {
-    application      = "HPA"
-    environment_name = "devtest"
-    service          = "Misc"
-  }
+  tags = var.tags
 }
 output "advice" {
   value = "Don't forget to set up the SQL instance user/schemas manually."
