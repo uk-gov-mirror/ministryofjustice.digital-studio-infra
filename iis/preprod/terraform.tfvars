@@ -13,3 +13,13 @@ custom_hostname             = "hpa-preprod.service.hmpps.dsd.io"
 has_storage                 = true
 scm_use_main_ip_restriction = true
 webhook_url                 = "https://$iis-preprod:KvQb7vusM7WLlsrxZXEKZvJGA74jJrvTyBEWcc5wJbpK1KA0KxSbzqeSgx2z@iis-preprod.scm.azurewebsites.net/deploy?scmType=GitHub"
+
+tags = {
+  "application"      = "HPA"
+  "business_unit"    = "HMPPS"
+  "environment_name" = "preprod"
+  "is_production"    = "false"
+  "owner"            = "DSO:digital-studio-operations-team@digital.justice.gov.uk"
+  "service"          = "Misc"
+  "source_code"      = "https://github.com/ministryofjustice/digital-studio-infra/tree/master/iis/preprod"
+}

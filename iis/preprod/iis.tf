@@ -14,12 +14,7 @@ data "azurerm_key_vault_secret" "kv_secrets" {
   key_vault_id = module.app_service.vault_id
 }
 variable "tags" {
-  type = map(any)
-  default = {
-    application      = "HPA"
-    environment_name = "preprod"
-    service          = "Misc"
-  }
+  type = map(string)
 }
 
 resource "random_id" "session-secret" {
@@ -67,11 +62,7 @@ module "app_service" {
     "index.php",
     "hostingstart.html",
   ]
-  tags = {
-    "application"      = "HPA"
-    "environment_name" = "preprod"
-    "service"          = "Misc"
-  }
+  tags = var.tags
   app_settings = {
     DB_PASS        = random_id.sql-iisuser-password.b64_url
     SESSION_SECRET = random_id.session-secret.b64_url

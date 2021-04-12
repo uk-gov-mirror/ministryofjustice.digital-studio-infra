@@ -16,11 +16,6 @@ locals {
 
   app_size  = "S1"
   app_count = 1
-
-  tags = {
-    Service     = var.app
-    Environment = var.env
-  }
 }
 variable "log_containers" {
   type    = list(any)
