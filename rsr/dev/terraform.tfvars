@@ -1,7 +1,13 @@
-tags = { "application" = "RSR"
+tags = {
+  "application"      = "RSR"                                                       # Mandatory
+  "business_unit"    = "HMPPS"                                                     # Mandatory
+  "is_production"    = "false"                                                     # Mandatory
+  "owner"            = "DSO:digital-studio-operations-team@digital.justice.gov.uk" # Mandatory
   "environment_name" = "devtest"
   "service"          = "Misc"
+  "source_code"      = "https://github.com/ministryofjustice/digital-studio-infra/tree/master/rsr/dev"
 }
+
 app = "rsr"
 env = "dev"
 # set below if creating binding from scratch
