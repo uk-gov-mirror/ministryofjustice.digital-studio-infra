@@ -1,7 +1,13 @@
-tags = { "application" = "NonCore"
+tags = {
+  "application"      = "NonCore"                                                   # Mandatory
+  "business_unit"    = "HMPPS"                                                     # Mandatory
+  "is_production"    = "false"                                                     # Mandatory
+  "owner"            = "DSO:digital-studio-operations-team@digital.justice.gov.uk" # Mandatory
   "environment_name" = "devtest"
   "service"          = "NonCore"
+  "source_code"      = "https://github.com/ministryofjustice/digital-studio-infra/tree/master/offloc/stage"
 }
+
 app = "offloc"
 env = "stage"
 # set below if creating binding from scratch

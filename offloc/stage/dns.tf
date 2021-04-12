@@ -13,12 +13,7 @@ resource "azurerm_dns_zone" "offloc_stage_zone" {
     ttl           = "3600"
   }
 
-  tags = {
-    Environment      = "stage"
-    application      = "NonCore"
-    environment_name = "devtest"
-    service          = "NonCore"
-  }
+  tags = var.tags
 }
 
 resource "azurerm_dns_ns_record" "zone_nameserver_record" {
@@ -33,12 +28,6 @@ resource "azurerm_dns_cname_record" "offloc_stage_www" {
   name                = "www"
   record              = "offloc-stage.azurewebsites.net"
   resource_group_name = local.name
-
-  tags = {
-    Environment = "stage"
-    Service     = "offloc"
-  }
-
-  ttl       = "300"
-  zone_name = azurerm_dns_zone.offloc_stage_zone.name
+  ttl                 = "300"
+  zone_name           = azurerm_dns_zone.offloc_stage_zone.name
 }
