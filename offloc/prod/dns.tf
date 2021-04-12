@@ -13,11 +13,7 @@ resource "azurerm_dns_zone" "offloc_service_justice_gov_uk" {
     ttl           = "3600"
   }
 
-  tags = {
-    application      = "NonCore"
-    environment_name = "prod"
-    service          = "NonCore"
-  }
+  tags = var.tags
 }
 
 resource "azurerm_dns_ns_record" "zone_ns_record" {
@@ -32,12 +28,6 @@ resource "azurerm_dns_cname_record" "www" {
   name                = "www"
   record              = "offloc-prod.azurewebsites.net"
   resource_group_name = local.name
-
-  tags = {
-    Environment = "prod"
-    Service     = "offloc"
-  }
-
-  ttl       = "300"
-  zone_name = azurerm_dns_zone.offloc_service_justice_gov_uk.name
+  ttl                 = "300"
+  zone_name           = azurerm_dns_zone.offloc_service_justice_gov_uk.name
 }
