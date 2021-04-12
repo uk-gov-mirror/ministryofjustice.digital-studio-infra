@@ -67,7 +67,7 @@ variable "log_containers" {
 # locals
 
 locals {
-  name    = "${var.app}-${var.env}"
+  name = "${var.app}-${var.env}"
 
   dns_name = "hpa-${var.env}"
 
