@@ -73,12 +73,6 @@ variable "scm_use_main_ip_restriction" {
 
 locals {
   name    = "${var.app}-${var.env}"
-  storage = "${var.app}${var.env}storage"
-
-  extra_dns_zone = "${var.app}-${var.env}-zone.hmpps.dsd.io"
-
-  app_size  = "S1"
-  app_count = 1
 
   dns_name = "hpa-${var.env}"
 
