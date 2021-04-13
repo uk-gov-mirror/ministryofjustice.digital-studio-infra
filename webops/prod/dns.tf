@@ -9,13 +9,7 @@ resource "azurerm_dns_ns_record" "nomis-api" {
   zone_name           = azurerm_dns_zone.service-hmpps.name
   resource_group_name = azurerm_resource_group.group.name
   ttl                 = 300
-
-  records = ["ns2-07.azure-dns.net.", "ns3-07.azure-dns.org.", "ns1-07.azure-dns.com.", "ns4-07.azure-dns.info."]
-
-  tags = {
-    Service     = "WebOps"
-    Environment = "Management"
-  }
+  records             = ["ns2-07.azure-dns.net.", "ns3-07.azure-dns.org.", "ns1-07.azure-dns.com.", "ns4-07.azure-dns.info."]
 }
 
 output "service_hmpps_dsd_io_namesevers" {
@@ -40,10 +34,6 @@ resource "azurerm_dns_ns_record" "studio-hosting" {
   resource_group_name = azurerm_resource_group.group.name
   ttl                 = 300
   records             = ["ns4-07.azure-dns.info.", "ns3-07.azure-dns.org.", "ns2-07.azure-dns.net.", "ns1-07.azure-dns.com."]
-  tags = {
-    Service     = "WebOps"
-    Environment = "Management"
-  }
 }
 
 resource "azurerm_dns_a_record" "reporting_lsast_nomis" {
@@ -124,10 +114,6 @@ resource "azurerm_dns_a_record" "aap" {
   resource_group_name = azurerm_resource_group.group.name
   records             = ["51.141.40.143"]
   ttl                 = 300
-  tags = {
-    Environment = "Prod"
-    Service     = "AAP"
-  }
 }
 
 resource "azurerm_dns_cname_record" "cafm" {
@@ -232,10 +218,6 @@ resource "azurerm_dns_cname_record" "offloc" {
   resource_group_name = azurerm_resource_group.group.name
   record              = "offloc-prod.azurewebsites.net"
   ttl                 = 300
-  tags = {
-    Environment = "prod"
-    Service     = "offloc"
-  }
 }
 
 resource "azurerm_dns_cname_record" "rsr" {
@@ -244,8 +226,4 @@ resource "azurerm_dns_cname_record" "rsr" {
   resource_group_name = azurerm_resource_group.group.name
   record              = "rsr-prod.azurewebsites.net"
   ttl                 = 300
-  tags = {
-    Environment = "Prod"
-    Service     = "RSR"
-  }
 }
