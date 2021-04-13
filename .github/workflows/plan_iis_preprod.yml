@@ -69,12 +69,13 @@ jobs:
 
       - name: terraform refresh
         working-directory: ${{ env.WORKING_DIRECTORY }}         
-        run: terraform refresh
+        run: |
+          az login
+          terraform refresh
 
       - name: terraform plan
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
-          az login
           terraform plan -out=tf.plan -refresh=false -no-color
           
       # - name: terraform plan
