@@ -15,10 +15,10 @@ scm_use_main_ip_restriction = true
 webhook_url                 = "https://$iis-preprod:KvQb7vusM7WLlsrxZXEKZvJGA74jJrvTyBEWcc5wJbpK1KA0KxSbzqeSgx2z@iis-preprod.scm.azurewebsites.net/deploy?scmType=GitHub"
 
 tags = {
-  application      = "HPA"                                                       # Mandatory
-  business_unit    = "HMPPS"                                                     # Mandatory
-  is_production    = "false"                                                     # Mandatory
-  owner            = "DSO:digital-studio-operations-team@digital.justice.gov.uk" # Mandatory
+  application      = "HPA"                                                    # Mandatory
+  business_unit    = "HMPPS"                                                  # Mandatory
+  is_production    = "false"                                                  # Mandatory
+  owner            = "Malcolm Casimir:malcolm.casimir@digital.justice.gov.uk" # Mandatory
   environment_name = "preprod"
   service          = "Misc"
   source_code      = "https://github.com/ministryofjustice/digital-studio-infra/tree/master/iis/preprod"
