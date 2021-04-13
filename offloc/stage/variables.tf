@@ -13,7 +13,6 @@ variable "env" {
 locals {
   name    = "${var.app}-${var.env}"
   storage = "${var.app}${var.env}storage"
-  cname   = local.name
 
   github_deploy_branch = "deploy-to-${var.env}"
 

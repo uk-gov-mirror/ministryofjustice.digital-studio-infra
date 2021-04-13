@@ -1,0 +1,89 @@
+name: plan iis preprod
+
+on:
+  pull_request:
+    types: 
+      - opened
+      - edited
+      - synchronize
+      - reopened
+    branches:
+      - master
+    paths:
+      - iis/preprod/*
+      - shared/apps/iis.tf
+      - azure-prod.tf
+      - ips.tf
+
+env:
+  GITHUB_ORGANIZATION: ministryofjustice
+  ENVIRONMENT: iis/preprod
+  GITHUB_USERNAME: hmpps-dso-automation
+  GITHUB_TOKEN: ${{ secrets.DSO_GITHUB_AUTOMATION_PAT }}
+  WORKING_DIRECTORY: iis/preprod
+
+jobs:
+  verify-terraform-config:
+    runs-on: ubuntu-latest
+    environment: iis/preprod
+
+    steps:
+      - name: define arm vars
+        run: |
+          echo "ARM_CLIENT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientSecret:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*subscriptionId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*tenantId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
+
+      # - uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }}
+      
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Setup GitHub credential.helper for terraform
+        uses: fusion-engineering/setup-git-credentials@v2
+        with:
+          credentials: https://${{ env.GITHUB_USERNAME }}:${{ env.GITHUB_TOKEN }}@github.com
+          
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 0.14.9
+        
+      - name: terraform code formatter
+        uses: ministryofjustice/github-actions/code-formatter@main
+      
+      - name: Terraform Init
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: terraform init
+
+      - name: terraform validate
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: terraform validate
+
+      # - name: terraform refresh
+      #   working-directory: ${{ env.WORKING_DIRECTORY }}         
+      #   run: terraform refresh
+
+      # - name: terraform plan
+      #   working-directory: ${{ env.WORKING_DIRECTORY }}
+      #   run: |
+      #     terraform plan -out=tf.plan -refresh=false -no-color
+          
+      # - name: terraform plan
+      #   working-directory: ${{ env.WORKING_DIRECTORY }}
+      #   run: |
+      #     terraform plan -out=tf.plan -refresh=false -no-color > tf_out.txt
+      #     tail -c 65476 tf_out.txt > tf_plan.txt
+      #     cat tf_plan.txt
+      #     echo 'TF_PLAN_OUT<<EOF' >> $GITHUB_ENV
+      #     cat tf_plan.txt >> $GITHUB_ENV
+      #     echo 'EOF' >> $GITHUB_ENV
+
+      # - name: Post a PR comment with the terraform plan output
+      #   uses: allthatjazzleo/actions-pull-request-add-comment@master
+      #   with:
+      #     GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      #     message: "Terraform plan output in ${{ env.ENVIRONMENT }} environment: \n```\n${{ env.TF_PLAN_OUT }}\n```"

@@ -6,7 +6,6 @@ module "app_service" {
   https_only           = true
   http2_enabled        = true
   app_service_kind     = "Windows"
-  scm_type             = "LocalGit"
   azure_jenkins_sp_oid = var.azure_jenkins_sp_oid
   sampling_percentage  = var.sampling_percentage
   custom_hostname      = var.custom_hostname
