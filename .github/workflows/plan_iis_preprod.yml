@@ -21,6 +21,7 @@ env:
   GITHUB_USERNAME: hmpps-dso-automation
   GITHUB_TOKEN: ${{ secrets.DSO_GITHUB_AUTOMATION_PAT }}
   WORKING_DIRECTORY: iis/preprod
+  ARM_CLIENT_SECRET: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_CLIENT_SECRET }}
 
 jobs:
   verify-terraform-config:
@@ -31,7 +32,6 @@ jobs:
       - name: define arm vars
         run: |
           echo "ARM_CLIENT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
-          echo "ARM_CLIENT_SECRET=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*clientSecret:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
           echo "ARM_SUBSCRIPTION_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*subscriptionId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
           echo "ARM_TENANT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD }} | sed 's/.*tenantId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
 
@@ -63,14 +63,14 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: terraform validate
 
-      # - name: terraform refresh
-      #   working-directory: ${{ env.WORKING_DIRECTORY }}         
-      #   run: terraform refresh
+      - name: terraform refresh
+        working-directory: ${{ env.WORKING_DIRECTORY }}         
+        run: terraform refresh
 
-      # - name: terraform plan
-      #   working-directory: ${{ env.WORKING_DIRECTORY }}
-      #   run: |
-      #     terraform plan -out=tf.plan -refresh=false -no-color
+      - name: terraform plan
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          terraform plan -out=tf.plan -refresh=false -no-color
           
       # - name: terraform plan
       #   working-directory: ${{ env.WORKING_DIRECTORY }}
