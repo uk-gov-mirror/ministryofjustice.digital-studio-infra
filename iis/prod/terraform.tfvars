@@ -13,9 +13,9 @@ has_storage                 = true
 scm_use_main_ip_restriction = true
 
 tags = {
-  application      = "HPA"                                                       # Mandatory
-  business_unit    = "HMPPS"                                                     # Mandatory
-  is_production    = "true"                                                      # Mandatory
+  application      = "HPA"                                                    # Mandatory
+  business_unit    = "HMPPS"                                                  # Mandatory
+  is_production    = "true"                                                   # Mandatory
   owner            = "Malcolm Casimir:malcolm.casimir@digital.justice.gov.uk" # Mandatory
   environment_name = "prod"
   service          = "Misc"

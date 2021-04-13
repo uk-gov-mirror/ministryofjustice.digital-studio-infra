@@ -11,9 +11,9 @@ sc_branch           = "deploy-to-stage"
 repo_url            = "https://github.com/ministryofjustice/offloc-server.git"
 
 tags = {
-  application      = "NonCore"                                                   # Mandatory
-  business_unit    = "HMPPS"                                                     # Mandatory
-  is_production    = "false"                                                     # Mandatory
+  application      = "NonCore"                                                # Mandatory
+  business_unit    = "HMPPS"                                                  # Mandatory
+  is_production    = "false"                                                  # Mandatory
   owner            = "Malcolm Casimir:malcolm.casimir@digital.justice.gov.uk" # Mandatory
   environment_name = "devtest"
   service          = "NonCore"

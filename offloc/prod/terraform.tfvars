@@ -10,9 +10,9 @@ has_storage           = true
 app_service_plan_size = "S2"
 
 tags = {
-  application      = "NonCore"                                                   # Mandatory
-  business_unit    = "HMPPS"                                                     # Mandatory
-  is_production    = "true"                                                      # Mandatory
+  application      = "NonCore"                                                # Mandatory
+  business_unit    = "HMPPS"                                                  # Mandatory
+  is_production    = "true"                                                   # Mandatory
   owner            = "Malcolm Casimir:malcolm.casimir@digital.justice.gov.uk" # Mandatory
   environment_name = "prod"
   service          = "NonCore"
