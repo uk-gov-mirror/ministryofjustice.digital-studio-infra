@@ -1,6 +1,15 @@
 name: plan iis preprod
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - iis/preprod/*
+      - iis/iis.tf
+      - azure-prod.tf
+      - ips.tf
+      - .github/workflows/plan_iis_preprod.yml
   pull_request:
     types: 
       - opened
@@ -33,12 +42,6 @@ jobs:
     environment: iis/preprod
 
     steps:
-      # - name: define arm vars
-      #   run: |
-      #     echo "ARM_CLIENT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_AZURE_CREDENTIALS }} | sed 's/.*clientId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
-      #     echo "ARM_SUBSCRIPTION_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_AZURE_CREDENTIALS }} | sed 's/.*subscriptionId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
-      #     echo "ARM_TENANT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_AZURE_CREDENTIALS }} | sed 's/.*tenantId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
-      
       - name: Checkout the code
         uses: actions/checkout@v2
 
@@ -94,7 +97,7 @@ jobs:
           comment: "Terraform plan output in ${{ env.ENVIRONMENT }}: \n```\n${{ env.TF_PLAN_OUT }}\n```"
 
       - name: terraform apply
-        if: ${{ github.event.pull_request.merged || github.event_name == 'push' || github.event_name == 'schedule' }}
+        if: ${{ github.event.pull_request.merged || github.event_name == 'push' }}
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
           terraform apply -auto-approve -no-color tf.plan > tf_out.txt
