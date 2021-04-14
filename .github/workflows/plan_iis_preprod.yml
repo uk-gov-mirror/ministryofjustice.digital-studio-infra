@@ -39,9 +39,9 @@ jobs:
       #     echo "ARM_SUBSCRIPTION_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_AZURE_CREDENTIALS }} | sed 's/.*subscriptionId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
       #     echo "ARM_TENANT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_AZURE_CREDENTIALS }} | sed 's/.*tenantId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
 
-      - uses: azure/login@v1
-        with:
-          creds: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_AZURE_CREDENTIALS }}
+      # - uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_AZURE_CREDENTIALS }}
       
       - name: Checkout the code
         uses: actions/checkout@v2
@@ -75,20 +75,15 @@ jobs:
       - name: terraform plan
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
-          terraform plan -out=tf.plan -refresh=false -no-color
-          
-      # - name: terraform plan
-      #   working-directory: ${{ env.WORKING_DIRECTORY }}
-      #   run: |
-      #     terraform plan -out=tf.plan -refresh=false -no-color > tf_out.txt
-      #     tail -c 65476 tf_out.txt > tf_plan.txt
-      #     cat tf_plan.txt
-      #     echo 'TF_PLAN_OUT<<EOF' >> $GITHUB_ENV
-      #     cat tf_plan.txt >> $GITHUB_ENV
-      #     echo 'EOF' >> $GITHUB_ENV
+          terraform plan -out=tf.plan -refresh=false -no-color > tf_out.txt
+          tail -c 65476 tf_out.txt > tf_plan.txt
+          cat tf_plan.txt
+          echo 'TF_PLAN_OUT<<EOF' >> $GITHUB_ENV
+          cat tf_plan.txt >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
 
-      # - name: Post a PR comment with the terraform plan output
-      #   uses: allthatjazzleo/actions-pull-request-add-comment@master
-      #   with:
-      #     GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-      #     message: "Terraform plan output in ${{ env.ENVIRONMENT }} environment: \n```\n${{ env.TF_PLAN_OUT }}\n```"
+      - name: Post a PR comment with the terraform plan output
+        uses: allthatjazzleo/actions-pull-request-add-comment@master
+        with:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          message: "Terraform plan output in ${{ env.ENVIRONMENT }} environment: \n```\n${{ env.TF_PLAN_OUT }}\n```"

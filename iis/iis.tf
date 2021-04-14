@@ -25,7 +25,7 @@ module "app_service" {
     TOKEN_HOST     = var.signon_hostname
   }
   app_service_plan_size       = var.app_service_plan_size
-  azure_git_repo_app_oid      = var.azure_git_repo_app_oid
+  azure_repo_app_principle_oid      = var.azure_repo_app_principle_oid
   azure_jenkins_sp_oid        = var.azure_jenkins_sp_oid
   certificate_name            = var.certificate_name
   custom_hostname             = var.custom_hostname

@@ -65,7 +65,7 @@ resource "azurerm_key_vault" "vault" {
 
   access_policy {
     tenant_id               = var.azure_tenant_id
-    object_id               = var.azure_git_repo_app_oid
+    object_id               = var.azure_repo_app_principle_oid
     certificate_permissions = []
     key_permissions         = []
     secret_permissions      = ["get"]
