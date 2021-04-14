@@ -19,7 +19,7 @@ variable "azure_app_service_oid" {
 
 variable "azure_git_repo_app_oid" {
   type    = string
-  default = "96deb3b1-8d81-4f81-b81b-f478088e1679"
+  default = "a92c3afa-a31b-4334-96b1-f326dc68b384"
 }
 
 variable "azure_webops_group_oid" {
