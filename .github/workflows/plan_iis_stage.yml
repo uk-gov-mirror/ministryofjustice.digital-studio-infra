@@ -38,10 +38,6 @@ jobs:
       #     echo "ARM_CLIENT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_AZURE_CREDENTIALS }} | sed 's/.*clientId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
       #     echo "ARM_SUBSCRIPTION_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_AZURE_CREDENTIALS }} | sed 's/.*subscriptionId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
       #     echo "ARM_TENANT_ID=`echo ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_AZURE_CREDENTIALS }} | sed 's/.*tenantId:\([^ ]*\).*/\1/g'`" >> $GITHUB_ENV
-
-      # - uses: azure/login@v1
-      #   with:
-      #     creds: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_AZURE_CREDENTIALS }}
       
       - name: Checkout the code
         uses: actions/checkout@v2
