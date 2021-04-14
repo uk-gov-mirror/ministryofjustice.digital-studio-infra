@@ -70,7 +70,6 @@ jobs:
       - name: terraform refresh
         working-directory: ${{ env.WORKING_DIRECTORY }}         
         run: |
-          az login
           terraform refresh
 
       - name: terraform plan
