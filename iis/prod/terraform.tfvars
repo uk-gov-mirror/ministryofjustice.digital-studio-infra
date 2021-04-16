@@ -29,7 +29,7 @@ key_vault_secrets = [
   "signon-client-secret",
   "administrators"
 ]
-repo_url                    = "https://iis-prod.scm.azurewebsites.net"
+repo_url                    = ""
 sampling_percentage         = "50"
 sc_branch                   = "master"
 scm_use_main_ip_restriction = true

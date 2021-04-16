@@ -24,25 +24,26 @@ module "app_service" {
     DB_NAME        = local.name
     TOKEN_HOST     = var.signon_hostname
   }
-  app_service_plan_size       = var.app_service_plan_size
-  azure_jenkins_sp_oid        = var.azure_jenkins_sp_oid
-  certificate_name            = var.certificate_name
-  custom_hostname             = var.custom_hostname
-  default_documents           = var.default_documents
-  env                         = var.env
-  has_storage                 = var.has_storage
-  https_only                  = var.https_only
-  ip_restriction_addresses    = local.ip_restriction_addresses
-  key_vault_secrets           = var.key_vault_secrets
-  log_containers              = var.log_containers
-  repo_url                    = var.repo_url
-  sa_name                     = "${replace(local.name, "-", "")}storage"
-  sampling_percentage         = var.sampling_percentage
-  sc_branch                   = var.sc_branch
-  scm_use_main_ip_restriction = var.scm_use_main_ip_restriction
-  signon_hostname             = var.signon_hostname
-  tags                        = var.tags
-  use_32_bit_worker_process   = var.use_32_bit_worker_process
+  app_service_plan_size        = var.app_service_plan_size
+  azure_repo_app_principal_oid = var.azure_repo_app_principal_oid
+  azure_jenkins_sp_oid         = var.azure_jenkins_sp_oid
+  certificate_name             = var.certificate_name
+  custom_hostname              = var.custom_hostname
+  default_documents            = var.default_documents
+  env                          = var.env
+  has_storage                  = var.has_storage
+  https_only                   = var.https_only
+  ip_restriction_addresses     = local.ip_restriction_addresses
+  key_vault_secrets            = var.key_vault_secrets
+  log_containers               = var.log_containers
+  repo_url                     = var.repo_url
+  sa_name                      = "${replace(local.name, "-", "")}storage"
+  sampling_percentage          = var.sampling_percentage
+  sc_branch                    = var.sc_branch
+  scm_use_main_ip_restriction  = var.scm_use_main_ip_restriction
+  signon_hostname              = var.signon_hostname
+  tags                         = var.tags
+  use_32_bit_worker_process    = var.use_32_bit_worker_process
 }
 
 # locals {
