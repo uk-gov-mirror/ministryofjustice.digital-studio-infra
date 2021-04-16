@@ -10,6 +10,7 @@ on:
       - azure-prod.tf
       - ips.tf
       - .github/workflows/plan_iis_preprod.yml
+      - shared/*
   pull_request:
     types: 
       - opened
@@ -24,6 +25,7 @@ on:
       - azure-prod.tf
       - ips.tf
       - .github/workflows/plan_iis_preprod.yml
+      - shared/*
 
 env:
   GITHUB_ORGANIZATION: ministryofjustice
