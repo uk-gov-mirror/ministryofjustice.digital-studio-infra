@@ -17,7 +17,7 @@ variable "azure_app_service_oid" {
   default = "5b2509b1-64bd-4117-b839-9b0c2b02e02c"
 }
 
-variable "azure_repo_app_principle_oid" {
+variable "azure_repo_app_principal_oid" {
   type    = string
   default = "77f0f168-c811-48b5-9da2-25a5e259a07c"
 }
