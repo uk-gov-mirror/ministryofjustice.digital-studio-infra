@@ -142,7 +142,7 @@ variable "azure_app_service_oid" {
 }
 
 variable "azure_repo_app_principal_oid" {
-  type    = string
+  type = string
 }
 
 variable "azure_webops_group_oid" {
