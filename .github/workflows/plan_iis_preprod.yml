@@ -10,6 +10,7 @@ on:
       - azure-prod.tf
       - ips.tf
       - .github/workflows/plan_iis_preprod.yml
+      - shared/*
   pull_request:
     types: 
       - opened
@@ -24,6 +25,7 @@ on:
       - azure-prod.tf
       - ips.tf
       - .github/workflows/plan_iis_preprod.yml
+      - shared/*
 
 env:
   GITHUB_ORGANIZATION: ministryofjustice
@@ -56,6 +58,7 @@ jobs:
           terraform_version: 0.14.9
         
       - name: terraform code formatter
+        if: ${{ github.event_name == 'pull_request' }}
         uses: ministryofjustice/github-actions/code-formatter@main
       
       - name: Terraform Init
