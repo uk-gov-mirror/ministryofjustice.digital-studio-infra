@@ -1,19 +1,20 @@
 
 module "app_service" {
-  source                  = "../../shared/modules/azure-app-service"
-  app                     = var.app
-  env                     = var.env
-  certificate_name        = var.certificate_name
-  app_service_kind        = "Windows"
-  sc_branch               = var.sc_branch
-  repo_url                = var.repo_url
-  https_only              = true
-  client_affinity_enabled = true
-  sa_name                 = "${replace(local.name, "-", "")}app"
-  has_storage             = var.has_storage
-  azure_jenkins_sp_oid    = var.azure_jenkins_sp_oid
-  sampling_percentage     = var.sampling_percentage
-  custom_hostname         = var.custom_hostname
+  source                       = "../../shared/modules/azure-app-service"
+  app                          = var.app
+  env                          = var.env
+  certificate_name             = var.certificate_name
+  app_service_kind             = "Windows"
+  sc_branch                    = var.sc_branch
+  repo_url                     = var.repo_url
+  https_only                   = true
+  client_affinity_enabled      = true
+  sa_name                      = "${replace(local.name, "-", "")}app"
+  has_storage                  = var.has_storage
+  azure_jenkins_sp_oid         = var.azure_jenkins_sp_oid
+  azure_repo_app_principal_oid = var.azure_repo_app_principal_oid
+  sampling_percentage          = var.sampling_percentage
+  custom_hostname              = var.custom_hostname
   app_settings = {
     "AZURE_STORAGE_ACCOUNT_NAME"    = "offlocstageapp"
     "AZURE_STORAGE_CONTAINER_NAME"  = "cde"
@@ -90,4 +91,3 @@ resource "azurerm_key_vault" "app" {
   enabled_for_template_deployment = false
   tags                            = var.tags
 }
-
