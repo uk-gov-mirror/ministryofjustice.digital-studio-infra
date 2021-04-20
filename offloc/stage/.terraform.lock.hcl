@@ -5,6 +5,7 @@ provider "registry.terraform.io/hashicorp/azurerm" {
   version     = "2.48.0"
   constraints = ">= 2.48.0"
   hashes = [
+    "h1:fYzUa9SDA/2DHXAA0b91QvsbBnCAbQrsHVmbV+RTS+E=",
     "h1:wPnrQttBm6ZLVkos8PE0FzMmISxuLwnVKb9NWFH9LVc=",
     "zh:007ebc1cd16ff6f4cafb749abe8fc1dc913e8d5ce5bb8b4d23f26693d479d6fd",
     "zh:0b87c72f8231a4f3fdf239886528dc0fbd90740341056377a4046724e7a357a5",
@@ -24,6 +25,7 @@ provider "registry.terraform.io/hashicorp/random" {
   version = "3.0.1"
   hashes = [
     "h1:0QaSbRBgBi8vI/8IRwec1INdOqBxXbgsSFElx1O4k4g=",
+    "h1:xN99GF2LlUhqjwbLVX2YPGpZ5NMG1ZuTFE6X66g5snM=",
     "zh:0d4f683868324af056a9eb2b06306feef7c202c88dbbe6a4ad7517146a22fb50",
     "zh:4824b3c7914b77d41dfe90f6f333c7ac9860afb83e2a344d91fbe46e5dfbec26",
     "zh:4b82e43712f3cf0d0cbc95b2cbcd409ba8f0dc7848fdfb7c13633c27468ed04a",
@@ -41,6 +43,7 @@ provider "registry.terraform.io/integrations/github" {
   version = "4.5.0"
   hashes = [
     "h1:TnF2/2b8uu+bcRcdWr60hHritYm7bbXBKoumbqb4ljA=",
+    "h1:V1uOSXoqpXrWUowEN8jmKqA6bcj6PyFMrD8WU1NbmRw=",
     "zh:22cb80695782a750ab8dd61357ed92a3ec3260b3cad15b3ed5cbb5371d1190eb",
     "zh:290b3d2b50df075835ff5dba2d02bf834576c9bb20555f715863c68e5ba2b482",
     "zh:31a0f119c5f384771706ddfb89f51c6a66ede1eab0091b19b39de5686c6189d3",

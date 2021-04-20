@@ -1,4 +1,4 @@
-name: plan iis stage
+name: iis stage
 
 on:
   push:

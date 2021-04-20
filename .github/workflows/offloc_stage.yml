@@ -1,16 +1,14 @@
-name: plan iis preprod
+name: offloc stage
 
 on:
   push:
     branches:
       - master
     paths:
-      - iis/preprod/*
-      - iis/iis.tf
-      - azure-prod.tf
-      - ips.tf
-      - .github/workflows/plan_iis_preprod.yml
-      - shared/*
+      - offloc/stage/*
+      - azure-devtest.tf
+      - .github/workflows/offloc_stage.yml
+      - shared/modules/azure-app-service/*
   pull_request:
     types: 
       - opened
@@ -20,28 +18,26 @@ on:
     branches:
       - master
     paths:
-      - iis/preprod/*
-      - iis/iis.tf
-      - azure-prod.tf
-      - ips.tf
-      - .github/workflows/plan_iis_preprod.yml
-      - shared/*
+      - offloc/stage/*
+      - azure-devtest.tf
+      - .github/workflows/offloc_stage.yml
+      - shared/modules/azure-app-service/*
 
 env:
   GITHUB_ORGANIZATION: ministryofjustice
-  ENVIRONMENT: iis/preprod
+  ENVIRONMENT: offloc/stage
   GITHUB_USERNAME: hmpps-dso-automation
   GITHUB_TOKEN: ${{ secrets.DSO_GITHUB_AUTOMATION_PAT }}
-  WORKING_DIRECTORY: iis/preprod
-  ARM_CLIENT_ID: d91544c4-212d-4da5-b6a4-ddf65fe188a5
-  ARM_CLIENT_SECRET: ${{ secrets.DIGITAL_STUDIO_INFRA_PROD_CLIENT_SECRET }}
-  ARM_SUBSCRIPTION_ID: a5ddf257-3b21-4ba9-a28c-ab30f751b383
+  WORKING_DIRECTORY: offloc/stage
+  ARM_CLIENT_ID: b11478e9-3ca6-40b8-bbcd-9cb46c02957c
+  ARM_CLIENT_SECRET: ${{ secrets.DIGITAL_STUDIO_INFRA_DEVTEST_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: c27cfedb-f5e9-45e6-9642-0fad1a5c94e7
   ARM_TENANT_ID: 747381f4-e81f-4a43-bf68-ced6a1e14edf
 
 jobs:
   verify-terraform-config:
     runs-on: ubuntu-latest
-    environment: iis/preprod
+    environment: offloc/stage
 
     steps:
       - name: Checkout the code
