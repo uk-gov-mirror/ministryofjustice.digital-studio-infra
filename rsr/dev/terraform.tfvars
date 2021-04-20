@@ -10,4 +10,3 @@ certificate_name    = "rsr-dev-rsr-dev-CERTrsr-devDOThmppsDOTdsdDOTio"
 https_only          = true
 sampling_percentage = "100"
 custom_hostname     = "rsr-dev.hmpps.dsd.io"
-has_database        = false
