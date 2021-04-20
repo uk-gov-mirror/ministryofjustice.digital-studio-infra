@@ -11,7 +11,7 @@ module "app_service" {
   azure_repo_app_principal_oid = var.azure_repo_app_principal_oid
   sampling_percentage          = var.sampling_percentage
   custom_hostname              = var.custom_hostname
-  default_documents            = [
+  default_documents = [
     "Default.htm",
     "Default.html",
     "Default.asp",
