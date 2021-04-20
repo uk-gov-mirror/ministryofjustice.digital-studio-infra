@@ -42,12 +42,7 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v2
-
-      - name: Setup GitHub credential.helper for terraform
-        uses: fusion-engineering/setup-git-credentials@v2
-        with:
-          credentials: https://${{ env.GITHUB_USERNAME }}:${{ env.GITHUB_TOKEN }}@github.com
-          
+        
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
